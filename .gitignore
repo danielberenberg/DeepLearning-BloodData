@@ -1,0 +1,5 @@
+*.MOV
+data/
+raw/
+*.tar.gz
+*.csv
