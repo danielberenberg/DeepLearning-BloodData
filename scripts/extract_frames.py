@@ -45,10 +45,15 @@ if __name__ == "__main__":
         fmt_file = "Trial%d.MOV"
 
         imgs_captured = []
-        for row in specs:
+        for row in specs: 
+            
             subject, trial = row
             
             subject = int(subject)
+            
+            if subject == 23:
+                continue
+            
             trial = int(trial)
             
             target_dir = os.path.join(data_dir, fmt_dir % subject)

@@ -1,5 +1,6 @@
 *.MOV
 data/
 raw/
+frames/
 *.tar.gz
 *.csv
