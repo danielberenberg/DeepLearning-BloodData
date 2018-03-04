@@ -50,8 +50,8 @@ if __name__ == "__main__":
             
             subject = int(subject)
             
-            if subject == 23:
-                continue
+#            if subject == 23:
+#                continue
             
             trial = int(trial)
             
