@@ -6,7 +6,7 @@ import basic_utils.video_core as vc
 INPUT_CSV = "DeepLearningClassData.csv"
 
 def usage(with_help=True): 
-    print("[Usage]: %s <frame_dir> <patition_out> <output_csv>" % sys.argv[0])
+    print("[Usage]: %s <frame_dir> <partition_out> <output_csv>" % sys.argv[0])
     if with_help:
         print("         %s HELP|help|h for more info" % sys.argv[0])
     sys.exit()
@@ -60,7 +60,6 @@ if __name__ == "__main__":
             output_path = os.path.join(partition_dir, frame_dir, trial_dir)
             if not os.path.isdir(frame_path):
                 continue
-
             print('*'*85)
             num_partitions = vc.partition_frame_dir(frame_path, output_dir=output_path)
         data = helper.look_up(subj_name)
