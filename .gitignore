@@ -4,5 +4,6 @@ raw/
 frames/
 partitioned/
 resized/
+partitions/
 *.tar.gz
 *.csv
