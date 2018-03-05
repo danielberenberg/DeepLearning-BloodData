@@ -1,8 +1,10 @@
-import csv
 import os
 import sys
 import basic_utils.basics as base
 import basic_utils.video_core as vc
+
+INPUT_CSV = "DeepLearningClassData.csv"
+
 def usage(with_help=True): 
     print("[Usage]: %s <frame_dir> <patition_out> <output_csv>" % sys.argv[0])
     if with_help:
@@ -18,13 +20,17 @@ def help_msg():
     print("\t| partition them into several 2 second long collections")
     usage(with_help=False)
 
+def extract_subject_name(subj_dir):
+    subj_dir = subj_dir[1:]
+    return str(int(subj_dir))
+
 if __name__ == "__main__":
     num_args = len(sys.argv)
     if num_args == 2 and sys.argv[1] in ["HELP", "help", "h"]:
         help_msg()
     elif num_args < 4:
         usage()
-    
+     
     frames_path   = sys.argv[1]
     partition_dir = sys.argv[2]
     output_csv    = sys.argv[3]
@@ -32,30 +38,33 @@ if __name__ == "__main__":
     if not os.path.exists(frames_path):
         raise IOError("Error: frames path not found | " + frames_path)
     
+    if not output_csv.endswith('.csv'):
+        output_csv += '.csv'
+
+    csv_in = open(INPUT_CSV, 'r')
+    csv_out = open(output_csv, 'w')
+    helper = base.CSV_Helper(csv_in, csv_out)
+    
     base.check_exists_create_if_not(partition_dir)
     
-    #print([x for x in os.listdir(frames_path) if x != ".DS_Store"])
     for frame_dir in os.listdir(frames_path):
         trial_path = os.path.join(frames_path,frame_dir)
-
+        if not os.path.isdir(trial_path):
+           continue
+        subj_name = extract_subject_name(frame_dir)
         #For some reason .DS_STORE is included when we traverse the directories, 
         #so we need to account for it
-        if not os.path.isdir(trial_path):
-            continue
         
         for trial_dir in os.listdir(trial_path):
             frame_path = os.path.join(trial_path, trial_dir)
             output_path = os.path.join(partition_dir, frame_dir, trial_dir)
-            if os.path.isdir(frame_path):
-                vc.partition_frame_dir(frame_path, output_dir=output_path)
+            if not os.path.isdir(frame_path):
+                continue
 
-
-#ignore this
-def test_csv():
-    with open('test.csv', 'w', newline='') as csvfile:
-        csv_writer = csv.writer(csvfile, delimiter=',',
-                quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        csv_writer.writerow(['Subject', 'Trial', 'Partition', 'Heart Rate', 'Respiratory Rate'])
-        csv_writer.writerow(['2', '1', '1', '80', '30'])
-        csv_writer.writerow(['Spam'] * 5 + ['Baked Beans'])
+            print('*'*85)
+            num_partitions = vc.partition_frame_dir(frame_path, output_dir=output_path)
+        data = helper.look_up(subj_name)
+        for p in range(num_partitions):
+            helper.write_to(subj_name, p, data)
+    helper.release()
 

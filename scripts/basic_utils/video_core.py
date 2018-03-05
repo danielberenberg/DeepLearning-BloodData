@@ -7,7 +7,6 @@ import sys
 import os
 import cv2
 import basic_utils.basics as base
-
 FPS = 30
 
 def video_file_exists(filename):
@@ -170,8 +169,10 @@ def partition_frame_dir(frame_dir, output_dir, num_seconds=2, front_trim=60, end
         num_seconds (optional) : the number of seconds that make up each partition
         front_trim (optional) : the number of frames to ignore from beginning of directory
         end_trim (optional) : the number of frames to ignore from end of directory
-        capacity_tolerance (optional) : the percentage of an incomplete paritition 
-                that will still be considered acceptable
+        capacity_tolerance (optional) : how full an acceptable partition must be 
+    
+    return:
+        the number of partitions created
     """
     
     if not os.path.exists(frame_dir):
@@ -192,7 +193,14 @@ def partition_frame_dir(frame_dir, output_dir, num_seconds=2, front_trim=60, end
     iteration = 0
     num_partitions = 0
     current_partition = []
-    total = (num_frames - front_trim - end_trim) // (num_seconds * FPS) 
+    
+    #The next five lines are only used for the progress bar output. Ignore it if you want.
+    eligible_frames = (num_frames - front_trim - end_trim + 1) // (2 if is_60_fps else 1)
+    total_partitions = eligible_frames // (num_seconds * FPS)
+    left_over = eligible_frames - total_partitions * num_seconds * FPS
+    if left_over / (num_seconds * FPS) >= capacity_tolerance:
+        total_partitions += 1
+
     while iteration < num_frames - end_trim:
         if iteration >= front_trim:
             if not is_60_fps:
@@ -205,15 +213,21 @@ def partition_frame_dir(frame_dir, output_dir, num_seconds=2, front_trim=60, end
                 move_frames(frame_dir, current_partition, next_output_dir)           
                 num_partitions+=1
                 current_partition = []
-                progressBar(num_partitions, total)
+                progressBar(num_partitions, total_partitions)
         iteration+=1
+
     #Handle any leftover frame lists that did not reach full capacity due to trimming.
     #If the frame list is acceptably full, then include it with the other partitioned directories
     if current_partition:
         if len(current_partition) / (num_seconds*FPS) >= capacity_tolerance:
             next_output_dir = os.path.join(output_dir, str(num_partitions))
             move_frames(frame_dir, current_partition, next_output_dir)
+            num_partitions+=1
+            progressBar(num_partitions, total_partitions)
 
+    print()
+    return num_partitions
+    
 def move_frames(source_dir, partitioned_frames, output_dir):
     """
     Helper method to move a selection of frames from the source directory
@@ -224,7 +238,7 @@ def move_frames(source_dir, partitioned_frames, output_dir):
         partitioned_frames : a list of frames that are being moved out of source directory
         output_dir : the directory where selected frames are being placed
     """
-    base.check_exists_create_if_not(output_dir)
+    base.check_exists_create_if_not(output_dir,suppress=True)
     current_index = 0
     for frame in partitioned_frames:
         frame_path = os.path.join(source_dir, frame)
@@ -233,6 +247,9 @@ def move_frames(source_dir, partitioned_frames, output_dir):
         current_index+=1
 
 def progressBar(value, endvalue, bar_length=20):
+        """
+        Stolen from StackOverflow. For that dank looking progress bar.
+        """
         percent = float(value) / endvalue
         arrow = '-' * int(round(percent * bar_length)-1) + '>'
         spaces = ' ' * (bar_length - len(arrow))

@@ -2,5 +2,6 @@
 data/
 raw/
 frames/
+partitioned/
 *.tar.gz
 *.csv
