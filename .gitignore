@@ -7,3 +7,5 @@ resized/
 partitions/
 *.tar.gz
 *.csv
+*.pyo
+*.pyc

@@ -54,16 +54,27 @@ if __name__ == "__main__":
         subj_name = extract_subject_name(frame_dir)
         #For some reason .DS_STORE is included when we traverse the directories, 
         #so we need to account for it
-        
+       
+        num_partitions = []
+        num_partitions.append(0)
+        num_partitions.append(0)
         for trial_dir in os.listdir(trial_path):
             frame_path = os.path.join(trial_path, trial_dir)
             output_path = os.path.join(partition_dir, frame_dir, trial_dir)
             if not os.path.isdir(frame_path):
                 continue
             print('*'*85)
-            num_partitions = vc.partition_frame_dir(frame_path, output_dir=output_path)
+            num_part = vc.partition_frame_dir(frame_path, output_dir=output_path)
+            if trial_dir == "Trial1_frames":
+                num_partitions[0] = num_part
+            elif trial_dir == "Trial2_frames":
+                num_partitions[1] = num_part
+            else:
+                raise Exception("????")
         data = helper.look_up(subj_name)
-        for p in range(num_partitions):
-            helper.write_to(subj_name, p, data)
+        
+        max_part = num_partitions[0] if num_partitions[0] > num_partitions[1] else num_partitions[1]
+        for p in range(max_part):
+            helper.write_to(subj_name, p, data, num_partitions)
     helper.release()
 
