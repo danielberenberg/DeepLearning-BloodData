@@ -3,8 +3,8 @@ data/
 raw/
 frames/
 partitioned/
-rsz/
 resized/
+rsz/
 partitions/
 *.tar.gz
 *.csv
