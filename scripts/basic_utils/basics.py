@@ -35,8 +35,14 @@ class CSV_Helper():
         self.look_up_csv.seek(0)
         return "?"
     
-    def write_to(self, subj_name, partition, specs):
+    def write_to(self, subj_name, partition, specs, num_partitions):
         params = [subj_name, partition]
+        if num_partitions[0] <= partition:
+            specs[0] = ""
+            specs[1] = ""
+        if num_partitions[1] <= partition:
+            specs[2] = ""
+            specs[3] = ""
         params.extend(specs)
         self.csv_writer.writerow(params)
         

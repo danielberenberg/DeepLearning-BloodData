@@ -2,7 +2,7 @@
 video_core.py is a subsection of basic_utils library that is meant 
 for video processing. 
 """
-
+from PIL import Image
 import sys
 import os
 import cv2
@@ -188,7 +188,7 @@ def partition_frame_dir(frame_dir, output_dir, num_seconds=2, front_trim=60, end
     #rough estimation to determine frame rate
     is_60_fps = num_frames > 1600
     
-    print('[partition_frame_dir]: {} -> {}'.format(frame_dir, output_dir))
+    print('[partition_frame_dir]: PARTITIONING {} -> {}'.format(frame_dir, output_dir))
     print("[partition_frame_dir]: Found {} frames".format(num_frames), ("(60fps)" if is_60_fps else "(30fps)"))
     iteration = 0
     num_partitions = 0
@@ -246,15 +246,41 @@ def move_frames(source_dir, partitioned_frames, output_dir):
         os.rename(frame_path, source_path)
         current_index+=1
 
+def resize_frame_dir(frame_dir, output_dir, width=224, height=224):
+    """
+    Copy and resize frames in given directory.
+    """
+    if not os.path.exists(frame_dir):
+        raise FileNotFoundError("Error: path {} does not exists".format(frame_dir))
+    if not os.path.isdir(frame_dir):
+        raise IOError("Error: path {} is not a directory".format(frame_dir))
+    
+    base.check_exists_create_if_not(output_dir, suppress=True)
+
+    print("[resize_frame_dir]: RESIZING {} -> {}".format(frame_dir, output_dir))
+    listed_directory = os.listdir(frame_dir)
+    num_partitions = len(listed_directory)
+    completed_partitions = 0
+
+    for frame in os.listdir(frame_dir):
+        current_frame_dir = os.path.join(frame_dir, frame)
+        img = Image.open(current_frame_dir)
+        img = img.resize((width, height), Image.ANTIALIAS)
+        output_path = os.path.join(output_dir, frame)
+        img.save(output_path) 
+        completed_partitions += 1
+        progressBar(completed_partitions, num_partitions)
+    print()
+
 def progressBar(value, endvalue, bar_length=20):
-        """
-        Stolen from StackOverflow. For that dank looking progress bar.
-        """
-        percent = float(value) / endvalue
-        arrow = '-' * int(round(percent * bar_length)-1) + '>'
-        spaces = ' ' * (bar_length - len(arrow))
-        sys.stdout.write("\r[{0}] {1}%".format(arrow + spaces, int(round(percent * 100))))
-        sys.stdout.flush()
+    """
+    Stolen from StackOverflow. For that dank looking progress bar.
+    """
+    percent = float(value) / endvalue
+    arrow = '-' * int(round(percent * bar_length)-1) + '>'
+    spaces = ' ' * (bar_length - len(arrow))
+    sys.stdout.write("\r[{0}] {1}%".format(arrow + spaces, int(round(percent * 100))))
+    sys.stdout.flush()
 
 
 
