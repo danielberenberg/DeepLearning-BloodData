@@ -25,6 +25,9 @@ class CSV_Helper():
         header = [first_line[0], "PARTITION"]
         header.extend(first_line[1:])
         self.csv_writer.writerow(header)
+    
+    def generate_header(self, header):
+        self.csv_writer.writerow(header)
 
     def look_up(self, subj_name):    
         size = len(subj_name)

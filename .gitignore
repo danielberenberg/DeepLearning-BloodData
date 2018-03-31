@@ -10,3 +10,4 @@ partitions/
 *.csv
 *.pyo
 *.pyc
+.ipynb_checkpoints/

@@ -6,7 +6,7 @@ from PIL import Image
 import sys
 import os
 import cv2
-import basic_utils.basics as base
+from .basics import *
 FPS = 30
 
 def video_file_exists(filename):
@@ -75,11 +75,11 @@ def video_file_to_frames(filename, output_dir=None, suppress=False):
     if vid_valid:
         if output_dir:
             output_dir = os.path.join(output_dir, "%s_frames" % no_ext)
-            base.check_exists_create_if_not(output_dir, suppress=suppress)
+            check_exists_create_if_not(output_dir, suppress=suppress)
 
         else:
             output_dir = "%s_frames" % no_ext
-            base.check_exists_create_if_not(output_dir, suppress=suppress)
+            check_exists_create_if_not(output_dir, suppress=suppress)
 
         # have output directory, now need to create the framesies
         vidcap = cv2.VideoCapture(filename)
@@ -140,7 +140,7 @@ def video_dir_to_frame_dir(video_dir, output_dir, suppress=False):
                 
                 imgs_captured = []
 
-                base.check_exists_create_if_not(output_dir, suppress=suppress)
+                check_exists_create_if_not(output_dir, suppress=suppress)
 
                 for mov in movies:
                     framenames = video_file_to_frames(mov, output_dir=output_dir, suppress=suppress)
@@ -238,7 +238,7 @@ def move_frames(source_dir, partitioned_frames, output_dir):
         partitioned_frames : a list of frames that are being moved out of source directory
         output_dir : the directory where selected frames are being placed
     """
-    base.check_exists_create_if_not(output_dir,suppress=True)
+    check_exists_create_if_not(output_dir,suppress=True)
     current_index = 0
     for frame in partitioned_frames:
         frame_path = os.path.join(source_dir, frame)
@@ -255,7 +255,7 @@ def resize_frame_dir(frame_dir, output_dir, width=224, height=224):
     if not os.path.isdir(frame_dir):
         raise IOError("Error: path {} is not a directory".format(frame_dir))
     
-    base.check_exists_create_if_not(output_dir, suppress=True)
+    check_exists_create_if_not(output_dir, suppress=True)
 
     print("[resize_frame_dir]: RESIZING {} -> {}".format(frame_dir, output_dir))
     listed_directory = os.listdir(frame_dir)

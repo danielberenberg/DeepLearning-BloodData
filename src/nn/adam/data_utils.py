@@ -2,6 +2,9 @@ import os
 import cv2
 import numpy as np
 import re
+from sklearn.cross_validation import train_test_split
+from sklearn import preprocessing
+from keras.utils import np_utils
 
 numbers = re.compile(r'(\d+)')
 def numericalSort(value):
@@ -29,6 +32,15 @@ def create_image_array(frames_list):
         img = cv2.imread(frame)
         imgs.append(img)
     return np.array(imgs)
+
+def split_data_with_heart_rate(X, Y, percent):
+    return train_test_split(X, Y, test_size=percent)
+
+def split_data(X, Y, percent):
+    le = preprocessing.LabelEncoder()
+    Y = le.fit_transform(Y)
+    Y = np_utils.to_categorical(Y)
+    return train_test_split(X, Y, test_size=percent)
 
 def package_data(frames_dir, csv_in):
     """
@@ -75,7 +87,7 @@ def package_data(frames_dir, csv_in):
                 Y.append(y)
         return X, Y
 
-def create_labeled_data_from_partition(frames_dir, subject, trial_name, partition, rate):
+def create_labeled_data_from_partition(frames_dir, subject, trial_name, partition, rate, heart_rate_value=True):
     """
     Create a list of image file paths, corresponding to one video partition, and a label.
     The path is constructed, and a label chosen, using data pulled from the csv file.
@@ -99,5 +111,8 @@ def create_labeled_data_from_partition(frames_dir, subject, trial_name, partitio
     for frame in sorted(os.listdir(full_part_path), key=numericalSort):
         frame_path = os.path.join(full_part_path, frame)
         data.append(frame_path)
-    label = FAST_LABEL if rate > 100 else SLOW_LABEL
+    if not heart_rate_value:
+        label = FAST_LABEL if rate > 100 else SLOW_LABEL
+    else:
+        label = rate
     return data, label
