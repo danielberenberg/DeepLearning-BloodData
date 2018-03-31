@@ -1,11 +1,24 @@
 # Analyzing Video Data to determine heart rate/respiratory rate
 
-## TODO 3/03/18
-* resize frames
-* partition videos
-    * find minimum BPM in resting
-    * if fps is 60, take every other frame
-    * find `ceiling(BPS)` for min resting
-    * partition videos based on this number of frames
+## Install Requirements
 
+This project assumes anaconda is being used.
+
+First, install pip if you do not already have it.
+```{r, engine='bash'}
+conda install pip
+```
+
+Then, install the required packages for data and video utilities. Run the following command:
+```{r, engine='bash'}
+pip install src/we_panic_utils/
+```
+
+## Tasks (As of 3/31/18):
+
+- [x] resize frames
+- [x] partition videos
+- [x] train classifier
+- [ ] introduce data augmentation
+- [ ] train regression model
 
