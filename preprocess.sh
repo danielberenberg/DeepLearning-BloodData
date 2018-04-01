@@ -20,3 +20,5 @@ python src/scripts/catalog_partitions.py partitions/ DeepLearningClassData.csv
 
 echo "[*] creating labels csv ---> partitions_cons.csv";
 python src/scripts/consolidated_to_csv.py partitions_cons.csv
+
+./cleanup.sh

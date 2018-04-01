@@ -33,9 +33,11 @@ def filter_path_with_set(filter_set, all_paths):
         filtered_keys = [key for key in all_paths.keys() 
                 if key.split('/')[1].split('_')[0] == subj_tri.split('_')[0] 
                 and key.split('/')[1].split('_')[1] == subj_tri.split('_')[1]]
-
-        if not filtered_keys:
-            print(subj_tri)
+        
+        print(filtered_keys)
+        #if not filtered_keys:
+            #print(subj_tri)
+        
         #for path_key in all_paths:
         #    split_key = path_key.split('_')
         #    subj_tri_key = split_key[0] + '_' + split_key[1]
