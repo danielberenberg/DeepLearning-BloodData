@@ -43,6 +43,7 @@ def threadsafe_generator(func):
 
     return gen
 
+
 class DataProcessor():
     
     def __init__(self):

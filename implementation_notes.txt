@@ -1,0 +1,10 @@
+Some notes about data augmentation implementation choices:
+
+Augmentation done so far:
+    === double speed of video
+    === halve speed of video
+
+notes:
+    === found that ratio of respiratory to heart rate is approximately
+        1:4, so when doubling and halving video speed we double/halve 
+        the heart rate and take the resulting number and divide by 4

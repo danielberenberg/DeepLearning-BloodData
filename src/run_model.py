@@ -20,7 +20,7 @@ def parse_input():
                  all of the relevant arguments
     """
 
-    parser = argparse.ArgumentParse(description="a suite of commands for running a model")
+    parser = argparse.ArgumentParser(description="a suite of commands for running a model")
 
     parser.add_argument("model_type",
                         help="the type of model to run",
@@ -29,13 +29,13 @@ def parse_input():
 
     parser.add_argument("--train",
                         help="states whether the model should be trained",
-                        type=bool,
+                        # type=bool,
                         default=False,
                         action="store_true")
 
     parser.add_argument("--test",
                         help="states whether the model should be tested",
-                        type=bool,
+                        # type=bool,
                         default=False,
                         action="store_true")
 
@@ -183,4 +183,9 @@ def validate_arguments(args):
 
 
 if __name__ == "__main__":
+    
+    args = parse_input().parse_args()
+
+    validate_arguments(args)
+
     sys.exit("under construction ... ")
