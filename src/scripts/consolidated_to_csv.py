@@ -36,7 +36,7 @@ if __name__ == "__main__":
     #header = ["SUBJECT","TRIAL","PARTITION","HEART RATE","RESPIRATORY RATE","HEART RATE CLASS"]
     for row in mat:
         subj, tr, part = [int(r) for r in row[:3]]
-        fmt_slug = "S%04d_t%d_p%02d" % (subj, tr, part)
+        fmt_slug = "S%04d_t%d_p%d" % (subj, tr, part)
         
         newr = [fmt_slug]
         newr.extend(row[3:])
