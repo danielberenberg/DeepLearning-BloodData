@@ -12,13 +12,16 @@ class CSV_Helper():
     Use this for looking up data in DeepLearningClassData.csv,
     and writing to some specified csv output.
     """
-    def __init__(self, look_up_csv, write_to_csv):
+    def __init__(self, look_up_csv, write_to_csv, header=None):
         self.look_up_csv = look_up_csv
         self.write_to_csv = write_to_csv 
         self.csv_writer = csv.writer(write_to_csv, delimiter=',',
                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        self.create_header() 
-    
+        if header==None:
+            self.create_header() 
+        else:
+            self.generate_header(header)
+
     def create_header(self):
         first_line = self.look_up_csv.readline()
         first_line = first_line.rstrip().split(",")

@@ -4,9 +4,16 @@ Catalog partitions in a .csv of the form:
 SUBJECT     TRIAL       PARTITION       HEART RATE      RESPIRATORY RATE
 """
 
+import re
 import os
 import sys
 import basic_utils.basics as base
+
+numbers = re.compile(r'(\d+)')
+def numericalSort(value):
+    parts = numbers.split(value)
+    parts[1::2] = map(int, parts[1::2])
+    return parts
 
 def usage():
     print("[usage]: python %s <partition-dir> <master_csv>" % sys.argv[0])
@@ -34,14 +41,13 @@ if __name__ == "__main__":
     
     csv_ = open(csv_, "r")
     #print(header)
-    output_csv = open("partitions.csv","w")
+    output_csv = open("partitions_cons.csv","w")
     
     exclude = [".DS_Store","._.DS_Store"]
     
-    csvh = base.CSV_Helper(csv_, output_csv)
-    header = ["SUBJECT","TRIAL","PARTITION","HEART RATE","RESPIRATORY RATE","HEART RATE CLASS"]
-    
-    csvh.generate_header(header)
+    header = ["SUBJECT","TRIAL","PARTITION","HEART RATE","RESPIRATORY RATE","HEART RATE CLASS"] 
+    csvh = base.CSV_Helper(csv_, output_csv, header=header)
+    #csvh.generate_header(header)
     #print(mat)
     # gives subjects
     for child in sorted(os.listdir(dir_)):
@@ -49,13 +55,13 @@ if __name__ == "__main__":
             pth = os.path.join(dir_, child)
             
             # gives TrialN_frames
-            for grandchild in sorted(os.listdir(pth)):
+            for grandchild in sorted(os.listdir(pth), key=numericalSort):
                 if grandchild not in exclude:
                     
                     fullpth = os.path.join(pth, grandchild)
                     
                     # gives partition namees
-                    for greatgc in sorted(os.listdir(fullpth)):
+                    for greatgc in sorted(os.listdir(fullpth), key=numericalSort):
                         if greatgc not in exclude:
                             
                             # write to output_csv the follwoing

@@ -6,6 +6,7 @@ partitioned/
 resized/
 rsz/
 partitions/
+consolidated/
 *.tar.gz
 *.csv
 *.pyo

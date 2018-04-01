@@ -29,11 +29,10 @@ if __name__ == "__main__":
 
     mat, header = base.csv2data(csv_)
     csv_ = open(csv_, "r")
-    output_csv = open("partitions_cons.csv","w")
-    csvh = base.CSV_Helper(csv_, output_csv)
+    output_csv = open("partitions_out.csv","w")
     
-    header = ["SAMPLE","HEART RATE","RESPIRATORY RATE","HEART RATE CLASS"]
-    csvh.generate_header(header)
+    header = ["SAMPLE","HEART RATE","RESPIRATORY RATE","HEART RATE CLASS"] 
+    csvh = base.CSV_Helper(csv_, output_csv, header=header)
     #header = ["SUBJECT","TRIAL","PARTITION","HEART RATE","RESPIRATORY RATE","HEART RATE CLASS"]
     for row in mat:
         subj, tr, part = [int(r) for r in row[:3]]

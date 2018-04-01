@@ -31,8 +31,8 @@ if __name__ == "__main__":
     try:
         if sys.argv[1] in ["HELP", "help", "h"]:
             help_msg()
-
-        csv_name = sys.argv[1]
+        csv_name = sys.argv[1] 
+        
         data_dir = sys.argv[2]
         output_dir = sys.argv[3]
         
