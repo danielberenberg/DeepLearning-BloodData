@@ -58,13 +58,13 @@ if __name__ == "__main__":
             target_dir = os.path.join(data_dir, fmt_dir % subject)
             target_file = fmt_file % trial
 
-            #target = os.path.join(target_dir, target_file)
+            target = os.path.join(target_dir, target_file)
             
-            for movie in os.listdir(target_dir):
-                target = os.path.join(target_dir, movie)
-                imgs = vc.video_file_to_frames(target, output_dir=output_dir, suppress=False)
-                print("-"*78)
-                imgs_captured.extend(imgs)
+            #for movie in os.listdir(target_dir):
+                #target = os.path.join(target_dir, movie)
+            imgs = vc.video_file_to_frames(target, output_dir=output_dir, suppress=False)
+            print("-"*78)
+            imgs_captured.extend(imgs)
 
 
         

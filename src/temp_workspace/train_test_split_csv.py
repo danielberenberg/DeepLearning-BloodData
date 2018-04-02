@@ -2,28 +2,34 @@ import csv
 import random
 import os
 
-data_path = "consolidated"
-partition_csv = "partitions_out.csv"
-filtered_csv = "NextStartingPoint.csv"
-
-percent = 0.2
 def main():
-    subjects, trial1, trial2 = all_subjects()
-
     
-    training_set = split_subjects(trial1, trial2, 0.20)
+    regular_data_path = "reg_consolidated"
+    augmented_data_path = "aug_consolidated"
+    filtered_csv = "NextStartingPoint.csv" 
+    consolidated_csv = "reg_part_out.csv"
+    
+    train, test, val = train_test_split_with_csv(regular_data_path, augmented_data_path, filtered_csv, consolidated_csv) 
+    print(test)
+
+def train_test_split_with_csv(regular_data_path, augmented_data_path, filtered_csv, consolidated_csv,
+        train_csv_out="train.csv", test_csv_out="test.csv", val_csv_out="val.csv"): 
+
+    trial1, trial2 = all_subjects(filtered_csv)
+    testing_set = split_subjects(trial1, trial2, 0.20)
     validation_set = split_subjects(trial1, trial2, 0.10)
 
     trial1.extend(trial2)
-    testing_set = trial1 
-    
-    all_paths = fetch_paths_with_labels(partition_csv)
-    
-    filter_path_with_set(testing_set, all_paths)
-    #print(all_paths)
-    return
+    training_set = trial1 
+    all_paths = fetch_paths_with_labels(consolidated_csv, regular_data_path)
 
-def filter_path_with_set(filter_set, all_paths):
+    filtered_training_paths = filter_path_with_set(training_set, all_paths, augmented_data_path)
+    filtered_testing_paths = filter_path_with_set(testing_set, all_paths, augmented_data_path)
+    filtered_validation_paths = filter_path_with_set(validation_set, all_paths, augmented_data_path)
+    
+    return filtered_training_paths, filtered_testing_paths, filtered_validation_paths
+
+def filter_path_with_set(filter_set, all_paths, augment_path=None):
     filtered_set_paths = {}
     for subject, trial in filter_set:
         subj_tri = "S{}_t{}".format("0" * (4 - len(subject)) + subject, trial)
@@ -34,17 +40,36 @@ def filter_path_with_set(filter_set, all_paths):
                 if key.split('/')[1].split('_')[0] == subj_tri.split('_')[0] 
                 and key.split('/')[1].split('_')[1] == subj_tri.split('_')[1]]
         
-        print(filtered_keys)
-        #if not filtered_keys:
-            #print(subj_tri)
         
-        #for path_key in all_paths:
-        #    split_key = path_key.split('_')
-        #    subj_tri_key = split_key[0] + '_' + split_key[1]
-        #    if subj_tri == subj_tri_key:
-        #        prepare_removal = []
+        for key in filtered_keys:
+            filtered_set_paths[key] = all_paths[key]
+            if augment_path != None:
+                try:
+                    augmented = fetch_augmented(key, augment_path)
+                except FileNotFoundError as e:
+                    print(e)
+                else:
+                    heart_rate, resp_rate = filtered_set_paths[key]
+                    heart_rate = int(heart_rate)
+                    resp_rate = int(resp_rate)
+                    if augmented.split('_')[2] == "t1":
+                        heart_rate *= 2
+                    else:
+                        heart_rate //= 2
+                    resp_rate = int(round(heart_rate/4))
+                    filtered_set_paths[augmented] = (heart_rate, resp_rate)
+            del(all_paths[key])
 
-def fetch_paths_with_labels(consolidated_csv): 
+    return filtered_set_paths
+
+def fetch_augmented(path, augmented_path):
+    without_dir = path.split('/')[1]
+    with_augmented = os.path.join(augmented_path, without_dir)
+    if not os.path.exists(with_augmented):
+        raise FileNotFoundError("{} does not exist!".format(with_augmented))
+    return with_augmented
+
+def fetch_paths_with_labels(consolidated_csv, data_path): 
     with open(consolidated_csv, 'r') as p_csv:
         reader = csv.reader(p_csv)
         next(reader) #skip the header
@@ -72,7 +97,7 @@ def split_subjects(trial1, trial2, split_p=0.2):
     
     return split_set
 
-def all_subjects():
+def all_subjects(filtered_csv):
     with open(filtered_csv, 'r') as starting_point:
         reader = csv.reader(starting_point)
         next(reader)
@@ -87,7 +112,6 @@ def all_subjects():
                 trial1.append(subj)
             else:
                 trial2.append(subj)
-        return all_subj, trial1, trial2
-
+        return trial1, trial2
 
 main()

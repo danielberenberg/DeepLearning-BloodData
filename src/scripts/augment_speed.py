@@ -11,8 +11,8 @@ output_dir = 'augmented'
 BASH_COMMAND = 'ffmpeg -i {} -vf setpts={}*PTS {}' 
 GET_DURATION_COMMAND = "ffprobe -v error -show_entries format=duration \
         -of default=noprint_wrappers=1:nokey=1 {}"
-SPLIT_COMMAND = "ffmpeg -i {} -vcodec copy -acodec copy -ss {} -t {} {} \
-   -vcodec copy -acodec copy -ss {} -t {} {}"
+SPLIT_COMMAND = "ffmpeg -i {} -vcodec copy -acodec copy -ss {} -t {} {}"
+
 HALVE_COMMAND = "ffmpeg -i {} -vcodec copy -acodec copy \
     -ss {} -t {} {}"
 
@@ -30,16 +30,16 @@ def main():
                 if trial in video:
                     if trial == "1":
                         speed = 0.5
-                        ext = "FAST"
+                        #ext = "FAST"
                         trial_path = video
                     else:
                         speed = 2
-                        ext = "SLOW"
+                        #ext = "SLOW"
                         trial_path = video
                     break
             out = os.path.join(output_dir, subj_path.split('/')[1])
             base.check_exists_create_if_not(out)
-            new_name = os.path.join(out, trial_path + '_' + ext + '.mov')
+            new_name = os.path.join(out, trial_path)
             change_speed(os.path.join(subj_path, video), new_name, speed)
 
 def fetch_path(subj):
@@ -60,7 +60,7 @@ def handle(video_path, factor):
     p = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
     out, err = p.communicate()
    
-    if factor == 2: #if the video was slowed down, split it into two 30 second parts
+    if factor == 2: #if the video was slowed down, split it into two 30 second parts and throw out the second part
         split_name = video_path.split('.')[0]
         end_time_1 = int(float(out) / 2)
         end_time_2 = int(float(out))
@@ -73,11 +73,12 @@ def handle(video_path, factor):
             end_time_2 = "00:01:" + '0' + str(end_time_2 - 60)
         else:
             end_time_2 = "00:00:" + str(end_time_2)
-        command = SPLIT_COMMAND.format(video_path, 0, end_time_1, split_name + '_first_half.mov',
-                end_time_1, end_time_2, split_name + '_second_half.mov') 
+        command = SPLIT_COMMAND.format(video_path, 0, end_time_1, split_name + '_first_half.mov') 
         p = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
         p.wait()
         p.kill()
+        os.remove(video_path)
+        os.rename(split_name + '_first_half.mov', video_path)
     else: #if the video was sped up, cut it in half and reverse it
         halved_name = video_path.split('.')[0] + '_halved.mov'
         end_time = "00:00:" + str(int(float(out)/2))
@@ -91,6 +92,7 @@ def handle(video_path, factor):
         p.wait()
         p.kill()
         os.remove(halved_name)
-    os.remove(video_path)
+        os.remove(video_path)
+        os.rename(video_path.split('.')[0] + '_looped.mov', video_path)
 
 main()
