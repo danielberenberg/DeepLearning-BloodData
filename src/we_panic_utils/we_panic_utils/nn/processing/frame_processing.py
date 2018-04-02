@@ -11,7 +11,6 @@ from keras.preprocessing.image import load_img, img_to_array
 from keras.preprocessing.image import random_rotation, random_shift, random_shear 
 from keras.preprocessing.image import random_zoom, flip_axis
 
-
 class threadsafe_iterator:
     """
     A class for threadsafe iteratio
