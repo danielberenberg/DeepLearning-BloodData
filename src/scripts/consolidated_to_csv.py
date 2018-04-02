@@ -7,15 +7,16 @@ import sys, os
 import basic_utils.basics as base
 
 def usage():
-    print("[usage]: python %s <partition-csv>" % sys.argv[0])
+    print("[usage]: python %s <partition-csv> <consolidated_csv>" % sys.argv[0])
     sys.exit()
  
 def parse_input():
     try:
         dir_ = sys.argv[1]
+        csv_out = sys.argv[2]
 
         if os.path.exists(dir_):
-            return dir_
+            return dir_, csv_out
 
         else:
             raise OSError("%s not found" % dir_)
@@ -24,12 +25,12 @@ def parse_input():
         usage()
 
 if __name__ == "__main__":
-    csv_ = parse_input()
+    csv_, csv_out = parse_input()
     
 
     mat, header = base.csv2data(csv_)
     csv_ = open(csv_, "r")
-    output_csv = open("partitions_out.csv","w")
+    output_csv = open(csv_out,"w")
     
     header = ["SAMPLE","HEART RATE","RESPIRATORY RATE","HEART RATE CLASS"] 
     csvh = base.CSV_Helper(csv_, output_csv, header=header)

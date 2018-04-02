@@ -8,6 +8,8 @@ rsz/
 partitions/
 consolidated/
 augmented/
+reg_consolidated/
+aug_consolidated/
 *.tar.gz
 *.csv
 *.pyo

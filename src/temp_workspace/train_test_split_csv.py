@@ -1,93 +1,76 @@
+import split_utils as util
+import we_panic_utils.basic_utils.basics as base
+
 import csv
-import random
 import os
 
-data_path = "consolidated"
-partition_csv = "partitions_out.csv"
-filtered_csv = "NextStartingPoint.csv"
+"""
+Public API
+"""
 
-percent = 0.2
 def main():
-    subjects, trial1, trial2 = all_subjects()
-
     
-    training_set = split_subjects(trial1, trial2, 0.20)
-    validation_set = split_subjects(trial1, trial2, 0.10)
+    regular_data_path = "reg_consolidated"
+    augmented_data_path = "aug_consolidated"
+    filtered_csv = "NextStartingPoint.csv" 
+    consolidated_csv = "reg_part_out.csv"
+    dir_out = "test/"
 
-    trial1.extend(trial2)
-    testing_set = trial1 
+    train, test, val = train_test_split_with_csv(regular_data_path, augmented_data_path, filtered_csv, consolidated_csv, dir_out) 
     
-    all_paths = fetch_paths_with_labels(partition_csv)
-    
-    filter_path_with_set(testing_set, all_paths)
-    #print(all_paths)
-    return
+    #data = data_set_from_csv('test/train.csv')
+    #for key in data:
+        #print(key, data[key])
 
-def filter_path_with_set(filter_set, all_paths):
-    filtered_set_paths = {}
-    for subject, trial in filter_set:
-        subj_tri = "S{}_t{}".format("0" * (4 - len(subject)) + subject, trial)
-       
-        #¯\_﹙ツ﹚_/¯
-        #filter out only the keys of the dictionary the belong to this subject and trial
-        filtered_keys = [key for key in all_paths.keys() 
-                if key.split('/')[1].split('_')[0] == subj_tri.split('_')[0] 
-                and key.split('/')[1].split('_')[1] == subj_tri.split('_')[1]]
-        
-        print(filtered_keys)
-        #if not filtered_keys:
-            #print(subj_tri)
-        
-        #for path_key in all_paths:
-        #    split_key = path_key.split('_')
-        #    subj_tri_key = split_key[0] + '_' + split_key[1]
-        #    if subj_tri == subj_tri_key:
-        #        prepare_removal = []
-
-def fetch_paths_with_labels(consolidated_csv): 
-    with open(consolidated_csv, 'r') as p_csv:
-        reader = csv.reader(p_csv)
-        next(reader) #skip the header
-        paths = {}
-        for path in reader:
-            full_path = os.path.join(data_path, path[0])
-            if not os.path.exists(full_path):
-                raise FileNotFoundError("{} does not exist!".format(full_path))
-            paths[full_path] = (path[1], path[2])
-    return paths
-        
-def split_subjects(trial1, trial2, split_p=0.2):
-    smallest = min(len(trial1), len(trial2))
-    
-    num_split = int((smallest * split_p))
-    num_split = 1 if num_split == 0 else num_split
-    split_set = []
-    while len(split_set) < num_split * 2:
-        trial1_index = random.randint(0, len(trial1)-1)
-        trial2_index = random.randint(0, len(trial2)-1)
-        split_set.append(trial1[trial1_index])
-        split_set.append(trial2[trial2_index])
-        trial1.pop(trial1_index)
-        trial2.pop(trial2_index)  
-    
-    return split_set
-
-def all_subjects():
-    with open(filtered_csv, 'r') as starting_point:
-        reader = csv.reader(starting_point)
+def data_set_from_csv(csv_path):
+    if not os.path.exists(csv_path):
+        raise FileNotFoundError("{} was not found".format(csv_path))
+    data = {}
+    with open(csv_path, 'r') as csv_in:
+        reader = csv.reader(csv_in)
         next(reader)
-        
-        all_subj = []
-        trial1 = []
-        trial2 = []
-        for subj in reader:
-            if subj[0] not in all_subj:
-                all_subj.append(subj[0])
-            if subj[1] == "1":
-                trial1.append(subj)
-            else:
-                trial2.append(subj)
-        return all_subj, trial1, trial2
+        for path, hr, rr in reader:
+            data[path] = (hr, rr)
+    return data
 
+def data_set_to_csv(data_set, csv_path):
+    if not csv_path.endswith('.csv'):
+        csv_path += '.csv'
+    with open(csv_path, 'w') as csv_out:
+        writer = csv.writer(csv_out)
+        header = ['PATH', 'HEART RATE', 'RESPIRATORY RATE']
+        writer.writerow(header)
+        for key in data_set:
+            data = data_set[key]
+            writer.writerow([key, data[0], data[1]])
+
+
+def train_test_split_with_csv(regular_data_path, augmented_data_path, filtered_csv, consolidated_csv, dir_out, 
+        train_csv_out="train.csv", test_csv_out="test.csv", val_csv_out="val.csv", verbose=True): 
+    
+    base.check_exists_create_if_not(dir_out)
+
+    trial1, trial2 = util.all_subjects(filtered_csv)
+    testing_set = util.split_subjects(trial1, trial2, 0.20)
+    validation_set = util.split_subjects(trial1, trial2, 0.10)
+    
+    trial1.extend(trial2)
+    training_set = trial1 
+    
+    if verbose:
+        print(util.set_to_str("----Training Set----", training_set))        
+        print(util.set_to_str("----Validation Set----", validation_set))         
+        print(util.set_to_str("----Testing Set----", testing_set))         
+    
+    all_paths = util.fetch_paths_with_labels(consolidated_csv, regular_data_path)
+
+    filtered_training_paths = util.filter_path_with_set(training_set, all_paths, augmented_data_path, verbose)
+    filtered_testing_paths = util.filter_path_with_set(testing_set, all_paths, augmented_data_path, verbose)
+    filtered_validation_paths = util.filter_path_with_set(validation_set, all_paths, augmented_data_path, verbose)
+   
+    data_set_to_csv(filtered_training_paths, os.path.join(dir_out, train_csv_out)) 
+    data_set_to_csv(filtered_testing_paths, os.path.join(dir_out, test_csv_out))
+    data_set_to_csv(filtered_validation_paths, os.path.join(dir_out, val_csv_out))
+    return filtered_training_paths, filtered_testing_paths, filtered_validation_paths
 
 main()

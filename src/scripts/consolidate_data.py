@@ -8,14 +8,15 @@ import sys
 import shutil
 
 def usage():
-    print("[usage] %s <directory>" % sys.argv[0])
+    print("[usage] %s <directory> <consolidated_out_dir>" % sys.argv[0])
     sys.exit()
 
 def parse_input(): 
     try:
         dir_ = sys.argv[1]
+        out_dir_ = sys.argv[2]
         if os.path.isdir(dir_):
-            return dir_
+            return dir_, out_dir_
 
         else:
             raise OSError("%s not found" % dir_)
@@ -25,8 +26,8 @@ def parse_input():
 
 if __name__ == '__main__':
     #pass
-    dir_ = parse_input()
-    os.makedirs("consolidated")
+    dir_, out_dir_ = parse_input()
+    os.makedirs(out_dir_)
     exclude = [".DS_Store","._.DS_Store"]
      
     for child in sorted(os.listdir(dir_)):
@@ -49,7 +50,7 @@ if __name__ == '__main__':
 
                             slug = "%s_t%s_p%s" % (SUBJECT, TRIAL, PARTITION)
                             
-                            subdir = os.path.join("consolidated",slug)
+                            subdir = os.path.join(out_dir_,slug)
                          
                             os.makedirs(subdir)
                             
