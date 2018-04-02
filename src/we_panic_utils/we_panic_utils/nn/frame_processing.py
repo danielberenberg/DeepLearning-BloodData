@@ -1,29 +1,21 @@
-import classifier
-import threading
+"""
+A module for processing frames as a sequence
+"""
+
+import threading 
 import os
-import random
 import random
 import numpy as np
 
 from keras.preprocessing.image import load_img, img_to_array
-from keras.preprocessing.image import random_rotation, random_shift, random_shear, 
-from keras.utils import to_categorical
-
-def train_test_split(data_dir):
-    contents = sorted(os.listdir(data_dir))
-    
-    train, test = [], []
-
-    for i,c in enumerate(contents):
-        if i%5 == 0:
-            test.append(os.path.join(data_dir,c))
-        else:
-            train.append(os.path.join(data_dir,c))
-
-    return train, test
+from keras.preprocessing.image import random_rotation, random_shift, random_shear 
+from keras.preprocessing.image import random_zoom, flip_axis
 
 
 class threadsafe_iterator:
+    """
+    A class for threadsafe iteratio
+    """
     def __init__(self, iterator):
         self.iterator = iterator
         self.lock = threading.Lock()
@@ -45,11 +37,29 @@ def threadsafe_generator(func):
     return gen
 
 
-class DataProcessor():
-    
-    def __init__(self):
-        pass
+class FrameProcessor:
+    """
+    the one stop shop object for data frame sequence augmentation 
+    """
 
+    def __init__(self,
+                 rotation_range=0.,
+                 width_shift_range=0.,
+                 height_shift_range=0.,
+                 shear_range=0.,
+                 zoom_range=0.,
+                 horizontal_flip=False,
+                 vertical_flip=False):
+
+        self.rotation_range = rotation_range
+        self.width_shift_range = width_shift_range
+        self.height_shift_range = height_shift_range
+        self.shear_range = shear_range
+        self.zoom_range = zoom_range
+        self.horizontal_flip = horizontal_flip
+        self.vertical_flip = vertical_flip
+
+    """
     @threadsafe_generator
     def frame_generator(self, batch_size, train_test, data_dir, data_dict):
         train, test = train_test_split(data_dir) 
@@ -86,8 +96,8 @@ class DataProcessor():
     #@staticmethod
     def get_sample_frames(self, sample):
         """
-        return the sorted list of absolute image paths
-        for this sample
+        #return the sorted list of absolute image paths
+        #for this sample
         """
     
         contents = os.listdir(sample)
@@ -99,7 +109,7 @@ class DataProcessor():
     
     def rescale(self, frames, sequence_length):
         """
-        return the rescaled list of images in case theres an extra img or so
+        #return the rescaled list of images in case theres an extra img or so
         """
     
         skip = len(frames) // sequence_length
@@ -109,7 +119,7 @@ class DataProcessor():
     
     def build_image_sequence(self, frames,input_shape=(224,224,3)):
         """
-        return a list of images from filenames
+        #return a list of images from filenames
         """
         return [self.process_img(frame,input_shape) for frame in frames]
     
@@ -121,10 +131,4 @@ class DataProcessor():
         x = (img_arr/255.).astype(np.float32)
 
         return x
-
-    def one_hot(self, label):
-        label_encoded = classifier.CLASSES.index(label)
-        label_hot = to_categorical(label_encoded, len(classifier.CLASSES))
-    
-        return label_hot
-    
+    """
