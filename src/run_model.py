@@ -303,6 +303,6 @@ if __name__ == "__main__":
     regular, augmented, filtered_csv, partition_csv, batch_size, epochs, train, test, inputs, outputs = validate_arguments(args)
     training_paths2labels, testing_paths2labels, validation_paths2labels = train_test_split_with_csv_support(regular, filtered_csv,
                                                                                                              partition_csv, outputs,
-                                                                                                             augmented)
+                                                                                                             augmented_data_path=augmented)
     
     sys.exit("under construction ... ")
