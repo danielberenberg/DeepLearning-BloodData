@@ -9,6 +9,7 @@ import numpy as np
 
 from keras.preprocessing.image import load_img, img_to_array
 from keras.preprocessing.image import apply_transform, transform_matrix_offset_center
+import keras.backend as K
 
 from PIL import ImageEnhance
 from PIL import Image as pil_image
@@ -132,20 +133,20 @@ class FrameProcessor:
                     # with probability 0.5, flip vertical axis
                     coin_flip = np.random.random_sample() > 0.5
                     if coin_flip:
-                        sequence = self.sequence_flip_axis(sequence, 0)   # flip on the row axis
+                        sequence = self.sequence_flip_axis(sequence, 1)   # flip on the row axis
                 
                 if self.horizontal_flip:
                     # with probability 0.5, flip horizontal axis (cols)
                     coin_flip - np.random.random_sample() > 0.5
 
                     if coin_flip:
-                        sequence = self.sequence_flip_axis(sequence, 1)   # flip on the column axis
+                        sequence = self.sequence_flip_axis(sequence, 2)   # flip on the column axis
                 
                 X.append(sequence)
 
             yield np.array(X), np.array(y)
    
-    def random_sequence_rotation(self, seq, row_axis=0, col_axis=1, channel_axis=2,
+    def random_sequence_rotation(self, seq, row_axis=1, col_axis=2, channel_axis=0,
                                  fill_mode='nearest', cval=0):
         """
         apply a rotation to an entire sequence of frames
@@ -175,7 +176,7 @@ class FrameProcessor:
         
         return [apply_transform(x, transform_matrix, channel_axis, fill_mode, cval) for x in seq] 
             
-    def random_sequence_shift(self, seq, row_axis=0, col_axis=1, channel_axis=2, 
+    def random_sequence_shift(self, seq, row_axis=1, col_axis=2, channel_axis=0, 
                               fill_mode="nearest", cval=0):
         """
         apply a height/width shift to an entire sequence of frames
@@ -204,7 +205,7 @@ class FrameProcessor:
         
         return [apply_transform(x, transform_matrix, channel_axis, fill_mode, cval) for x in seq]
 
-    def random_sequence_shear(self, seq, row_axis=0, col_axis=1, channel_axis=2,
+    def random_sequence_shear(self, seq, row_axis=1, col_axis=2, channel_axis=0,
                               fill_mode='nearest', cval=0):
         """
         apply a random shear to an entire sequence of frames
@@ -234,7 +235,7 @@ class FrameProcessor:
         
         return [apply_transform(x, transform_matrix, channel_axis, fill_mode, cval) for x in seq]
 
-    def random_sequence_zoom(self, seq, row_axis=0, col_axis=1, channel_axis=2,
+    def random_sequence_zoom(self, seq, row_axis=1, col_axis=2, channel_axis=0,
                              fill_mode='nearest', cval=0): 
         """
         apply a random zoom on an entire sequence of frames
