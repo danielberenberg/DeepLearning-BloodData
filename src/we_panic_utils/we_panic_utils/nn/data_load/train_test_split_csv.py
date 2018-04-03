@@ -104,4 +104,5 @@ def train_test_split_with_csv_support(regular_data_path, filtered_csv, consolida
     data_set_to_csv(filtered_training_paths, os.path.join(dir_out, train_csv_out), verbose=verbose) 
     data_set_to_csv(filtered_testing_paths, os.path.join(dir_out, test_csv_out), verbose=verbose)
     data_set_to_csv(filtered_validation_paths, os.path.join(dir_out, val_csv_out), verbose=verbose)
+    
     return filtered_training_paths, filtered_testing_paths, filtered_validation_paths
