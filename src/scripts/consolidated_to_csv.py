@@ -4,7 +4,7 @@ format in consolidated data directory
 """
 
 import sys, os
-import basic_utils.basics as base
+import we_panic_utils.basic_utils.basics as base
 
 def usage():
     print("[usage]: python %s <partition-csv> <consolidated_csv>" % sys.argv[0])

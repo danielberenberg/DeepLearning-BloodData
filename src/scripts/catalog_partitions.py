@@ -7,7 +7,7 @@ SUBJECT     TRIAL       PARTITION       HEART RATE      RESPIRATORY RATE
 import re
 import os
 import sys
-import basic_utils.basics as base
+import we_panic_utils.basic_utils.basics as base
 
 numbers = re.compile(r'(\d+)')
 def numericalSort(value):

@@ -48,7 +48,8 @@ class FrameProcessor:
                  shear_range=0.,
                  zoom_range=0.,
                  horizontal_flip=False,
-                 vertical_flip=False):
+                 vertical_flip=False,
+                 batch_size=4):
 
         self.rotation_range = rotation_range
         self.width_shift_range = width_shift_range
@@ -57,14 +58,15 @@ class FrameProcessor:
         self.zoom_range = zoom_range
         self.horizontal_flip = horizontal_flip
         self.vertical_flip = vertical_flip
+        
+        self.batch_size = batch_size
 
-    """
     @threadsafe_generator
-    def frame_generator(self, batch_size, train_test, data_dir, data_dict):
-        train, test = train_test_split(data_dir) 
-        data = train if train_test == "train" else test
-    
-        print ("[*] creating a %s generator with %d samples" % (train_test, len(data)))
+    def frame_generator(self, paths2labels, generator_type="frame"):
+        """
+        a generator for serving up batches of frame sequences 
+        """
+        print("[*] creating a %s generator with %d samples" % (generator_type, len(paths2labels))
     
         while 1:
             X, y = [], []
@@ -92,6 +94,7 @@ class FrameProcessor:
     
             yield np.array(X), np.array(y)
     
+    """
     #@staticmethod
     def get_sample_frames(self, sample):
         """

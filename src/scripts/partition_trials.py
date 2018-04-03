@@ -1,7 +1,7 @@
 import os
 import sys
-import basic_utils.basics as base
-import basic_utils.video_core as vc
+import we_panic_utils.basic_utils.basics as base
+import we_panic_utils.basic_utils.video_core as vc
 
 INPUT_CSV = "DeepLearningClassData.csv"
 

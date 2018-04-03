@@ -1,7 +1,8 @@
 import sys
 import os
-import basic_utils.video_core as vc
-import basic_utils.basics as base
+import we_panic_utils.basic_utils.video_core as vc
+import we_panic_utils.basic_utils.basics as base
+
 def usage(with_help=True): 
     print("[Usage]: %s <partitions_dir> <resized_out>" % sys.argv[0])
     if with_help:

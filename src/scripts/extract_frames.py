@@ -7,8 +7,8 @@ and extracting the frames from the subjects listed in that csv
 import sys
 import os
 
-import basic_utils.basics as base
-import basic_utils.video_core as vc
+import we_panic_utils.basic_utils.basics as base
+import we_panic_utils.basic_utils.video_core as vc
 
 def usage(with_help=True):
     print("[Usage]: %s <csv_file> <data_dir> <output_directory>" % sys.argv[0])
