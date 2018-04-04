@@ -8,7 +8,7 @@ import os
 
 import we_panic_utils.basic_utils as basic_utils
 from we_panic_utils.nn.data_load.train_test_split_csv import train_test_split_with_csv_support
-
+from we_panic_utils.nn.Engine
 
 def parse_input():
     """
@@ -37,7 +37,13 @@ def parse_input():
                         help="director[y|ies] to draw data from",
                         type=str,
                         nargs="+")
-    
+     
+    parser.add_argument("--ignore_augmented",
+                        help="specify which phases of running model should ignore augmented data",
+                        type=str,
+                        nargs="+",
+                        choices=["train", "validation", "test"])
+
     parser.add_argument("--partition_csv",
                         help="csv containing the mapping from partition paths to heart rate/resp rates",
                         type=str,
@@ -125,7 +131,8 @@ def summarize_arguments(args):
     print(formatter % ("data", args.data))
     print(formatter % ("partition_csv", args.partition_csv))
     print(formatter % ("csv", args.csv))
-
+    
+    print(formatter % ("ignore_augmented", str(args.ignore_augmented)))
     formatter = "[%s] %r"
 
     print(formatter % ("train", args.train))
@@ -134,8 +141,8 @@ def summarize_arguments(args):
     formatter = "[%s] %d"
 
     print(formatter % ("batch_size", args.batch_size))
-    print(formatter % ("epochs", args.epochs))
-    print(formatter % ("rotation_range"))
+    print(formatter % ("epochs", args.epochs)) 
+    #print(formatter % ("rotation_range", args.rotation_range))
 
 
 class ArgumentError(Exception):
@@ -240,7 +247,14 @@ def validate_arguments(args):
         assert len(args.data) == 2, "Expected maximum two directories, regular and augmented; got %d" % len(args.data)
         print("[validate_arguments] : taking %s to be `regular`, %s to be `augmented`" % (args.data[0], args.data[1]))
         augmented = args.data[1]
-        
+    
+    if len(args.ignore_augmented) > 1:
+        assert len(args.ignore_augmented) < 4, "Expected maximum three phases to ignore, got %d" % len(args.ignore_augmented)
+        assert args.ignore_augmented[0] != args.ignore_augmented[1], "Why would you pass in two of the same argument? Are you dumb? %s and %s" % (args.ignore_augmented[0], args.ignore_augmented[1])
+        if len(args.ignore_augmented) > 2:
+            assert args.ignore_augmented[0] != args.ignore_augmented[2], "Why would you pass in two of the same argument? Are you dumb? %s and %s" % (args.ignore_augmented[0], args.ignore_augmented[2])
+            assert args.ignore_augmented[1] != args.ignore_augmented[2], "Why would you pass in two of the same argument? Are you dumb? %s and %s" % (args.ignore_augmented[1],
+                args.ignore_augmented[2])
     regular = args.data[0]
 
     # if --test=False and --train=False, exit because there's nothing to do
@@ -299,10 +313,23 @@ def validate_arguments(args):
 if __name__ == "__main__":
     
     args = parse_input().parse_args()
+    
 
     regular, augmented, filtered_csv, partition_csv, batch_size, epochs, train, test, inputs, outputs = validate_arguments(args)
-    training_paths2labels, testing_paths2labels, validation_paths2labels = train_test_split_with_csv_support(regular, filtered_csv,
-                                                                                                             partition_csv, outputs,
-                                                                                                             augmented_data_path=augmented)
     
+    #print(regular, augmented, filtered_csv, partition_csv, batch_size, epochs, train, test, inputs, outputs)
+    
+    print(summarize_arguments(args))
+    #training_paths2labels, testing_paths2labels, validation_paths2labels = train_test_split_with_csv_support(regular, filtered_csv,
+    #                                                                                                         partition_csv, outputs,
+    #                                                                                                         augmented_data_path=augmented)
+    
+    if train:
+        train, test, val = train_test_split_with_csv_support(regular, filtered_csv, 
+                partition_csv, outputs, augmented_data_path=augmented, ignore_augmented=args.ignore_augmented)
+        
+        print(test)
+        pass
+
+
     sys.exit("under construction ... ")

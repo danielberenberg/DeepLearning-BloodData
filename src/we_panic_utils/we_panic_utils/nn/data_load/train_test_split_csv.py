@@ -33,7 +33,7 @@ def data_set_to_csv(data_set, csv_path, verbose=True):
             writer.writerow([key, data[0], data[1]])
 
 def train_test_split_with_csv_support(regular_data_path, filtered_csv, consolidated_csv, dir_out, 
-        augmented_data_path=None, test_split=0.2, val_split=0.1, train_csv_out="train.csv", 
+        augmented_data_path=None, ignore_augmented=[], test_split=0.2, val_split=0.1, train_csv_out="train.csv", 
         test_csv_out="test.csv", val_csv_out="val.csv", verbose=True): 
     """
     Split all available data into train, test, and validation sets.
@@ -105,4 +105,11 @@ def train_test_split_with_csv_support(regular_data_path, filtered_csv, consolida
     data_set_to_csv(filtered_testing_paths, os.path.join(dir_out, test_csv_out), verbose=verbose)
     data_set_to_csv(filtered_validation_paths, os.path.join(dir_out, val_csv_out), verbose=verbose)
     
+    if "train" in ignore_augmented:
+        filtered_training_paths = {path : filtered_training_paths[path] for path in filtered_training_paths if augmented_data_path not in path}
+    if "test" in ignore_augmented:
+        filtered_testing_paths = {path : filtered_testing_paths[path] for path in filtered_testing_paths if augmented_data_path not in path}
+    if "validation" in ignore_augmented: 
+        filtered_validation_paths = {path : filtered_validation_paths[path] for path in filtered_validation_paths if augmented_data_path not in path}
+
     return filtered_training_paths, filtered_testing_paths, filtered_validation_paths

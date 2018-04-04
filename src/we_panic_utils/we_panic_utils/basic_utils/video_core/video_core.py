@@ -6,7 +6,7 @@ from PIL import Image
 import sys
 import os
 import cv2
-from .basics import *
+from we_panic_utils.basic_utils.basics import check_exists_create_if_not 
 
 import subprocess
 FPS = 30
