@@ -19,6 +19,7 @@ SPLIT_COMMAND = "ffmpeg -i {} -vcodec copy -acodec copy -ss {} -t {} {}"
 HALVE_COMMAND = "ffmpeg -i {} -vcodec copy -acodec copy \
     -ss {} -t {} {}"
 
+
 def video_file_exists(filename):
     """
     Return whether or not this file exists and is a
@@ -35,9 +36,13 @@ def video_file_exists(filename):
     does_exist = os.path.exists(filename)
     is_vid = filename.endswith(".mov") or filename.endswith(".MOV")
 
-
     if does_exist and is_vid:
-        parent = filename.split("/")[-2]
+        if len(filename.split("/")) > 1:
+            parent = filename.split("/")[0]
+        
+        else:
+            parent = ""
+
         no_ext = filename.split("/")[-1][:-4]
         
         # example : S0001/Trial1
@@ -80,6 +85,7 @@ def video_file_to_frames(filename, output_dir=None, suppress=False):
     """
     # check the video's existence
     vid_valid, err, no_ext = video_file_exists(filename)
+    
     #print("vid : {}".format(vid_valid))
     
     if vid_valid:
@@ -121,6 +127,7 @@ def video_file_to_frames(filename, output_dir=None, suppress=False):
     # a problem occurred
     else:
         raise ValueError(err)
+
 
 def video_dir_to_frame_dir(video_dir, output_dir, suppress=False):
     """
@@ -168,7 +175,7 @@ def video_dir_to_frame_dir(video_dir, output_dir, suppress=False):
         raise FileNotFoundError("%s not found" % video_dir)
 
 def partition_frame_dir(frame_dir, output_dir, num_seconds=2, front_trim=60, end_trim=60, 
-        capacity_tolerance=1.0):
+                        capacity_tolerance=1.0):
     """
     Given a directory of frames, this method partitions them into several subdirectories,
     such that each directory contains num_seconds*FPS frames.
