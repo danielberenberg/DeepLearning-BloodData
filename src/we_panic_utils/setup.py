@@ -12,6 +12,7 @@ setup(name='we_panic_utils',
       packages=find_packages(),
       install_requires=[
           'Pillow',
-          'opencv-python'
+          'opencv-python',
+          'keras'
         ],
       zip_safe=False)
