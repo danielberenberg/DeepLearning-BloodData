@@ -38,7 +38,7 @@ def video_file_exists(filename):
 
     if does_exist and is_vid:
         if len(filename.split("/")) > 1:
-            parent = filename.split("/")[0]
+            parent = filename.split("/")[-2]
         
         else:
             parent = ""
@@ -90,6 +90,7 @@ def video_file_to_frames(filename, output_dir=None, suppress=False):
     
     if vid_valid:
         if output_dir:
+            print(output_dir, no_ext)
             output_dir = os.path.join(output_dir, "%s_frames" % no_ext)
             check_exists_create_if_not(output_dir, suppress=suppress)
 

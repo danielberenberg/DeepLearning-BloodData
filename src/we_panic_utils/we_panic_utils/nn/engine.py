@@ -31,7 +31,7 @@ class Engine():
                  inputs, 
                  outputs, 
                  ignore_augmented, 
-                 input_shape=(60, 224, 224, 3), 
+                 input_shape=(60, 100, 100, 3), 
                  output_shape=2):
 
         self.regular_data = regular_data

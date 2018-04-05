@@ -53,6 +53,6 @@ if __name__ == "__main__":
                 if not os.path.isdir(frame_path):
                     continue
                 output_path = os.path.join(resize_path, subject, trial, partition)
-                vc.resize_frame_dir(frame_path, output_path)
+                vc.resize_frame_dir(frame_path, output_path, width=100, height=100)
     print("Done.")
 
