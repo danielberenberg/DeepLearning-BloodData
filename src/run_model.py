@@ -143,8 +143,6 @@ def summarize_arguments(args):
 
     print(formatter % ("batch_size", args.batch_size))
     print(formatter % ("epochs", args.epochs)) 
-    #print(formatter % ("rotation_range", args.rotation_range))
-
 
 class ArgumentError(Exception):
     """
@@ -320,7 +318,7 @@ if __name__ == "__main__":
     args = parse_input().parse_args()
     regular, augmented, filtered_csv, partition_csv, batch_size, epochs, train, test, inputs, outputs = validate_arguments(args)
     
-    print(summarize_arguments(args))
+    summarize_arguments(args)
     
     engine = Engine(regular_data=regular,
                     augmented_data=augmented,

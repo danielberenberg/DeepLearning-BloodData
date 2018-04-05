@@ -255,7 +255,7 @@ class FrameProcessor:
         shear_range: Float. Shear Intensity (Shear angle in counter-clockwise direction in degrees)
     """
     def __init__(self,
-                 rotation_range=0.,
+                 rotation_range=0,
                  width_shift_range=0.,
                  height_shift_range=0.,
                  shear_range=0.,
@@ -287,6 +287,26 @@ class FrameProcessor:
         assert type(self.horizontal_flip) == bool, "horizontal_flip should be a boolean"
         assert type(self.vertical_flip) == bool, "vertical_flip should be a boolean"
 
+    @threadsafe_generator
+    def testing_generator(self, paths2labels, generator_type):
+        print("[*] creating a %s testing generator with %d samples" % (generator_type, len(paths2labels)))
+        sequence_paths = [pth for pth in paths2labels]
+        current = 0
+        while 1:
+            X, y = [], []
+            selected_path = sequence_paths[current]
+            y = paths2labels[selected_path]
+
+            #y = [paths2labels[pth] for pth in selected_paths]
+            frames = get_sample_frames(selected_path)
+            sequence = build_image_sequence(frames)
+            X.append(sequence)
+            print(selected_path)
+            current += 1
+            if current == len(sequence_paths):
+                current = 0
+            yield np.array(X), np.array(y)
+                
     @threadsafe_generator
     def frame_generator(self, paths2labels, generator_type):
         """

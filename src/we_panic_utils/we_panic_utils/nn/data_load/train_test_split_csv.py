@@ -8,7 +8,11 @@ import sys
 Public API
 """
 
-def data_set_from_csv(csv_path):
+def data_set_from_csv(csv_path, augmented_dir=None):
+    ignore = False
+    if not augmented_dir is None:
+        ignore = True
+
     if not os.path.exists(csv_path):
         raise FileNotFoundError("{} was not found".format(csv_path))
     data = {}
@@ -16,7 +20,8 @@ def data_set_from_csv(csv_path):
         reader = csv.reader(csv_in)
         next(reader)
         for path, hr, rr in reader:
-            data[path] = (hr, rr)
+            if not ignore or augmented_dir not in path:
+                data[path] = (hr, rr)
     return data
 
 def data_set_to_csv(data_set, csv_path, verbose=True):

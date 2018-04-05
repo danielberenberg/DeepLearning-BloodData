@@ -1,7 +1,8 @@
 from .data_load import train_test_split_with_csv_support, data_set_to_csv, data_set_from_csv
 from .models import CNN_LSTM, CNN_3D
 from .processing import *
-
+from keras.callbacks import CSVLogger, ModelCheckpoint
+from keras.models import evaluate_generator
 
 class Engine():
     """
@@ -55,10 +56,11 @@ class Engine():
         preferences passed in the constructor and runs that procedure
         """
         model = self.__choose_model().instantiate()   
-        
+        processor = FrameProcessor()
         train_set = test_set = val_set = None
 
         if self.train:
+            print("Training the model.")
             train_set, test_set, val_set = train_test_split_with_csv_support(self.regular_data,
                                                                              self.filtered_csv, 
                                                                              self.partition_csv, 
@@ -66,14 +68,53 @@ class Engine():
                                                                              augmented_data_path=self.augmented_data,
                                                                              ignore_augmented=self.ignore_augmented)
 
-            print("This is where the model would be trained")
+            
+            train_generator = processor.frame_generator(train_set, "train")
+            val_generator = processor.testing_generator(val_set, "validation")
+
+            csv_logger = CSVLogger(os.path.join(self.outputs, "training.log"))
+            checkpointer = ModelCheckpoint(filepath=os.path.join(self.outputs, 'models', self.model_type + '.h5'), 
+                    verbose=1, save_best_only=True, save_weights_only=True)
+
+            model.fit_generator(generator=train_generator,
+                               steps_per_epoch=len(train_set)//self.batch_size,
+                               epochs=self.epochs,
+                               verbose=1,
+                               callbacks=[csv_logger, checkpointer],
+                               validation_data=val_generator,
+                               validation_steps=len(val_set), workers=4)
         
         if self.test:
-
+            #if the test set doesn't exist yet, it means we are testing without training
             if not test_set:
-                print("This is where data would be loaded")
+                print("Testing model without training.")
+                model_dir = os.path.join(self.inputs, "models")
+                model_path = "" 
+                for path in os.listdir(model_dir):
+                    if self.model_type in path and path.endswith(".h5"):
+                        model_path = path
+                        break
+                if model_path == "":
+                    raise FileNotFoundError("Could not locate model file in {}-- have you trained the model yet?".format(model_dir))
+                
+                print("Loading model from file: {}".format(model_path))
+                model.load_weights(model_path)
+                
+                test_dir = os.path.join(self.inputs, "test.csv")
+                ignore = None
+                if "test" in self.ignore_augmented:
+                    ignore = self.augmented_data
+                test_set = data_set_from_csv(test_dir, ignore)
+
+                test_generator = processor.testing_generator(test_set, "test")
+                loss = evaluate_generator(test_generator, len(test_set))
+                print(loss)
+            #otherwise, we can use the existing test set that was generated during the training phase
             else:
-                print("This is where we train with the existing data set")
+                print("Testing model after training.")
+                test_generator = processor.testing_generator(test_set, "test")
+                loss = evaluate_generator(test_generator, len(test_set))
+                print(loss) 
 
     def __choose_model(self):
         """
