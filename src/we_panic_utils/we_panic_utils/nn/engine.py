@@ -2,7 +2,7 @@ from .data_load import train_test_split_with_csv_support, data_set_to_csv, data_
 from .models import CNN_LSTM, CNN_3D
 from .processing import *
 from keras.callbacks import CSVLogger, ModelCheckpoint
-from keras.models import evaluate_generator
+
 
 class Engine():
     """
@@ -107,13 +107,13 @@ class Engine():
                 test_set = data_set_from_csv(test_dir, ignore)
 
                 test_generator = processor.testing_generator(test_set, "test")
-                loss = evaluate_generator(test_generator, len(test_set))
+                loss = model.evaluate_generator(test_generator, len(test_set))
                 print(loss)
             #otherwise, we can use the existing test set that was generated during the training phase
             else:
                 print("Testing model after training.")
                 test_generator = processor.testing_generator(test_set, "test")
-                loss = evaluate_generator(test_generator, len(test_set))
+                loss = model.evaluate_generator(test_generator, len(test_set))
                 print(loss) 
 
     def __choose_model(self):

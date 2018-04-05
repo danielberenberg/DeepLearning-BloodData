@@ -331,9 +331,9 @@ if __name__ == "__main__":
                     test=test,
                     inputs=inputs,
                     outputs=outputs,
-                    ignore_augmented=args.ignore_augmented
-                    )
+                    ignore_augmented=args.ignore_augmented)
 
+    print("starting ... ")
     engine.run()
 
     sys.exit("under construction ... ")
