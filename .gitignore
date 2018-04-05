@@ -16,3 +16,5 @@ aug_consolidated/
 *.pyc
 .ipynb_checkpoints/
 _warped/
+*.swp*
+YouAreAlreadyDead*
