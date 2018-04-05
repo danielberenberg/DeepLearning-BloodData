@@ -8,7 +8,7 @@ import os
 
 import we_panic_utils.basic_utils as basic_utils
 from we_panic_utils.nn.data_load.train_test_split_csv import train_test_split_with_csv_support
-from we_panic_utils.nn.Engine
+from we_panic_utils.nn import Engine
 
 def parse_input():
     """
@@ -42,6 +42,7 @@ def parse_input():
                         help="specify which phases of running model should ignore augmented data",
                         type=str,
                         nargs="+",
+                        default=[],
                         choices=["train", "validation", "test"])
 
     parser.add_argument("--partition_csv",
@@ -204,7 +205,7 @@ def verify_directory_structure(dirname):
             print("[verify_directory_structure] - no %s/train.csv" % dirname)
             verified = False
 
-        if not os.path.exists(os.path.join(dirname, "validation.csv")):
+        if not os.path.exists(os.path.join(dirname, "val.csv")):
             print("[verify_directory_structure] - no %s/validation.csv" % dirname)
             verified = False
 
@@ -248,13 +249,17 @@ def validate_arguments(args):
         print("[validate_arguments] : taking %s to be `regular`, %s to be `augmented`" % (args.data[0], args.data[1]))
         augmented = args.data[1]
     
-    if len(args.ignore_augmented) > 1:
+    if args.ignore_augmented != None and len(args.ignore_augmented) > 1:
         assert len(args.ignore_augmented) < 4, "Expected maximum three phases to ignore, got %d" % len(args.ignore_augmented)
-        assert args.ignore_augmented[0] != args.ignore_augmented[1], "Why would you pass in two of the same argument? Are you dumb? %s and %s" % (args.ignore_augmented[0], args.ignore_augmented[1])
+        assert args.ignore_augmented[0] != args.ignore_augmented[1], "Why would you pass in two \
+                of the same argument? Are you dumb? %s and %s" % (args.ignore_augmented[0], args.ignore_augmented[1])
         if len(args.ignore_augmented) > 2:
-            assert args.ignore_augmented[0] != args.ignore_augmented[2], "Why would you pass in two of the same argument? Are you dumb? %s and %s" % (args.ignore_augmented[0], args.ignore_augmented[2])
-            assert args.ignore_augmented[1] != args.ignore_augmented[2], "Why would you pass in two of the same argument? Are you dumb? %s and %s" % (args.ignore_augmented[1],
+            assert args.ignore_augmented[0] != args.ignore_augmented[2], "Why would you pass in two \
+                    of the same argument? Are you dumb? %s and %s" % (args.ignore_augmented[0], args.ignore_augmented[2])
+            assert args.ignore_augmented[1] != args.ignore_augmented[2], "Why would you pass in two \
+                    of the same argument? Are you dumb? %s and %s" % (args.ignore_augmented[1],
                 args.ignore_augmented[2])
+    
     regular = args.data[0]
 
     # if --test=False and --train=False, exit because there's nothing to do
@@ -313,23 +318,24 @@ def validate_arguments(args):
 if __name__ == "__main__":
     
     args = parse_input().parse_args()
-    
-
     regular, augmented, filtered_csv, partition_csv, batch_size, epochs, train, test, inputs, outputs = validate_arguments(args)
     
-    #print(regular, augmented, filtered_csv, partition_csv, batch_size, epochs, train, test, inputs, outputs)
-    
     print(summarize_arguments(args))
-    #training_paths2labels, testing_paths2labels, validation_paths2labels = train_test_split_with_csv_support(regular, filtered_csv,
-    #                                                                                                         partition_csv, outputs,
-    #                                                                                                         augmented_data_path=augmented)
     
-    if train:
-        train, test, val = train_test_split_with_csv_support(regular, filtered_csv, 
-                partition_csv, outputs, augmented_data_path=augmented, ignore_augmented=args.ignore_augmented)
-        
-        print(test)
-        pass
+    engine = Engine(regular_data=regular,
+                    augmented_data=augmented,
+                    model_type=args.model_type,
+                    filtered_csv=filtered_csv,
+                    partition_csv=partition_csv,
+                    batch_size=batch_size,
+                    epochs=epochs,
+                    train=train,
+                    test=test,
+                    inputs=inputs,
+                    outputs=outputs,
+                    ignore_augmented=args.ignore_augmented
+                    )
 
+    engine.run()
 
     sys.exit("under construction ... ")
