@@ -1,7 +1,8 @@
 from .data_load import train_test_split_with_csv_support, data_set_to_csv, data_set_from_csv
 from .models import CNN_LSTM, CNN_3D
-from .processing import *
+from .processing import FrameProcessor
 from keras.callbacks import CSVLogger, ModelCheckpoint
+import os
 
 
 class Engine():
@@ -15,6 +16,9 @@ class Engine():
         partition_csv - the csv that maps individual partititions to their respective labels
         batch_size - the batch size
         epochs - number of epochs to train
+        train - boolean stating whether or not to train
+        test - boolean stating whether or not to test
+        frameproc - FrameProcessor object for augmentation
         input_shape - shape of the sequence passed, 60 separate 224x224x3 frames
         output_shape - the number of outputs
     """
@@ -29,7 +33,8 @@ class Engine():
                  train, 
                  test, 
                  inputs, 
-                 outputs, 
+                 outputs,
+                 frameproc,
                  ignore_augmented, 
                  input_shape=(60, 100, 100, 3), 
                  output_shape=2):
@@ -48,7 +53,7 @@ class Engine():
         self.ignore_augmented = ignore_augmented 
         self.input_shape = input_shape
         self.output_shape = output_shape
-
+        self.processor = frameproc
 
     def run(self):
         """
@@ -56,7 +61,6 @@ class Engine():
         preferences passed in the constructor and runs that procedure
         """
         model = self.__choose_model().instantiate()   
-        processor = FrameProcessor()
         train_set = test_set = val_set = None
 
         if self.train:
@@ -68,24 +72,26 @@ class Engine():
                                                                              augmented_data_path=self.augmented_data,
                                                                              ignore_augmented=self.ignore_augmented)
 
-            
-            train_generator = processor.frame_generator(train_set, "train")
-            val_generator = processor.testing_generator(val_set, "validation")
+            train_generator = self.processor.frame_generator(train_set, "train")
+            val_generator = self.processor.testing_generator(val_set, "validation")
 
             csv_logger = CSVLogger(os.path.join(self.outputs, "training.log"))
             checkpointer = ModelCheckpoint(filepath=os.path.join(self.outputs, 'models', self.model_type + '.h5'), 
-                    verbose=1, save_best_only=True, save_weights_only=True)
+                                           verbose=1, 
+                                           save_best_only=True, 
+                                           save_weights_only=True)
 
             model.fit_generator(generator=train_generator,
-                               steps_per_epoch=len(train_set)//self.batch_size,
-                               epochs=self.epochs,
-                               verbose=1,
-                               callbacks=[csv_logger, checkpointer],
-                               validation_data=val_generator,
-                               validation_steps=len(val_set), workers=4)
+                                steps_per_epoch=len(train_set) // self.batch_size,
+                                epochs=self.epochs,
+                                verbose=1,
+                                callbacks=[csv_logger, checkpointer],
+                                validation_data=val_generator,
+                                validation_steps=len(val_set), workers=4)
         
         if self.test:
-            #if the test set doesn't exist yet, it means we are testing without training
+
+            # if the test set doesn't exist yet, it means we are testing without training
             if not test_set:
                 print("Testing model without training.")
                 model_dir = os.path.join(self.inputs, "models")
@@ -106,15 +112,16 @@ class Engine():
                     ignore = self.augmented_data
                 test_set = data_set_from_csv(test_dir, ignore)
 
-                test_generator = processor.testing_generator(test_set, "test")
+                test_generator = self.processor.testing_generator(test_set, "test")
                 loss = model.evaluate_generator(test_generator, len(test_set))
-                print(loss)
-            #otherwise, we can use the existing test set that was generated during the training phase
+                # print(loss)
+
+            # otherwise, we can use the existing test set that was generated during the training phase
             else:
                 print("Testing model after training.")
-                test_generator = processor.testing_generator(test_set, "test")
+                test_generator = self.processor.testing_generator(test_set, "test")
                 loss = model.evaluate_generator(test_generator, len(test_set))
-                print(loss) 
+                # print(loss) 
 
     def __choose_model(self):
         """
