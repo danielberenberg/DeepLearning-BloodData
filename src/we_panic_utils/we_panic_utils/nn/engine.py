@@ -36,7 +36,7 @@ class Engine():
                  inputs, 
                  outputs,
                  frameproc,
-                 ignore_augmented=False, 
+                 ignore_augmented=[""], 
                  input_shape=(60, 100, 100, 3), 
                  output_shape=2):
 
