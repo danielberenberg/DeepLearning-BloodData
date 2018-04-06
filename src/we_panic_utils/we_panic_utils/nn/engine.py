@@ -19,7 +19,7 @@ class Engine():
         train - boolean stating whether or not to train
         test - boolean stating whether or not to test
         frameproc - FrameProcessor object for augmentation
-        ignore_augmented - boolean value stating whether or not to ignoe augmented data
+        ignore_augmented - list containing phases of running the model in which to ignore augmented data
         input_shape - shape of the sequence passed, 60 separate 100x100x3 frames
         output_shape - the number of outputs
     """
