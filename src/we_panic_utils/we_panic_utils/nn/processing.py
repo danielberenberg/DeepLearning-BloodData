@@ -209,7 +209,7 @@ def get_sample_frames(sample):
     return filenames
   
 
-def build_image_sequence(frames, input_shape=(224, 224, 3)):
+def build_image_sequence(frames, input_shape=(100, 100, 3)):
     """
     return a list of images from filenames
     """
@@ -297,12 +297,16 @@ class FrameProcessor:
             selected_path = sequence_paths[current]
             y = paths2labels[selected_path]
 
+            y = [y]
             #y = [paths2labels[pth] for pth in selected_paths]
             frames = get_sample_frames(selected_path)
             sequence = build_image_sequence(frames)
             X.append(sequence)
             print(selected_path)
+            
             current += 1
+            
+            # print(selected_path) 
             if current == len(sequence_paths):
                 current = 0
             yield np.array(X), np.array(y)

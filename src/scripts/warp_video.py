@@ -1,6 +1,6 @@
 import argparse
 import we_panic_utils.basic_utils.video_core as vc
-import we_panic_utils.nn.processing.frame_processing as fp
+import we_panic_utils.nn.processing as fp
 import we_panic_utils.basic_utils.basics as base
 
 import numpy as np

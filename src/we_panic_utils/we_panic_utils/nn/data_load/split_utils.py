@@ -19,7 +19,8 @@ def filter_path_with_set(filter_set, all_paths, augment_path=None, verbose=True)
                 and key.split('/')[1].split('_')[1] == subj_tri.split('_')[1]]
         
         for key in filtered_keys:
-            filtered_set_paths[key] = all_paths[key]
+            # filtered_set_paths[key] = all_paths[key] 
+            filtered_set_paths[key] = (int(all_paths[key][0]), int(all_paths[key][1]))
             if augment_path != None:
                 try:
                     augmented = fetch_augmented(key, augment_path)

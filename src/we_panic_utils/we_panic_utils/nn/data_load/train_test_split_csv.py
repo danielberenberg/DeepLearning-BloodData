@@ -21,7 +21,9 @@ def data_set_from_csv(csv_path, augmented_dir=None):
         next(reader)
         for path, hr, rr in reader:
             if not ignore or augmented_dir not in path:
-                data[path] = (hr, rr)
+                # data[path] = (hr, rr)
+
+                data[path] = (int(hr), int(rr))
     return data
 
 def data_set_to_csv(data_set, csv_path, verbose=True):
@@ -35,7 +37,10 @@ def data_set_to_csv(data_set, csv_path, verbose=True):
         writer.writerow(header)
         for key in data_set:
             data = data_set[key]
-            writer.writerow([key, data[0], data[1]])
+
+            # writer.writerow([key, data[0], data[1]])
+            writer.writerow([key, str(data[0]), str(data[1])])
+
 
 def train_test_split_with_csv_support(regular_data_path, filtered_csv, consolidated_csv, dir_out, 
         augmented_data_path=None, ignore_augmented=[], test_split=0.2, val_split=0.1, train_csv_out="train.csv", 
