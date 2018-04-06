@@ -18,3 +18,5 @@ aug_consolidated/
 _warped/
 *.swp*
 YouAreAlreadyDead*
+run_history/
+*.h5
