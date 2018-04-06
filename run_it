@@ -1,14 +1,15 @@
 #!/bin/sh
 
-screen python src/run_model.y CNN+LSTM reg_consolidated aug_consolidated\
+screen python src/run_model.py 3D-CNN reg_consolidated aug_consolidated \
 --train \
 --test \
---output_dir run_history/test \
---epochs 100 \
+--output_dir run_history/cnn_3d \
+--epochs 30 \
 --batch_size 4 \
 --width_shift_range 0.25 \
 --height_shift_range 0.25 \
 --zoom_range 0.25 \
 --shear_range 25 \
-
-
+--rotation_range 25 \
+--horizontal_flip \
+--vertical_flip

@@ -99,7 +99,7 @@ class Engine():
                 model_path = "" 
                 for path in os.listdir(model_dir):
                     if self.model_type in path and path.endswith(".h5"):
-                        model_path = path
+                        model_path = os.path.join(model_dir, path)
                         break
                 if model_path == "":
                     raise FileNotFoundError("Could not locate model file in {}-- have you trained the model yet?".format(model_dir))
@@ -115,14 +115,20 @@ class Engine():
 
                 test_generator = self.processor.testing_generator(test_set, "test")
                 loss = model.evaluate_generator(test_generator, len(test_set))
-                # print(loss)
+                
+                pred = model.predict_generator(test_generator, len(test_set))
+                print(loss)
+                print(pred) 
+                 # print(loss)
 
             # otherwise, we can use the existing test set that was generated during the training phase
             else:
                 print("Testing model after training.")
                 test_generator = self.processor.testing_generator(test_set, "test")
                 loss = model.evaluate_generator(test_generator, len(test_set))
-                # print(loss) 
+                pred = model.predict_generator(test_generator, len(test_set))
+                print(loss)
+                print(pred) 
 
     def __choose_model(self):
         """
@@ -131,7 +137,7 @@ class Engine():
         if self.model_type == "CNN+LSTM":
             return CNN_LSTM(self.input_shape, self.output_shape)
 
-        if self.model_type == "CNN-3D":
+        if self.model_type == "3D-CNN":
             return CNN_3D(self.input_shape, self.output_shape)
 
         raise ValueError("Model type does not exist: {}".format(self.model_type))
