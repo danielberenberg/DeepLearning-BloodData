@@ -19,7 +19,8 @@ class Engine():
         train - boolean stating whether or not to train
         test - boolean stating whether or not to test
         frameproc - FrameProcessor object for augmentation
-        input_shape - shape of the sequence passed, 60 separate 224x224x3 frames
+        ignore_augmented - boolean value stating whether or not to ignoe augmented data
+        input_shape - shape of the sequence passed, 60 separate 100x100x3 frames
         output_shape - the number of outputs
     """
     def __init__(self, 
@@ -35,7 +36,7 @@ class Engine():
                  inputs, 
                  outputs,
                  frameproc,
-                 ignore_augmented, 
+                 ignore_augmented=False, 
                  input_shape=(60, 100, 100, 3), 
                  output_shape=2):
 
@@ -82,7 +83,7 @@ class Engine():
                                            save_weights_only=True)
 
             model.fit_generator(generator=train_generator,
-                                steps_per_epoch=len(train_set) // self.batch_size,
+                                steps_per_epoch=len(train_set) // self.processor.batch_size,
                                 epochs=self.epochs,
                                 verbose=1,
                                 callbacks=[csv_logger, checkpointer],

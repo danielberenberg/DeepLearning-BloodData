@@ -9,6 +9,8 @@ import os
 import we_panic_utils.basic_utils as basic_utils
 from we_panic_utils.nn.data_load.train_test_split_csv import train_test_split_with_csv_support
 from we_panic_utils.nn import Engine
+from we_panic_utils.nn.processing import FrameProcessor
+
 
 def parse_input():
     """
@@ -86,6 +88,11 @@ def parse_input():
                         help="the input directory when testing model",
                         type=str,
                         default=None)
+    
+    parser.add_argument("--rotation_range",
+                        help="the range to rotate the sequences",
+                        type=int,
+                        default=0)
 
     parser.add_argument("--width_shift_range",
                         help="the range to shift the width",
@@ -122,9 +129,7 @@ def parse_input():
 
 def summarize_arguments(args):
     """
-    report the arguments passed into the app
-    
-    still TODO
+    report the arguments passed into the app 
     """
     formatter = "[%s] %s"
 
@@ -143,6 +148,7 @@ def summarize_arguments(args):
 
     print(formatter % ("batch_size", args.batch_size))
     print(formatter % ("epochs", args.epochs)) 
+    
 
 class ArgumentError(Exception):
     """
@@ -247,16 +253,20 @@ def validate_arguments(args):
         print("[validate_arguments] : taking %s to be `regular`, %s to be `augmented`" % (args.data[0], args.data[1]))
         augmented = args.data[1]
     
-    if args.ignore_augmented != None and len(args.ignore_augmented) > 1:
+    if args.ignore_augmented is not None and len(args.ignore_augmented) > 1:
         assert len(args.ignore_augmented) < 4, "Expected maximum three phases to ignore, got %d" % len(args.ignore_augmented)
+        
         assert args.ignore_augmented[0] != args.ignore_augmented[1], "Why would you pass in two \
                 of the same argument? Are you dumb? %s and %s" % (args.ignore_augmented[0], args.ignore_augmented[1])
+        
         if len(args.ignore_augmented) > 2:
+            
             assert args.ignore_augmented[0] != args.ignore_augmented[2], "Why would you pass in two \
                     of the same argument? Are you dumb? %s and %s" % (args.ignore_augmented[0], args.ignore_augmented[2])
+            
             assert args.ignore_augmented[1] != args.ignore_augmented[2], "Why would you pass in two \
                     of the same argument? Are you dumb? %s and %s" % (args.ignore_augmented[1],
-                args.ignore_augmented[2])
+                                                                      args.ignore_augmented[2])
     
     regular = args.data[0]
 
@@ -319,7 +329,15 @@ if __name__ == "__main__":
     regular, augmented, filtered_csv, partition_csv, batch_size, epochs, train, test, inputs, outputs = validate_arguments(args)
     
     summarize_arguments(args)
-    
+    fp = FrameProcessor(rotation_range=args.rotation_range,
+                        width_shift_range=args.width_shift_range,
+                        height_shift_range=args.height_shift_range,
+                        shear_range=args.shear_range,
+                        zoom_range=args.zoom_range,
+                        vertical_flip=args.vertical_flip,
+                        horizontal_flip=args.horizontal_flip,
+                        batch_size=batch_size)
+
     engine = Engine(regular_data=regular,
                     augmented_data=augmented,
                     model_type=args.model_type,
@@ -331,6 +349,7 @@ if __name__ == "__main__":
                     test=test,
                     inputs=inputs,
                     outputs=outputs,
+                    frameproc=fp,
                     ignore_augmented=args.ignore_augmented)
 
     print("starting ... ")
