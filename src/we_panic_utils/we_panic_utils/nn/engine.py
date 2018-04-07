@@ -127,6 +127,10 @@ class Engine():
                 test_generator = self.processor.testing_generator(test_set, "test")
                 loss = model.evaluate_generator(test_generator, len(test_set))
                 pred = model.predict_generator(test_generator, len(test_set))
+                
+                with open(os.path.join(self.outputs, "test.log"), 'w') as log:
+                    log.write(str(loss[0]) + "," + str(loss[1])) 
+
                 print(loss)
                 print(pred) 
 
