@@ -19,7 +19,7 @@ class Engine():
         train - boolean stating whether or not to train
         test - boolean stating whether or not to test
         frameproc - FrameProcessor object for augmentation
-        ignore_augmented - boolean value stating whether or not to ignoe augmented data
+        ignore_augmented - list containing phases of running the model in which to ignore augmented data
         input_shape - shape of the sequence passed, 60 separate 100x100x3 frames
         output_shape - the number of outputs
     """
@@ -36,7 +36,7 @@ class Engine():
                  inputs, 
                  outputs,
                  frameproc,
-                 ignore_augmented=False, 
+                 ignore_augmented=[""], 
                  input_shape=(60, 100, 100, 3), 
                  output_shape=2):
 
@@ -99,7 +99,7 @@ class Engine():
                 model_path = "" 
                 for path in os.listdir(model_dir):
                     if self.model_type in path and path.endswith(".h5"):
-                        model_path = path
+                        model_path = os.path.join(model_dir, path)
                         break
                 if model_path == "":
                     raise FileNotFoundError("Could not locate model file in {}-- have you trained the model yet?".format(model_dir))
@@ -115,14 +115,24 @@ class Engine():
 
                 test_generator = self.processor.testing_generator(test_set, "test")
                 loss = model.evaluate_generator(test_generator, len(test_set))
-                # print(loss)
+                
+                pred = model.predict_generator(test_generator, len(test_set))
+                print(loss)
+                print(pred) 
+                 # print(loss)
 
             # otherwise, we can use the existing test set that was generated during the training phase
             else:
                 print("Testing model after training.")
                 test_generator = self.processor.testing_generator(test_set, "test")
                 loss = model.evaluate_generator(test_generator, len(test_set))
-                # print(loss) 
+                pred = model.predict_generator(test_generator, len(test_set))
+                
+                with open(os.path.join(self.outputs, "test.log"), 'w') as log:
+                    log.write(str(loss[0]) + "," + str(loss[1])) 
+
+                print(loss)
+                print(pred) 
 
     def __choose_model(self):
         """
@@ -131,7 +141,7 @@ class Engine():
         if self.model_type == "CNN+LSTM":
             return CNN_LSTM(self.input_shape, self.output_shape)
 
-        if self.model_type == "CNN-3D":
+        if self.model_type == "3D-CNN":
             return CNN_3D(self.input_shape, self.output_shape)
 
         raise ValueError("Model type does not exist: {}".format(self.model_type))
