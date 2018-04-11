@@ -171,7 +171,6 @@ def ttswcsv2(data_path, metadata, output_dir,
     return filtered_training_paths, filtered_testing_paths, filtered_validation_paths 
 
 
-
 def train_test_split_with_csv_support(regular_data_path, filtered_csv, consolidated_csv, dir_out, 
         augmented_data_path=None, ignore_augmented=[], test_split=0.2, val_split=0.1, train_csv_out="train.csv", 
         test_csv_out="test.csv", val_csv_out="val.csv", verbose=True): 
