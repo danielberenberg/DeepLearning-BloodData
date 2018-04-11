@@ -1,9 +1,8 @@
 #!/bin/sh
 
-screen python src/run_model.py CNN+LSTM reg_consolidated aug_consolidated \
---train \
+python src/run_model.py CNN+LSTM reg_consolidated aug_consolidated \
 --test \
---output_dir run_history/lrcn_second_run \
+--input_dir run_history/lrcn_second_run \
 --epochs 150 \
 --batch_size 4 \
 --width_shift_range 0.25 \
