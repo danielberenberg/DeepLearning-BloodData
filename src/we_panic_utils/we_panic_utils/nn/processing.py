@@ -262,7 +262,8 @@ class FrameProcessor:
                  zoom_range=0.,
                  horizontal_flip=False,
                  vertical_flip=False,
-                 batch_size=4):
+                 batch_size=4,
+                 sequence_length=60):
 
         self.rotation_range = rotation_range
         self.width_shift_range = width_shift_range
@@ -272,6 +273,7 @@ class FrameProcessor:
         self.horizontal_flip = horizontal_flip
         self.vertical_flip = vertical_flip
         
+        self.sequence_length = sequence_length
         self.batch_size = batch_size
         
         assert type(self.rotation_range) == int, "rotation_range should be integer valued"
@@ -286,6 +288,10 @@ class FrameProcessor:
         
         assert type(self.horizontal_flip) == bool, "horizontal_flip should be a boolean"
         assert type(self.vertical_flip) == bool, "vertical_flip should be a boolean"
+        
+        assert type(self.sequence_length) == int, "sequence_length should be an integer"
+        assert self.sequence_length > 0, "sequence_length should be > 0"
+
 
     @threadsafe_generator
     def testing_generator(self, paths2labels, generator_type):
@@ -310,7 +316,128 @@ class FrameProcessor:
             if current == len(sequence_paths):
                 current = 0
             yield np.array(X), np.array(y)
+
+    
+    @threadsafe_generator
+    def testing_generator_v2(self, paths2labels):
+        """
+        generate sequences of self.batch_size clips length self.sequence_length
+        but don't augment the data
+        """
+    
+        sequence_paths = [path for path in paths2labels]
+        while True:
+            X, y = [], []
+            
+            selected_paths = random.sample(sequence_paths, self.batch_size)
+            content_sizes = [len(os.listdir(p)) for p in selected_paths]
+            fps = []
+
+            for sz in content_sizes:
+                if sz > 1300:
+                    fps.append(60)
+
+                else:
+                    fps.append(30)
+            
+            for path, sz, fps_ in zip(selected_paths, content_sizes, fps):
                 
+                heart_rate, resp_rate = paths2labels[path]
+                
+                frames = os.listdir(path)
+                frames = sorted(frames)
+                frames = [os.path.join(path, frame) for frame in frames]
+                
+                selected_frames = None
+
+                if fps_ > 30:
+                    seq_begin = random.randint(0, sz - 2 * self.sequence_length)
+                    selected_frames = frames[seq_begin:seq_begin + self.sequence_length:2]
+
+                else:
+                    seq_begin = random.randint(0, sz - self.sequence_length) 
+                    selected_frames = frames[seq_begin:seq_begin + self.sequence_length]
+                
+                sequence = build_image_sequence(selected_frames)
+
+                X.append(sequence)
+                y.append(heart_rate, resp_rate)
+
+            yield np.array(X), np.array(y)
+
+
+    @threadsafe_generator    
+    def train_generator(self, paths2labels):
+        """
+        generate a sequence of self.batch_size clips length self.sequence_length        
+        """
+        
+        sequence_paths = [path for path in paths2labels]
+        while True:
+            X, y = [], []
+            
+            selected_paths = random.sample(sequence_paths, self.batch_size)
+            content_sizes = [len(os.listdir(p)) for p in selected_paths]
+            fps = []
+
+            for sz in content_sizes:
+                if sz > 1300:
+                    fps.append(60)
+
+                else:
+                    fps.append(30)
+            
+            for path, sz, fps_ in zip(selected_paths, content_sizes, fps):
+                
+                heart_rate, resp_rate = paths2labels[path]
+                
+                frames = os.listdir(path)
+                frames = sorted(frames)
+                frames = [os.path.join(path, frame) for frame in frames]
+                
+                selected_frames = None
+
+                if fps_ > 30:
+                    seq_begin = random.randint(0, sz - 2 * self.sequence_length)
+                    selected_frames = frames[seq_begin:seq_begin + self.sequence_length:2]
+
+                else:
+                    seq_begin = random.randint(0, sz - self.sequence_length) 
+                    selected_frames = frames[seq_begin:seq_begin + self.sequence_length]
+                
+                sequence = build_image_sequence(selected_frames)
+
+                # now we want to apply the augmentation
+                if self.rotation_range > 0.0:
+                    sequence = random_sequence_rotation(sequence, self.rotation_range)
+
+                if self.width_shift_range > 0.0 or self.height_shift_range > 0.0:
+                    sequence = random_sequence_shift(sequence, self.width_shift_range, self.height_shift_range)
+                
+                if self.shear_range > 0.0:
+                    sequence = random_sequence_shear(sequence, self.shear_range)
+
+                if self.zoom_range > 0.0:
+                    sequence = random_sequence_zoom(sequence, self.zoom_range)
+                
+                if self.vertical_flip:
+                    # with probability 0.5, flip vertical axis
+                    coin_flip = np.random.random_sample() > 0.5
+                    if coin_flip:
+                        sequence = sequence_flip_axis(sequence, 1)   # flip on the row axis
+                
+                if self.horizontal_flip:
+                    # with probability 0.5, flip horizontal axis (cols)
+                    coin_flip - np.random.random_sample() > 0.5
+
+                    if coin_flip:
+                        sequence = sequence_flip_axis(sequence, 2)   # flip on the column axis
+                
+                X.append(sequence)
+                y.append(heart_rate, resp_rate)
+
+            yield np.array(X), np.array(y)
+
     @threadsafe_generator
     def frame_generator(self, paths2labels, generator_type):
         """

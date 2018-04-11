@@ -343,7 +343,6 @@ if __name__ == "__main__":
                     augmented_data=augmented,
                     model_type=args.model_type,
                     filtered_csv=filtered_csv,
-                    partition_csv=partition_csv,
                     batch_size=batch_size,
                     epochs=epochs,
                     train=train,
