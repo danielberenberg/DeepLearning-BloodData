@@ -167,7 +167,8 @@ def ttswcsv2(data_path, metadata, output_dir,
         train_df.to_csv(os.path.join(output_dir, csvnames['train']))
 
         filtered_training_paths = generate_paths2labels(train_df, data_path)
-
+    
+    # return train_df, test_df, val_df
     return filtered_training_paths, filtered_testing_paths, filtered_validation_paths 
 
 

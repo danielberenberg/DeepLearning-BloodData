@@ -76,7 +76,7 @@ if __name__ == "__main__":
     selects_df = pd.read_csv(selects)
     metadf = pd.read_csv(metadata)
 
-    frame_df = pd.DataFrame(columns=["Subject", "Trial", "Heart Rate", "Respiratory Rate"])
+    frame_df = pd.DataFrame(columns=["Subject", "Trial", "Path", "Heart Rate", "Respiratory Rate"])
 
     fmt_dir = "S%04d"
     fmt_file = "Trial%d.MOV"
@@ -98,11 +98,12 @@ if __name__ == "__main__":
         data = metadf[metadf['SUBJECT'] == subject]
 
         subj, t1_hrate, t1_resprate, t2_hrate, t2_resprate = [list(data[col])[0] for col in columns]
-        if trial is 1:
-            r = [subject, trial, t1_hrate, t1_resprate]
+        
+        if trial == 1:
+            r = [subject, trial, os.path.join(output_directory, subject, trial), t1_hrate, t1_resprate]
 
         else:
-            r = [subject, trial, t2_hrate, t2_resprate]
+            r = [subject, trial, os.path.join(output_directory, subject, trial), t2_hrate, t2_resprate]
         
         frame_df.loc[i] = r
 
