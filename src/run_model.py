@@ -123,7 +123,6 @@ def parse_input():
                         help="flip the horizontal axis",
                         default=False,
                         action="store_true")
-
     return parser
 
 
