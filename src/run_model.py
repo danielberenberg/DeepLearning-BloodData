@@ -5,6 +5,7 @@ command line app for train/testing models.
 import argparse
 import sys
 import os
+import time
 
 import we_panic_utils.basic_utils as basic_utils
 from we_panic_utils.nn.data_load.train_test_split_csv import train_test_split_with_csv_support
@@ -341,7 +342,6 @@ if __name__ == "__main__":
                     augmented_data=augmented,
                     model_type=args.model_type,
                     filtered_csv=filtered_csv,
-                    partition_csv=partition_csv,
                     batch_size=batch_size,
                     epochs=epochs,
                     train=train,
@@ -352,6 +352,10 @@ if __name__ == "__main__":
                     ignore_augmented=args.ignore_augmented)
 
     print("starting ... ")
+    start = time.time()
     engine.run()
-
-    sys.exit("under construction ... ")
+    end = time.time()
+    total = (end - start) / 60
+    if train:
+        with open(os.path.join(outputs, "time.txt"), 'w') as t:
+            t.write(str(total))

@@ -56,9 +56,9 @@ class CNN_LSTM(RegressionModel):
         model.add(TimeDistributed(Flatten()))
 
         model.add(Dropout(0.5))
-        model.add(LSTM(4096, return_sequences=False, dropout=0.5)) 
+        model.add(LSTM(256, return_sequences=False, dropout=0.5)) 
         model.add(Dropout(0.5)) 
-        model.add(Dense(1024, activation='relu')) 
+        model.add(Dense(512, activation='relu')) 
         model.add(Dropout(0.5)) 
         model.add(Dense(self.output_shape, activation='linear'))
 

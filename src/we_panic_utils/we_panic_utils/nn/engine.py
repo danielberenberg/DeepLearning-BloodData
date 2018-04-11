@@ -1,4 +1,4 @@
-from .data_load import train_test_split_with_csv_support, data_set_to_csv, data_set_from_csv
+from .data_load import train_test_split_with_csv_support, ttswcsv2, data_set_to_csv, data_set_from_csv
 from .models import CNN_LSTM, CNN_3D
 from .processing import FrameProcessor
 from keras.callbacks import CSVLogger, ModelCheckpoint
@@ -28,7 +28,6 @@ class Engine():
                  augmented_data, 
                  model_type, 
                  filtered_csv, 
-                 partition_csv, 
                  batch_size, 
                  epochs, 
                  train, 
@@ -43,8 +42,8 @@ class Engine():
         self.regular_data = regular_data
         self.augmented_data = augmented_data
         self.model_type = model_type
-        self.filtered_csv = filtered_csv
-        self.partition_csv = partition_csv
+        self.metadata = filtered_csv
+        # self.partition_csv = partition_csv
         self.batch_size = batch_size
         self.epochs = epochs
         self.train = train
@@ -66,14 +65,36 @@ class Engine():
 
         if self.train:
             print("Training the model.")
-            train_set, test_set, val_set = train_test_split_with_csv_support(self.regular_data,
-                                                                             self.filtered_csv, 
-                                                                             self.partition_csv, 
-                                                                             self.outputs, 
-                                                                             augmented_data_path=self.augmented_data,
-                                                                             ignore_augmented=self.ignore_augmented)
+            # train_set, test_set, val_set = train_test_split_with_csv_support(self.regular_data,
+            #                                                                 self.filtered_csv, 
+            #                                                                 self.partition_csv, 
+            #                                                                 self.outputs, 
+            #                                                                 augmented_data_path=self.augmented_data,
+            #                                                                 ignore_augmented=self.ignore_augmented)
+            
+            ignore_augmented = {'train': 'train_aug.csv', 'val': 'val_aug.csv', 'test': 'test_aug.csv'}
+            
+            for ign in self.ignore_augmented:
+                if ign in ignore_augmented:
+                    ignore_augmented.pop(ign)
 
-            train_generator = self.processor.frame_generator(train_set, "train")
+            train_reg, test_reg, val_reg = ttswcsv2(self.regular_data, self.metadata, self.outputs) 
+            train_aug, test_aug, val_aug = ttswcsv2(self.augmented_data, self.metadata, self.outputs)
+
+            regs = [train_reg, test_reg, val_reg]
+            augs = [train_aug, test_aug, val_aug]
+            sets = []
+
+            for reg, aug in zip(regs, augs):
+                if aug is not None:
+                    s = reg.copy()
+                    s.update(aug)
+
+                    sets.append(s)
+        
+            train_set, test_set, val_set = sets
+
+            train_generator = self.processor.train_generator(train_set)
             val_generator = self.processor.testing_generator(val_set, "validation")
 
             csv_logger = CSVLogger(os.path.join(self.outputs, "training.log"))
@@ -99,7 +120,7 @@ class Engine():
                 model_path = "" 
                 for path in os.listdir(model_dir):
                     if self.model_type in path and path.endswith(".h5"):
-                        model_path = path
+                        model_path = os.path.join(model_dir, path)
                         break
                 if model_path == "":
                     raise FileNotFoundError("Could not locate model file in {}-- have you trained the model yet?".format(model_dir))
@@ -113,16 +134,26 @@ class Engine():
                     ignore = self.augmented_data
                 test_set = data_set_from_csv(test_dir, ignore)
 
-                test_generator = self.processor.testing_generator(test_set, "test")
+                test_generator = self.processor.testing_generator_v2(test_set)
                 loss = model.evaluate_generator(test_generator, len(test_set))
-                # print(loss)
+                
+                pred = model.predict_generator(test_generator, len(test_set))
+                print(loss)
+                print(pred) 
+                 # print(loss)
 
             # otherwise, we can use the existing test set that was generated during the training phase
             else:
                 print("Testing model after training.")
-                test_generator = self.processor.testing_generator(test_set, "test")
+                test_generator = self.processor.testing_generato_v2r(test_set)
                 loss = model.evaluate_generator(test_generator, len(test_set))
-                # print(loss) 
+                pred = model.predict_generator(test_generator, len(test_set))
+                
+                with open(os.path.join(self.outputs, "test.log"), 'w') as log:
+                    log.write(str(loss[0]) + "," + str(loss[1])) 
+
+                print(loss)
+                print(pred) 
 
     def __choose_model(self):
         """
@@ -131,7 +162,7 @@ class Engine():
         if self.model_type == "CNN+LSTM":
             return CNN_LSTM(self.input_shape, self.output_shape)
 
-        if self.model_type == "CNN-3D":
+        if self.model_type == "3D-CNN":
             return CNN_3D(self.input_shape, self.output_shape)
 
         raise ValueError("Model type does not exist: {}".format(self.model_type))
