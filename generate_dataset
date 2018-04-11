@@ -18,18 +18,21 @@ function preprocess () {
         python src/scripts/extract_frames.py $SELECTS $METADATA $MOVIEDIR frames/
     fi
 
-
-    echo "[+] resizing real trials ---> $OUTPUTDIR"
-    python src/scripts/resize_trials.py frames --output_dir $OUTPUTDIR      
-
-
+    if [ ! -d $OUTPUTDIR ]; then
+        echo "[+] resizing real trials ---> $OUTPUTDIR"
+        python src/scripts/resize_trials.py frames --output_dir $OUTPUTDIR      
+    fi
+    
     if [ ! -d augmented/ ]; then
         echo "[+] augmenting movie selection ---> augmented/"
         python src/scripts/augment_speed.py $MOVIEDIR NextStartingPoint.csv augmented/   
     fi
 
-    echo "[+] resizing augmented trials ---> $OUTPUTDIR_rsz"
-    python src/scripts/resize_trials.py augmented/ --output_dir $OUTPUTDIR_augmented
+
+    if [ ! -d $OUTPUTDIR_augmented ]; then
+        echo "[+] resizing augmented trials ---> $OUTPUTDIR_augmented"
+        python src/scripts/resize_trials.py augmented/ --output_dir $OUTPUTDIR_augmented
+    fi
 }
 
 function control_c () {
