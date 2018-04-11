@@ -1,5 +1,4 @@
 *.MOV
-data/
 raw/
 frames/
 partitioned/
