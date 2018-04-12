@@ -28,10 +28,14 @@ function preprocess () {
         python src/scripts/augment_speed.py $MOVIEDIR NextStartingPoint.csv augmented/   
     fi
 
+    if [ ! -d frames_aug/ ]; then
+        echo "[+] extracting frames from movies ---> frames/"
+        python src/scripts/extract_frames.py $SELECTS $METADATA augmented/ frames_aug/
+    fi
 
-    if [ ! -d $OUTPUTDIR_augmented ]; then
+    if [ ! -d rsz_augmented/ ]; then
         echo "[+] resizing augmented trials ---> $OUTPUTDIR_augmented"
-        python src/scripts/resize_trials.py augmented/ --output_dir $OUTPUTDIR_augmented
+        python src/scripts/resize_trials.py frame_aug/ --output_dir $OUTPUTDIR_augmented
     fi
 }
 
