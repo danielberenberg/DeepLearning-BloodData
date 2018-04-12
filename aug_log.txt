@@ -1,0 +1,6 @@
+Not halving the speed of subject 4 trial 1: resulting heart rate would have been 28.0
+Not halving the speed of subject 23 trial 1: resulting heart rate would have been 32.0
+Not halving the speed of subject 30 trial 1: resulting heart rate would have been 30.0
+Not halving the speed of subject 31 trial 1: resulting heart rate would have been 27.0
+Not doubling the speed of subject 2 trial 2: resulting heart rate would have been 256.0
+Not doubling the speed of subject 23 trial 2: resulting heart rate would have been 232.0

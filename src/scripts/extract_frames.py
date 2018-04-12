@@ -100,10 +100,10 @@ if __name__ == "__main__":
         subj, t1_hrate, t1_resprate, t2_hrate, t2_resprate = [list(data[col])[0] for col in columns]
         
         if trial == 1:
-            r = [subject, trial, os.path.join(output_directory, subject, trial), t1_hrate, t1_resprate]
+            r = [subject, trial, os.path.join(output_directory, str(subject), str(trial)), t1_hrate, t1_resprate]
 
         else:
-            r = [subject, trial, os.path.join(output_directory, subject, trial), t2_hrate, t2_resprate]
+            r = [subject, trial, os.path.join(output_directory, str(subject), str(trial)), t2_hrate, t2_resprate]
         
         frame_df.loc[i] = r
 

@@ -60,7 +60,7 @@ def video_file_exists(filename):
     return False, error, None
 
 
-def video_file_to_frames(filename, output_dir=None, suppress=False):
+def video_file_to_frames(filename, output_dir=None, suppress=False, clip=2):
     """
     Convert a video file to individual frames
 
@@ -90,7 +90,6 @@ def video_file_to_frames(filename, output_dir=None, suppress=False):
     
     if vid_valid:
         if output_dir:
-            print(output_dir, no_ext)
             output_dir = os.path.join(output_dir, "%s_frames" % no_ext)
             check_exists_create_if_not(output_dir, suppress=suppress)
 
@@ -100,20 +99,36 @@ def video_file_to_frames(filename, output_dir=None, suppress=False):
 
         # have output directory, now need to create the framesies
         vidcap = cv2.VideoCapture(filename)
+        FPS = int(round(vidcap.get(cv2.CAP_PROP_FPS)))
+        total = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
+
         success, image = vidcap.read()
         
         image_names = []
         count = 0
         success = True
 
+        if not suppress:
+            print("[video_file_to_frames]-- extracting frames from %d fps video with %d frames" % (FPS, total))
+
         # while there is a next image
         while success:
-            pth = os.path.join(output_dir, "frame-%05d.png" % count)
-            image_names.append(pth)
-            cv2.imwrite(pth, image)
+            pth = ""
+            if count >= FPS * clip and count < total - (FPS * clip):
+                if FPS == 60:
+                    if count % 2 == 0:        
+                        pth = os.path.join(output_dir, "frame-%05d.png" % ((count-FPS*clip)/2))
+                        image_names.append(pth)
+                        cv2.imwrite(pth, image)
+                else:
+                    pth = os.path.join(output_dir, "frame-%05d.png" % (count-FPS*clip))
+                    image_names.append(pth)
+                    cv2.imwrite(pth, image)
+
+             
             success, image = vidcap.read()
-            
-            if not suppress:
+             
+            if not suppress and pth != "":
                 if success:
                     sys.stdout.write("\r[video_file_to_frames]-- writing [%s]" % pth)
                     sys.stdout.flush()
@@ -123,8 +138,26 @@ def video_file_to_frames(filename, output_dir=None, suppress=False):
                     sys.stdout.flush()
 
             count += 1
-
+          
+        if not suppress:
+            print("\n[video_file_to_frames]-- clipped [%d] seconds off of each end of video" % clip)
+        #clip off two seconds of the video
+        
+        #i = 0
+        #size = len(image_names)
+        #for video_frame in os.listdir(output_dir): 
+        #    if i < clip * FPS:
+        #        pth = os.path.join(output_dir, video_frame)
+        #        os.remove(pth)
+        #    elif i > size - (clip * FPS):
+        #        pth = os.path.join(output_dir, video_frame)
+        #        os.remove(pth)
+        #    elif FPS == 60 and i % 2 == 1:
+        #        pth = os.path.join(output_dir, video_frame)
+        #        os.remove(pth)
+        #    i+=1
         return image_names
+    
     # a problem occurred
     else:
         raise ValueError(err)
