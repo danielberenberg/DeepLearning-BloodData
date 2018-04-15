@@ -1,11 +1,49 @@
 import os
 import csv
 import random
+import pandas as pd
 
 """
 Implementation details
 """
 
+def get_testing_set(df_in, size):
+    df_out = pd.DataFrame()
+    l = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]
+    selected = random.sample(l, size)
+
+    for s in selected:
+        df = df_in[buckets(df_in, s)] 
+        index = random.randint(0, len(df)-1)
+        df_index = df[index:index+1]
+        df_out = df_out.append(df_index)
+        subject = list(df_index["Subject"])[0]
+        trial = list(df_index["Trial"])[0]
+        df_in = df_in[(df_in.Subject != subject) | (df_in.Trial != trial)] 
+    
+    return df_in, df_out
+
+def buckets(df, val):
+    if val < 0.1:
+        return (df['Heart Rate'] < 45)
+    if val < 0.2:
+        return (df['Heart Rate'] >= 45) & (df['Heart Rate'] < 60)
+    if val < 0.3:
+        return (df['Heart Rate'] >= 60) & (df['Heart Rate'] < 75)
+    if val < 0.4:
+        return (df['Heart Rate'] >= 75) & (df['Heart Rate'] < 90)
+    if val < 0.5:
+        return (df['Heart Rate'] >= 90) & (df['Heart Rate'] < 105)
+    if val < 0.6:
+        return (df['Heart Rate'] >= 105) & (df['Heart Rate'] < 120)
+    if val < 0.7:
+        return (df['Heart Rate'] >= 120) & (df['Heart Rate'] < 135)
+    if val < 0.8:
+        return (df['Heart Rate'] >= 135) & (df['Heart Rate'] < 150)
+    if val < 0.9:
+        return (df['Heart Rate'] >= 150) & (df['Heart Rate'] < 175)
+    if val <= 1.0:
+        return (df['Heart Rate'] >= 175)
 
 def filter_path_with_set(filter_set, all_paths, augment_path=None, verbose=True):
     

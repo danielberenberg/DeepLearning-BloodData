@@ -6,6 +6,7 @@ import os
 import sys
 import pandas as pd
 import random
+import numpy as np
 
 """
 Public API
@@ -77,6 +78,25 @@ def generate_paths2labels(df, data_path):
 
     return filtered_paths
 
+def ttswcvs3(data_path, metadata, output_dir,
+             test_split=0.2, val_split=0.1, verbose=True):
+    
+    metadf = pd.read_csv(metadata)
+    
+    metadf['Path'] = metadf.apply (lambda row: os.path.join(data_path, "S%04d" % row["Subject"], 
+        "Trial%d_frames" % row["Trial"]), axis=1)
+    
+    base.check_exists_create_if_not(output_dir)    
+    
+    test_len = int(test_split * len(metadf))
+    val_len = int(val_split * len(metadf))
+    metadf, test_df = util.get_testing_set(metadf, test_len)
+    metadf, val_df = util.get_testing_set(metadf, val_len) 
+
+    test_df.to_csv(os.path.join(output_dir, 'test.csv'), index=False)
+    val_df.to_csv(os.path.join(output_dir, 'val.csv'), index=False)
+    metadf.to_csv(os.path.join(output_dir, 'train.csv'), index=False)
+    return metadf, test_df, val_df
 
 def ttswcsv2(data_path, metadata, output_dir,
              test_split=0.2, val_split=0.1,
@@ -236,7 +256,7 @@ def train_test_split_with_csv_support(regular_data_path, filtered_csv, consolida
     all_paths = util.fetch_paths_with_labels(consolidated_csv, regular_data_path)
 
     filtered_training_paths = util.filter_path_with_set(training_set, all_paths, augmented_data_path, verbose)
-    filtered_testing_paths = util.filter_path_with_gtset(testing_set, all_paths, augmented_data_path, verbose)
+    filtered_testing_paths = util.filter_path_with_set(testing_set, all_paths, augmented_data_path, verbose)
     filtered_validation_paths = util.filter_path_with_set(validation_set, all_paths, augmented_data_path, verbose)
    
     base.check_exists_create_if_not(dir_out, not verbose)
