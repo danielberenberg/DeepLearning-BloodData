@@ -2,6 +2,8 @@
 A module for processing frames as a sequence
 """
 
+from .data_load import buckets
+
 import threading 
 import os
 import random
@@ -365,6 +367,78 @@ class FrameProcessor:
 
             yield np.array(X), np.array(y)
 
+    def testing_generator_v3(self, test_df):
+        paths, hr = list(test_df["Path"]), list(test_df["Heart Rate"])
+        i = 0
+        while True:
+            X, y = [], []
+            
+            current_path = paths[i]
+            current_hr = hr[i]
+            frame_dir = os.listdir(current_path)
+            for _ in range(self.batch_size):
+                start = random.randint(0, len(frame_dir)-self.sequence_length)
+                frames = frame_dir[start:start+self.sequence_length]
+                frames = [os.path.join(current_path, frame) for frame in frames]
+                X.append(build_image_sequence(frames))
+                y.append(current_hr)
+
+            i+=1
+            if i == len(test_df):
+                i = 0
+            yield np.array(X), np.array(y)
+            
+    def train_generator_v3(self, train_df):
+        bucket_list = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]
+        while True:
+            X, y = [], []
+
+            for _ in range(self.batch_size):
+                rand_bucket = bucket_list[random.randint(0, len(bucket_list)-1)]
+                df = train_df[buckets(train_df, rand_bucket)]
+                rand_subj_index = random.randint(0, len(df)-1)
+                rand_subj_df = df[rand_subj_index:rand_subj_index+1]
+ 
+                path = list(rand_subj_df["Path"])[0]
+                hr = list(rand_subj_df["Heart Rate"])[0]
+
+                frame_dir = os.listdir(path)
+                start = random.randint(0, len(frame_dir)-self.sequence_length)
+                frames = frame_dir[start:start+self.sequence_length]
+                frames = [os.path.join(path, frame) for frame in frames]
+
+                sequence = build_image_sequence(frames)
+                
+                # now we want to apply the augmentation
+                if self.rotation_range > 0.0:
+                    sequence = random_sequence_rotation(sequence, self.rotation_range)
+
+                if self.width_shift_range > 0.0 or self.height_shift_range > 0.0:
+                    sequence = random_sequence_shift(sequence, self.width_shift_range, self.height_shift_range)
+                
+                if self.shear_range > 0.0:
+                    sequence = random_sequence_shear(sequence, self.shear_range)
+
+                if self.zoom_range > 0.0:
+                    sequence = random_sequence_zoom(sequence, self.zoom_range)
+                
+                if self.vertical_flip:
+                    # with probability 0.5, flip vertical axis
+                    coin_flip = np.random.random_sample() > 0.5
+                    if coin_flip:
+                        sequence = sequence_flip_axis(sequence, 1)   # flip on the row axis
+                
+                if self.horizontal_flip:
+                    # with probability 0.5, flip horizontal axis (cols)
+                    coin_flip - np.random.random_sample() > 0.5
+
+                    if coin_flip:
+                        sequence = sequence_flip_axis(sequence, 2)   # flip on the column axis
+
+                X.append(sequence)
+                y.append(hr)
+
+            yield np.array(X), np.array(y)
 
     @threadsafe_generator    
     def train_generator(self, paths2labels):

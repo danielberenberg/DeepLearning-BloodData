@@ -80,7 +80,17 @@ def generate_paths2labels(df, data_path):
 
 def ttswcvs3(data_path, metadata, output_dir,
              test_split=0.2, val_split=0.1, verbose=True):
-    
+
+    """
+    Train test split with CSV support version 3.
+    Currently no support for ignoring augmented data!
+
+    This function is similar to the previous variants, except that it creates and returns data frames,
+    instead of directly working with CSV files.
+    This version works with "buckets", which each data point belongs to. This is to ensure that all data
+    has roughly the same chance of being seen.
+    """
+
     metadf = pd.read_csv(metadata)
     
     metadf['Path'] = metadf.apply (lambda row: os.path.join(data_path, "S%04d" % row["Subject"], 

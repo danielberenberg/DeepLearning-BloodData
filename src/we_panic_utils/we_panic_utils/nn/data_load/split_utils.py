@@ -8,10 +8,29 @@ Implementation details
 """
 
 def get_testing_set(df_in, size):
-    df_out = pd.DataFrame()
-    l = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]
-    selected = random.sample(l, size)
+    """
+    Extracts a test set given a dataframe of all of the input data.
+    Each subject contained by the testing set will belong to a unique bucket.
 
+    args:
+        df_in: the dataframe of input data
+        size: the number of subjects that the testing set will contain
+    return:
+        -> a dataframe containing the testing subjects
+    """
+    df_out = pd.DataFrame()
+
+    l = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]
+
+    #just to make sure that the testing sets don't exhaust any of the buckets
+    #or choose from the same bucket twice, added some additional checks
+    selected = []
+    while(len(selected) < size):
+        chosen_bucket = l[random.randint(0, len(l)-1)]
+        bucket = df_in[buckets(df_in, chosen_bucket)]
+        if (len(bucket) > 1 and chosen_bucket not in selected):
+            selected.append(chosen_bucket)
+    
     for s in selected:
         df = df_in[buckets(df_in, s)] 
         index = random.randint(0, len(df)-1)
