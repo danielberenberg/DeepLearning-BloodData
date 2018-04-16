@@ -90,12 +90,11 @@ def ttswcvs3(data_path, metadata, output_dir,
     This version works with "buckets", which each data point belongs to. This is to ensure that all data
     has roughly the same chance of being seen.
     """
-
     metadf = pd.read_csv(metadata)
     
     metadf['Path'] = metadf.apply (lambda row: os.path.join(data_path, "S%04d" % row["Subject"], 
         "Trial%d_frames" % row["Trial"]), axis=1)
-    
+        
     base.check_exists_create_if_not(output_dir)    
     
     test_len = int(test_split * len(metadf))

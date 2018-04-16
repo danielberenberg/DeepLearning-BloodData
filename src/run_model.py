@@ -338,10 +338,10 @@ if __name__ == "__main__":
                         horizontal_flip=args.horizontal_flip,
                         batch_size=batch_size)
 
-    engine = Engine(regular_data=regular,
-                    augmented_data=augmented,
+    engine = Engine(data=regular,
+                    #augmented_data=augmented,
                     model_type=args.model_type,
-                    filtered_csv=filtered_csv,
+                    filtered_csv=partition_csv,
                     batch_size=batch_size,
                     epochs=epochs,
                     train=train,
@@ -353,7 +353,7 @@ if __name__ == "__main__":
 
     print("starting ... ")
     start = time.time()
-    engine.run()
+    engine.run2()
     end = time.time()
     total = (end - start) / 60
     if train:

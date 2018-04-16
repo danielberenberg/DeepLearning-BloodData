@@ -38,7 +38,7 @@ class Engine():
                  frameproc,
                  ignore_augmented=[""], 
                  input_shape=(60, 100, 100, 3), 
-                 output_shape=2):
+                 output_shape=1):
 
         #self.regular_data = regular_data
         #self.augmented_data = augmented_data
@@ -71,7 +71,7 @@ class Engine():
             train_set, test_set, val_set = ttswcvs3(self.data, self.metadata, self.outputs)
             
             train_generator = self.processor.train_generator_v3(train_set)
-            val_generator = self.processor.testing_generator_v3(val_set, "validation")
+            val_generator = self.processor.testing_generator_v3(val_set)
 
             csv_logger = CSVLogger(os.path.join(self.outputs, "training.log"))
             checkpointer = ModelCheckpoint(filepath=os.path.join(self.outputs, 'models', self.model_type + '.h5'), 
@@ -90,7 +90,7 @@ class Engine():
         if self.test:
 
             # if the test set doesn't exist yet, it means we are testing without training
-            if not test_set:
+            if test_set is None:
                 print("Testing model without training.")
                 model_dir = os.path.join(self.inputs, "models")
                 model_path = "" 
