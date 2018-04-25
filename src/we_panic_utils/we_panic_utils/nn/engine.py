@@ -1,5 +1,5 @@
 from .data_load import train_test_split_with_csv_support, ttswcsv2, ttswcvs3, data_set_to_csv, data_set_from_csv
-from .models import C3D, CNN_LSTM, CNN_3D
+from .models import C3D, CNN_LSTM, CNN_3D, CNN_3D_small
 from .processing import FrameProcessor
 from keras import models
 from keras.callbacks import CSVLogger, ModelCheckpoint
@@ -277,7 +277,9 @@ class Engine():
 
         if self.model_type == "3D-CNN":
             return CNN_3D(self.input_shape, self.output_shape)
-
+        
+        if self.model_type == "CNN_3D_small":
+            return CNN_3D_small(self.input_shape, self.output_shape)
         raise ValueError("Model type does not exist: {}".format(self.model_type))
 
 

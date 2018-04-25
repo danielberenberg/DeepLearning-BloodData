@@ -34,7 +34,7 @@ def parse_input():
     parser.add_argument("model_type",
                         help="the type of model to run",
                         type=str,
-                        choices=["C3D", "CNN+LSTM", "3D-CNN"])
+                        choices=["C3D", "CNN+LSTM", "3D-CNN", "CNN_3D_small"])
     
     parser.add_argument("data",
                         help="director[y|ies] to draw data from",
