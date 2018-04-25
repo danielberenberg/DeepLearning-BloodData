@@ -34,7 +34,7 @@ def parse_input():
     parser.add_argument("model_type",
                         help="the type of model to run",
                         type=str,
-                        choices=["CNN+LSTM", "3D-CNN"])
+                        choices=["C3D", "CNN+LSTM", "3D-CNN"])
     
     parser.add_argument("data",
                         help="director[y|ies] to draw data from",
@@ -64,6 +64,12 @@ def parse_input():
                         default=False,
                         action="store_true")
 
+    parser.add_argument("--load",
+                        help="states whether an existing model should be loaded for training",
+                        # type=bool,
+                        default=False,
+                        action="store_true")
+    
     parser.add_argument("--test",
                         help="states whether the model should be tested",
                         # type=bool,
@@ -142,6 +148,7 @@ def summarize_arguments(args):
     formatter = "[%s] %r"
 
     print(formatter % ("train", args.train))
+    print(formatter % ("load", args.load))
     print(formatter % ("test", args.test))
 
     formatter = "[%s] %d"
@@ -312,21 +319,22 @@ def validate_arguments(args):
     # if --test=True and --train=True, then we need only an output directory
     if args.train and args.test:
         generate_output_directory(args.output_dir)
-        print("[validate_arguments] : overwriting input directory from %s to %s" % (args.input_dir, args.output_dir))
-        args.input_dir = args.output_dir
+        if not args.load:
+            print("[validate_arguments] : overwriting input directory from %s to %s" % (args.input_dir, args.output_dir))
+            args.input_dir = args.output_dir
         
     input_dir, output_dir = args.input_dir, args.output_dir
     
     assert os.path.exists(args.csv), "%s not found" % args.csv
     assert os.path.exists(args.partition_csv), "%s not found" % args.partition_csv
  
-    return regular, augmented, args.csv, args.partition_csv, batch_size, epochs, args.train, args.test, input_dir, output_dir 
+    return regular, augmented, args.csv, args.partition_csv, batch_size, epochs, args.train, args.load, args.test, input_dir, output_dir 
 
 
 if __name__ == "__main__":
     
     args = parse_input().parse_args()
-    regular, augmented, filtered_csv, partition_csv, batch_size, epochs, train, test, inputs, outputs = validate_arguments(args)
+    regular, augmented, filtered_csv, partition_csv, batch_size, epochs, train, load, test, inputs, outputs = validate_arguments(args)
     
     summarize_arguments(args)
     fp = FrameProcessor(rotation_range=args.rotation_range,
@@ -345,6 +353,7 @@ if __name__ == "__main__":
                     batch_size=batch_size,
                     epochs=epochs,
                     train=train,
+                    load=load,
                     test=test,
                     inputs=inputs,
                     outputs=outputs,

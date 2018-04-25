@@ -1,12 +1,11 @@
 #!/bin/sh
 
-python src/run_model.py CNN+LSTM rsz \
---train \
+python src/run_model.py C3D rsz \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/test_new_method \
---epochs 2 \
---batch_size 4 \
+--input_dir run_history/c3d_reloaded \
+--epochs 50 \
+--batch_size 8 \
 --width_shift_range 0.25 \
 --height_shift_range 0.25 \
 --zoom_range 0.25 \

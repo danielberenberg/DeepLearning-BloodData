@@ -372,7 +372,6 @@ class FrameProcessor:
         i = 0
         while True:
             X, y = [], []
-            
             current_path = paths[i]
             current_hr = hr[i]
             frame_dir = os.listdir(current_path)
