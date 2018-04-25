@@ -1,0 +1,3 @@
+#!/bin/bash
+
+python src/scripts/augment_speed.py data DeepLearningClassData.csv NextStartingPoint.csv && python src/scripts/extract_frames.py NextStartingPoint.csv DeepLearningClassData.csv data frames

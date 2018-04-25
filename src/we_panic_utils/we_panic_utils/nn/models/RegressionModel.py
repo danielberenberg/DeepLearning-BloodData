@@ -137,21 +137,21 @@ class CNN_3D(RegressionModel):
     def get_model(self):
         model = Sequential()
         
-        model.add(Conv3D(64, kernel_size=(3,3,3), 
-               input_shape=self.input_shape, activation='relu'))
+        model.add(Conv3D(64, kernel_size=(3, 3, 3), 
+                  input_shape=self.input_shape, activation='relu'))
         model.add(MaxPooling3D(pool_size=2, strides=(1, 2, 2)))
         model.add(Dropout(0.5)) 
-        model.add(Conv3D(128, kernel_size=(3,3,3), 
-                activation='relu')) 
+        model.add(Conv3D(128, kernel_size=(3, 3, 3), 
+                  activation='relu')) 
         model.add(MaxPooling3D(pool_size=2, strides=2))
         model.add(Dropout(0.5))
-        model.add(Conv3D(128, kernel_size=(3,3,3), 
-                activation='relu')) 
-        model.add(Conv3D(256, kernel_size=(3,3,3), 
-                activation='relu'))
+        model.add(Conv3D(128, kernel_size=(3, 3, 3), 
+                  activation='relu')) 
+        model.add(Conv3D(256, kernel_size=(3, 3, 3), 
+                  activation='relu'))
         model.add(MaxPooling3D(pool_size=2, strides=2)) 
-        model.add(Conv3D(256, kernel_size=(3,3,3), 
-                activation='relu')) 
+        model.add(Conv3D(256, kernel_size=(3, 3, 3), 
+                  activation='relu')) 
         model.add(MaxPooling3D(pool_size=2, strides=2))
         
         model.add(Flatten()) 
