@@ -1,7 +1,9 @@
 from .data_load import train_test_split_with_csv_support, ttswcsv2, ttswcvs3, data_set_to_csv, data_set_from_csv
-from .models import CNN_LSTM, CNN_3D
+from .models import C3D, CNN_LSTM, CNN_3D
 from .processing import FrameProcessor
+from keras import models
 from keras.callbacks import CSVLogger, ModelCheckpoint
+from keras import backend as Ki
 import os
 import pandas as pd
 
@@ -32,6 +34,7 @@ class Engine():
                  batch_size, 
                  epochs, 
                  train, 
+                 load,
                  test, 
                  inputs, 
                  outputs,
@@ -49,6 +52,7 @@ class Engine():
         self.batch_size = batch_size
         self.epochs = epochs
         self.train = train
+        self.load = load
         self.test = test
         self.inputs = inputs
         self.outputs = outputs
@@ -66,7 +70,7 @@ class Engine():
         model = self.__choose_model().instantiate()   
         train_set = test_set = val_set = None
 
-        if self.train:
+        if self.train and not self.load:
             print("Training the model.")
             train_set, test_set, val_set = ttswcvs3(self.data, self.metadata, self.outputs)
             
@@ -76,17 +80,42 @@ class Engine():
             csv_logger = CSVLogger(os.path.join(self.outputs, "training.log"))
             checkpointer = ModelCheckpoint(filepath=os.path.join(self.outputs, 'models', self.model_type + '.h5'), 
                                            verbose=1, 
-                                           save_best_only=True, 
-                                           save_weights_only=True)
+                                           save_best_only=True)
 
             model.fit_generator(generator=train_generator,
-                                steps_per_epoch=len(train_set) // self.processor.batch_size,
+                                steps_per_epoch=500,
                                 epochs=self.epochs,
                                 verbose=1,
                                 callbacks=[csv_logger, checkpointer],
                                 validation_data=val_generator,
                                 validation_steps=len(val_set), workers=4)
         
+        if self.train and self.load:
+            print("Resuming training of existing model.")
+            model.load_weights(os.path.join(self.inputs, "models", self.model_type + ".h5"))
+            
+            print(K.eval(model.optimizer.lr))            
+
+            train_set = pd.read_csv(os.path.join(self.inputs, "train.csv"))
+            test_set = pd.read_csv(os.path.join(self.inputs, "test.csv"))
+            val_set = pd.read_csv(os.path.join(self.inputs, "val.csv"))
+
+            train_generator = self.processor.train_generator_v3(train_set)
+            val_generator = self.processor.testing_generator_v3(val_set)
+            
+            csv_logger = CSVLogger(os.path.join(self.outputs, "training.log"))
+            checkpointer = ModelCheckpoint(filepath=os.path.join(self.outputs, 'models', self.model_type + '.h5'), 
+                                           verbose=1, 
+                                           save_best_only=True)
+
+            model.fit_generator(generator=train_generator,
+                                steps_per_epoch=500,
+                                epochs=self.epochs,
+                                verbose=1,
+                                callbacks=[csv_logger, checkpointer],
+                                validation_data=val_generator,
+                                validation_steps=len(val_set), workers=4, initial_epoch=20)
+
         if self.test:
 
             # if the test set doesn't exist yet, it means we are testing without training
@@ -101,8 +130,10 @@ class Engine():
                 if model_path == "":
                     raise FileNotFoundError("Could not locate model file in {}-- have you trained the model yet?".format(model_dir))
                 
-                print("Loading model from file: {}".format(model_path))
-                model.load_weights(model_path)
+                #print("Loading model from file: {}".format(model_path))
+                #model.load_weights(model_path)
+                
+                model = models.load_model(model_path)
                 
                 test_dir = os.path.join(self.inputs, "test.csv")
                 
@@ -238,6 +269,9 @@ class Engine():
         """
         choose a model based on preferences
         """
+        if self.model_type == "C3D": 
+            return C3D(self.input_shape, self.output_shape)
+        
         if self.model_type == "CNN+LSTM":
             return CNN_LSTM(self.input_shape, self.output_shape)
 
