@@ -25,6 +25,24 @@ class RegressionModel():
     def get_model(self):
         raise NotImplementedError 
 
+class dumb(RegressionModel):
+    def __init__(self, input_shape, output_shape):
+        RegressionModel.__init__(self, input_shape, output_shape)
+
+    def instantiate(self):
+        return super(dumb, self).instantiate()
+    
+    def get_model(self):
+        model = Sequential()
+        model.add(Conv3D(64, 3, 3, 3, activation='relu',
+                         border_mode='same', name='conv1',
+                         subsample=(1, 1, 1),
+                         input_shape=self.input_shape))
+        model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2),
+                               border_mode='valid', name='pool1'))
+        model.add(Dense(self.output_shape, activation='linear'))
+        return model
+
 class C3D(RegressionModel):
     def __init__(self, input_shape, output_shape):
         RegressionModel.__init__(self, input_shape, output_shape)
@@ -169,24 +187,32 @@ class CNN_3D_small(RegressionModel):
         RegressionModel.__init__(self, input_shape, output_shape)
 
     def instantiate(self):
-        return super(CNN_3D, self).instantiate()
+        return super(CNN_3D_small, self).instantiate()
     
     def get_model(self):
         model = Sequential()
+        model.add(Conv3D(32, kernel_size=(3, 3, 3),
+                  input_shape=self.input_shape, activation='relu'))
+        model.add(Conv3D(32, kernel_size=(3, 3, 3),
+                  input_shape=self.input_shape, activation='relu'))
         model.add(Conv3D(64, kernel_size=(3, 3, 3),
                   input_shape=self.input_shape, activation='relu'))
         model.add(MaxPooling3D(pool_size=2, strides=(1, 2, 2)))
-        model.add(Dropout(0.5))
-
+        model.add(Conv3D(64, kernel_size=(3, 3, 3),
+                  input_shape=self.input_shape, activation='relu'))
+        model.add(MaxPooling3D(pool_size=2, strides=(1, 2, 2)))
         model.add(Conv3D(128, kernel_size=(3, 3, 3),
                   activation='relu'))  
-        model.add(Conv3D(256, kernel_size=(3, 3, 3),
+        model.add(MaxPooling3D(pool_size=2, strides=2)) 
+        model.add(Conv3D(128, kernel_size=(3, 3, 3),
                   activation='relu'))
         model.add(MaxPooling3D(pool_size=2, strides=2)) 
         # batch norm??
 
         model.add(Flatten())
-        model.add(Dense(1024, activation='relu'))
+        model.add(Dense(256, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(256, activation='relu'))
         model.add(Dropout(0.5))
         model.add(Dense(self.output_shape, activation='linear'))
         return model

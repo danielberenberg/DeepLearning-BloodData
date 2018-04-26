@@ -1,9 +1,9 @@
 from .data_load import train_test_split_with_csv_support, ttswcsv2, ttswcvs3, data_set_to_csv, data_set_from_csv
-from .models import C3D, CNN_LSTM, CNN_3D, CNN_3D_small
+from .models import C3D, CNN_LSTM, CNN_3D, CNN_3D_small, dumb
 from .processing import FrameProcessor
 from keras import models
-from keras.callbacks import CSVLogger, ModelCheckpoint
-from keras import backend as Ki
+from keras.callbacks import CSVLogger, ModelCheckpoint, Callback
+from keras import backend as K
 import os
 import pandas as pd
 
@@ -81,12 +81,14 @@ class Engine():
             checkpointer = ModelCheckpoint(filepath=os.path.join(self.outputs, 'models', self.model_type + '.h5'), 
                                            verbose=1, 
                                            save_best_only=True)
-
+            test_results_file = os.path.join(self.outputs, "test_results.log")
+            test_callback = TestResultsCallback(self.processor.testing_generator_v3(test_set), test_set, test_results_file, self.batch_size)
+    
             model.fit_generator(generator=train_generator,
-                                steps_per_epoch=500,
+                                steps_per_epoch=300,
                                 epochs=self.epochs,
                                 verbose=1,
-                                callbacks=[csv_logger, checkpointer],
+                                callbacks=[csv_logger, checkpointer, test_callback],
                                 validation_data=val_generator,
                                 validation_steps=len(val_set), workers=4)
         
@@ -107,14 +109,14 @@ class Engine():
             checkpointer = ModelCheckpoint(filepath=os.path.join(self.outputs, 'models', self.model_type + '.h5'), 
                                            verbose=1, 
                                            save_best_only=True)
-
+            
             model.fit_generator(generator=train_generator,
-                                steps_per_epoch=500,
+                                steps_per_epoch=300,
                                 epochs=self.epochs,
                                 verbose=1,
                                 callbacks=[csv_logger, checkpointer],
                                 validation_data=val_generator,
-                                validation_steps=len(val_set), workers=4, initial_epoch=20)
+                                validation_steps=len(val_set), workers=4)
 
         if self.test:
 
@@ -163,6 +165,57 @@ class Engine():
                 print(loss)
                 print(pred) 
 
+    
+    def __choose_model(self):
+        """
+        choose a model based on preferences
+        """
+        if self.model_type == "C3D": 
+            return C3D(self.input_shape, self.output_shape)
+        
+        if self.model_type == "CNN+LSTM":
+            return CNN_LSTM(self.input_shape, self.output_shape)
+
+        if self.model_type == "3D-CNN":
+            return CNN_3D(self.input_shape, self.output_shape)
+        
+        if self.model_type == "CNN_3D_small":
+            return CNN_3D_small(self.input_shape, self.output_shape)
+
+        if self.model_type == "dumb":
+            return dumb(self.input_shape, self.output_shape)
+        
+        raise ValueError("Model type does not exist: {}".format(self.model_type))
+
+class TestResultsCallback(Callback):
+    def __init__(self, test_gen, test_set, log_file, batch_size):
+        self.test_gen = test_gen
+        self.test_set = test_set
+        self.log_file = log_file
+        self.batch_size = batch_size
+
+    def on_epoch_end(self, epoch, logs):
+        if (epoch+1) % 5 == 0:
+            print('Logging tests at epoch', epoch)
+            with open(self.log_file, 'a') as log:
+                pred = self.model.predict_generator(self.test_gen, len(self.test_set))
+                subjects = list(self.test_set['Subject'])
+                trial = list(self.test_set['Trial'])
+                hr = list(self.test_set['Heart Rate'])
+                i = 0
+                s = 0
+                log.write("Epoch: " + str(epoch+1) + '\n')
+                for p in pred:
+                    subj = subjects[s]
+                    tri = trial[s]
+                    h = hr[s]
+                    val = p[0]
+                    log.write(str(subj) + ', ' + str(tri) + '| prediction=' + str(p) + ', actual=' + str(h) + '\n')
+                    i+=1
+                    if i % self.batch_size == 0:
+                        s += 1
+                    if s == len(subjects):
+                        s = 0
 
 #    def run(self):
 #        """
@@ -265,21 +318,5 @@ class Engine():
 #                print(loss)
 #                print(pred) 
 #
-    def __choose_model(self):
-        """
-        choose a model based on preferences
-        """
-        if self.model_type == "C3D": 
-            return C3D(self.input_shape, self.output_shape)
-        
-        if self.model_type == "CNN+LSTM":
-            return CNN_LSTM(self.input_shape, self.output_shape)
-
-        if self.model_type == "3D-CNN":
-            return CNN_3D(self.input_shape, self.output_shape)
-        
-        if self.model_type == "CNN_3D_small":
-            return CNN_3D_small(self.input_shape, self.output_shape)
-        raise ValueError("Model type does not exist: {}".format(self.model_type))
 
 
