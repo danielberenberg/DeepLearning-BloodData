@@ -383,7 +383,7 @@ class FrameProcessor:
                 start = random.randint(0, len(frame_dir)-self.sequence_length)
                 frames = frame_dir[start:start+self.sequence_length]
                 frames = [os.path.join(current_path, frame) for frame in frames]
-                X.append(build_image_sequence(frames))
+                X.append(build_image_sequence(frames, greyscale_on=self.greyscale_on))
                 y.append(current_hr)
 
             i+=1

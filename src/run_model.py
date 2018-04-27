@@ -161,7 +161,7 @@ def summarize_arguments(args):
 
     print(formatter % ("batch_size", args.batch_size))
     print(formatter % ("epochs", args.epochs)) 
-    
+    print(formatter % ("greyscale_on", args.greyscale_on)) 
 
 class ArgumentError(Exception):
     """
@@ -334,13 +334,13 @@ def validate_arguments(args):
     assert os.path.exists(args.csv), "%s not found" % args.csv
     assert os.path.exists(args.partition_csv), "%s not found" % args.partition_csv
  
-    return regular, augmented, args.csv, args.partition_csv, batch_size, epochs, args.train, args.load, args.test, input_dir, output_dir 
+    return regular, augmented, args.csv, args.partition_csv, batch_size, epochs, args.train, args.load, args.test, input_dir, output_dir, args.greyscale_on 
 
 
 if __name__ == "__main__":
     
     args = parse_input().parse_args()
-    regular, augmented, filtered_csv, partition_csv, batch_size, epochs, train, load, test, inputs, outputs = validate_arguments(args)
+    regular, augmented, filtered_csv, partition_csv, batch_size, epochs, train, load, test, inputs, outputs, greyscale_on = validate_arguments(args)
     
     summarize_arguments(args)
     fp = FrameProcessor(rotation_range=args.rotation_range,
@@ -350,8 +350,15 @@ if __name__ == "__main__":
                         zoom_range=args.zoom_range,
                         vertical_flip=args.vertical_flip,
                         horizontal_flip=args.horizontal_flip,
-                        batch_size=batch_size)
+                        batch_size=batch_size,
+                        greyscale_on=greyscale_on)
 
+    input_shape = None
+    if greyscale_on:
+        input_shape = (60, 100, 100, 1)
+    else:
+        input_shape = (60, 100, 100, 3)
+    print(input_shape)
     engine = Engine(data=regular,
                     #augmented_data=augmented,
                     model_type=args.model_type,
@@ -364,7 +371,8 @@ if __name__ == "__main__":
                     inputs=inputs,
                     outputs=outputs,
                     frameproc=fp,
-                    ignore_augmented=args.ignore_augmented)
+                    ignore_augmented=args.ignore_augmented,
+                    input_shape=input_shape)
 
     print("starting ... ")
     start = time.time()

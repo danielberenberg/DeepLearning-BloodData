@@ -1,11 +1,11 @@
 #!/bin/sh
 
-screen python src/run_model.py CNN_3D_small rsz \
+python src/run_model.py CNN+LSTM rsz \
 --train \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/cnn_3d_small \
---epochs 50 \
+--output_dir run_history/lrcn_3_gray \
+--epochs 1 \
 --batch_size 12 \
 --width_shift_range 0.10 \
 --height_shift_range 0.10 \
@@ -13,4 +13,5 @@ screen python src/run_model.py CNN_3D_small rsz \
 --shear_range 0 \
 --rotation_range 25 \
 --horizontal_flip \
---vertical_flip
+--vertical_flip \
+--greyscale_on
