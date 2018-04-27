@@ -1,15 +1,16 @@
 #!/bin/sh
 
-python src/run_model.py C3D rsz \
+screen python src/run_model.py CNN_3D_small rsz \
+--train \
 --test \
 --partition_csv subject_data.csv \
---input_dir run_history/c3d_reloaded \
+--output_dir run_history/cnn_3d_small \
 --epochs 50 \
---batch_size 8 \
---width_shift_range 0.25 \
---height_shift_range 0.25 \
---zoom_range 0.25 \
---shear_range 25 \
+--batch_size 12 \
+--width_shift_range 0.10 \
+--height_shift_range 0.10 \
+--zoom_range 0.10 \
+--shear_range 0 \
 --rotation_range 25 \
 --horizontal_flip \
 --vertical_flip

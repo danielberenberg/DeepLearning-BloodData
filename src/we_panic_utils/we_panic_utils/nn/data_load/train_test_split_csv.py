@@ -79,7 +79,7 @@ def generate_paths2labels(df, data_path):
     return filtered_paths
 
 def ttswcvs3(data_path, metadata, output_dir,
-             test_split=0.2, val_split=0.1, verbose=True):
+             test_split=0.2, val_split=0.2, verbose=True):
 
     """
     Train test split with CSV support version 3.
