@@ -70,7 +70,6 @@ def random_sequence_rotation(seq, rotation_range, row_axis=0, col_axis=1, channe
 
     h, w = seq[0].shape[row_axis], seq[0].shape[col_axis]
     transform_matrix = transform_matrix_offset_center(rotation_matrix, h, w) 
-    
     return [apply_transform(x, transform_matrix, channel_axis, fill_mode, cval) for x in seq] 
         
 
@@ -233,10 +232,11 @@ def process_img(frame, input_shape, greyscale_on=False):
     image = load_img(frame, target_size=(h_, w_))
     img_arr = img_to_array(image)
     
-    if greyscale_on:
-        img_arr = rgb2grey(img_arr)
-
     x = (img_arr / 255.).astype(np.float32)
+
+    #print(seq[0]) 
+    if greyscale_on:
+        x = (0.21 * x[:,:,:1]) + (0.72 * x[:,:,1:2]) + (0.07 * x[:,:,-1:])
     return x
 
 
