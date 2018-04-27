@@ -232,12 +232,11 @@ def process_img(frame, input_shape, greyscale_on=False):
     h_, w_, _ = input_shape
     image = load_img(frame, target_size=(h_, w_))
     img_arr = img_to_array(image)
-
-    x = (img_arr / 255.).astype(np.float32)
     
     if greyscale_on:
-        x = rgb2grey(x)
+        img_arr = rgb2grey(img_arr)
 
+    x = (img_arr / 255.).astype(np.float32)
     return x
 
 
