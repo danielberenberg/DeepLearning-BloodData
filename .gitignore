@@ -22,3 +22,4 @@ YouAreAlreadyDead*
 run_history/
 *.h5
 rsz_augmented
+**/*.swp*
