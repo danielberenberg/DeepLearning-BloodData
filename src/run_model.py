@@ -130,6 +130,12 @@ def parse_input():
                         help="flip the horizontal axis",
                         default=False,
                         action="store_true")
+    
+    parser.add_argument("--greyscale_on",
+                        help="convert images to greyscale at runtime",
+                        default=False,
+                        action="store_true")
+
     return parser
 
 

@@ -12,7 +12,7 @@ import numpy as np
 from keras.preprocessing.image import load_img, img_to_array
 from keras.preprocessing.image import apply_transform, transform_matrix_offset_center
 import keras.backend as K
-
+from skimage.color import rgb2grey
 from PIL import ImageEnhance
 from PIL import Image as pil_image
 
@@ -211,14 +211,14 @@ def get_sample_frames(sample):
     return filenames
   
 
-def build_image_sequence(frames, input_shape=(100, 100, 3)):
+def build_image_sequence(frames, input_shape=(100, 100, 3), greyscale_on=False):
     """
     return a list of images from filenames
     """
-    return [process_img(frame, input_shape) for frame in frames]
+    return [process_img(frame, input_shape, greyscale_on=greyscale_on) for frame in frames]
 
 
-def process_img(frame, input_shape):
+def process_img(frame, input_shape, greyscale_on=False):
     """
     load up an image as a numpy array
 
@@ -234,6 +234,9 @@ def process_img(frame, input_shape):
     img_arr = img_to_array(image)
 
     x = (img_arr / 255.).astype(np.float32)
+    
+    if greyscale_on:
+        x = rgb2grey(x)
 
     return x
 
@@ -265,7 +268,8 @@ class FrameProcessor:
                  horizontal_flip=False,
                  vertical_flip=False,
                  batch_size=4,
-                 sequence_length=60):
+                 sequence_length=60,
+                 greyscale_on=False):
 
         self.rotation_range = rotation_range
         self.width_shift_range = width_shift_range
@@ -274,7 +278,7 @@ class FrameProcessor:
         self.zoom_range = zoom_range
         self.horizontal_flip = horizontal_flip
         self.vertical_flip = vertical_flip
-        
+        self.greyscale_on = greyscale_on 
         self.sequence_length = sequence_length
         self.batch_size = batch_size
         
@@ -308,7 +312,7 @@ class FrameProcessor:
             y = [y]
             #y = [paths2labels[pth] for pth in selected_paths]
             frames = get_sample_frames(selected_path)
-            sequence = build_image_sequence(frames)
+            sequence = build_image_sequence(frames, greyscale_on=self.greyscale_on)
             X.append(sequence)
             print(selected_path)
             
@@ -360,7 +364,7 @@ class FrameProcessor:
                     seq_begin = random.randint(0, sz - self.sequence_length) 
                     selected_frames = frames[seq_begin:seq_begin + self.sequence_length]
                 
-                sequence = build_image_sequence(selected_frames)
+                sequence = build_image_sequence(selected_frames, greyscale_on=self.greyscale_on)
 
                 X.append(sequence)
                 y.append(heart_rate, resp_rate)
@@ -406,7 +410,7 @@ class FrameProcessor:
                 frames = frame_dir[start:start+self.sequence_length]
                 frames = [os.path.join(path, frame) for frame in frames]
 
-                sequence = build_image_sequence(frames)
+                sequence = build_image_sequence(frames, greyscale_on=self.greyscale_on)
                 
                 # now we want to apply the augmentation
                 if self.rotation_range > 0.0:
@@ -478,7 +482,7 @@ class FrameProcessor:
                     seq_begin = random.randint(0, sz - self.sequence_length) 
                     selected_frames = frames[seq_begin:seq_begin + self.sequence_length]
                 
-                sequence = build_image_sequence(selected_frames)
+                sequence = build_image_sequence(selected_frames, greyscale_on=self.greyscale_on)
 
                 # now we want to apply the augmentation
                 if self.rotation_range > 0.0:
@@ -534,7 +538,7 @@ class FrameProcessor:
             for pth in selected_paths:
                
                 frames = get_sample_frames(pth)
-                sequence = build_image_sequence(frames)
+                sequence = build_image_sequence(frames, greyscale_on=self.greyscale_on)
                 
                 # now we want to apply the augmentation
                 if self.rotation_range > 0.0:
