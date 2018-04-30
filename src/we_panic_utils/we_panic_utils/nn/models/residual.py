@@ -3,13 +3,14 @@ A sub-library for recurrent residual net building blocks
 =========================================================
 noteworthy citations:
 
-    [1] https://github.com/raghakot/keras-resnet/blob/master/resnet.py
-    [2] Keras documentation on github
-    [3] https://arxiv.org/pdf/1706.08807.pdf --- Recurrent Residual Learning for Action Recognition, Iqbalm et al.
-    [4] https://stats.stackexchange.com/questions/56950/neural-network-with-skip-layer-connections
-    [5] https://arxiv.org/pdf/1512.03385.pdf --- Deep Residual Learning for Image Recognition, He et al.
-    [6] https://arxiv.org/pdf/1603.05027v2.pdf --- Identity Mappings in Deep Residual Networks, He et al.  
-    [7] https://gist.github.com/bzamecnik/8ed16e361a0a6e80e2a4a259222f101e
+    [1] https://github.com/raghakot/keras-resnet/blob/master/resnet.py                                              | resnet implementation
+    [2] Keras documentation on github                                                                               | keras dox
+    [3] https://arxiv.org/pdf/1706.08807.pdf --- Recurrent Residual Learning for Action Recognition, Iqbalm et al.  | 
+    [4] https://stats.stackexchange.com/questions/56950/neural-network-with-skip-layer-connections                  |
+    [5] https://arxiv.org/pdf/1512.03385.pdf --- Deep Residual Learning for Image Recognition, He et al.            |
+    [6] https://arxiv.org/pdf/1603.05027v2.pdf --- Identity Mappings in Deep Residual Networks, He et al.           |
+    [7] https://gist.github.com/bzamecnik/8ed16e361a0a6e80e2a4a259222f101e                                          | residual LSTMs
+    [8] https://github.com/broadinstitute/keras-resnet/blob/master/keras_resnet/blocks/_time_distributed_2d.py      | time distributed residual
 """
 
 from __future__ import division
@@ -17,10 +18,12 @@ from keras.models import Model
 from keras.layers import Input, Activation, Dense, Flatten, Lambda, LSTM
 from keras.layers.convolutional import Conv2D, MaxPooling2D, AveragePooling2D
 from keras.layers.merge import add
+from keras.layers.wrappers import TimeDistributed
 from keras.layers.normalization import BatchNormalization
 from keras.regularizers import l2
 from keras import backend as K
 
+from keras_resnet.blocks import time_distributed_bottleneck2d
 
 def batchnorm_relu(input_lyrs, channel_axis=2):
     """
@@ -190,3 +193,14 @@ def make_residual_LSTM_layers(inputs, rnn_width, rnn_depth, rnn_dropout):
             x = add([Lambda(slice_last), x_rnn])
     
     return x
+
+
+def residualLSTMblock(inputs, rnn_width, filters, dropout=0.5, return_sequences=True, **kwargs):
+    
+    x = inputs
+    x_rnn = LSTM(rnn_width, dropout=dropout, return_sequences=return_sequences)(x)
+    time_dist = time_distributed_bottleneck2d(filters, **kwargs)(x_rnn)
+    
+    return add([x_rnn, time_dist])
+    
+

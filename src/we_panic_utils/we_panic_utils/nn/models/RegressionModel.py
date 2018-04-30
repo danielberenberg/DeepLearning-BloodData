@@ -8,7 +8,7 @@ from keras.layers.convolutional import Conv2D, MaxPooling2D, Conv3D, MaxPooling3
 from collections import deque
 import sys
 from keras.models import Model
-from .residual import residual_block
+from .residual import residualLSTMblock
 
 class RegressionModel():
     
@@ -234,28 +234,13 @@ class ResidualLSTM(RegressionModel):
 
         conv2 = TimeDistributed(Conv2D(32, (3, 3), kernel_initializer="he_normal", activation="relu"))(conv1)
         max_pool1 = TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2)))(conv2)
+        
         fltn1 = TimeDistributed(Flatten())(max_pool1)
-        lstm1 = LSTM(32, dropout=0.5, return_sequences=True)(fltn1)
-        resblock1 = TimeDistributed(residual_block(64, 4))(lstm1)
-        
-        fltn2 = TimeDistributed(Flatten())(resblock1)
-        lstm2 = LSTM(64, dropout=0.5, return_sequences=True)(fltn2)
-        lstm2 = add([lstm1, lstm2])
-        resblock2 = TimeDistributed(residual_block(128, 6))(lstm2)
-        
-        fltn3 = TimeDistributed(Flatten())(resblock2)
-        lstm3 = LSTM(128, dropout=0.5, return_sequences=True)(fltn3)
-        lstm3 = add([lstm2, lstm3])
-        resblock3 = TimeDistributed(residual_block(256, 8))(lstm3)
-        
-        conv3 = TimeDistributed(Conv2D(512, (3, 3), padding='same', activation='relu'))(resblock3)
-        conv4 = TimeDistributed(Conv2D(512, (3, 3), padding='same', activation='relu'))(conv3)
-
-        max_pool2 = TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2)))(conv4)
-        fltn4 = TimeDistributed(Flatten())(max_pool2)
-        lstm4 = LSTM(256, dropout=0.5, return_sequences=False)(fltn4)
-        
-        dense = Dense(self.output_shape, activation='linear')
+        block1 = residualLSTMblock(fltn1, 64, 64, dropout=0.5)
+        block2 = residualLSTMblock(block1, 128, 128, dropout=0.5)
+        block3 = residualLSTMblock(block2, 256, 256, dropout=0.5)
+        final_block = residualLSTMblock(block3, 256, 256, dropout=0.5)
+        dense = Dense(self.output_shape, activation='linear')(final_block)
 
         model = Model(inputs=Input(shape=self.input_shape), outputs=dense)
 

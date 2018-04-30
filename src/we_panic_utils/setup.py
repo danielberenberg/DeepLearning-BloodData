@@ -13,6 +13,7 @@ setup(name='we_panic_utils',
       install_requires=[
           'Pillow',
           'opencv-python',
-          'keras'
+          'keras',
+          'keras-resnet'
         ],
       zip_safe=False)
