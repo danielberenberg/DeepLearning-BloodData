@@ -17,8 +17,10 @@ if __name__ == "__main__":
         selected = sys.argv[3]
     except:
         print("\tUsage: <data_dir> <master_csv> <selected_subjects.csv>")
-    else:        
-        
+    else:       
+        #gives a list of values between 0.5 and 2 without 1
+        speed_changes = [round(x*0.1, 1) for x in range(5, 21) if x != 10]
+
         selected_df = pd.read_csv(selected)
         data = base.csv2data(master_csv)[0]
 
