@@ -1,4 +1,5 @@
-from keras.layers import Dense, Flatten, Dropout, ZeroPadding3D
+from keras.layers import Dense, Flatten, Dropout, ZeroPadding3D, Input
+from keras.layers.merge import add
 from keras.layers.recurrent import LSTM
 from keras.models import Sequential, load_model
 from keras.optimizers import SGD, Adam, RMSprop
@@ -6,7 +7,8 @@ from keras.layers.wrappers import TimeDistributed
 from keras.layers.convolutional import Conv2D, MaxPooling2D, Conv3D, MaxPooling3D
 from collections import deque
 import sys
-
+from keras.models import Model
+from .residual import residual_block
 
 class RegressionModel():
     
@@ -104,6 +106,7 @@ class C3D(RegressionModel):
         model.add(Dense(self.output_shape, activation='linear'))
 
         return model
+
 
 class CNN_LSTM(RegressionModel):
     def __init__(self, input_shape, output_shape):
@@ -212,4 +215,48 @@ class CNN_3D_small(RegressionModel):
         model.add(Dense(256, activation='relu'))
         model.add(Dropout(0.5))
         model.add(Dense(self.output_shape, activation='linear'))
+        return model
+
+
+
+class ResidualLSTM(RegressionModel):
+    def __init__(self, input_shape, output_shape):
+        RegressionModel.__init__(self, input_shape, output_shape)
+
+    def instantiate(self):
+        return super(ResidualLSTM, self).instantiate()
+
+    def get_model(self):
+        
+        # model = Sequential()
+        conv1 = TimeDistributed(Conv2D(32, (7, 7), strides=(2, 2), activation='relu',
+                                padding='same'))
+
+        conv2 = TimeDistributed(Conv2D(32, (3, 3), kernel_initializer="he_normal", activation="relu"))(conv1)
+        max_pool1 = TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2)))(conv2)
+        fltn1 = TimeDistributed(Flatten())(max_pool1)
+        lstm1 = LSTM(32, dropout=0.5, return_sequences=True)(fltn1)
+        resblock1 = TimeDistributed(residual_block(64, 4))(lstm1)
+        
+        fltn2 = TimeDistributed(Flatten())(resblock1)
+        lstm2 = LSTM(64, dropout=0.5, return_sequences=True)(fltn2)
+        lstm2 = add([lstm1, lstm2])
+        resblock2 = TimeDistributed(residual_block(128, 6))(lstm2)
+        
+        fltn3 = TimeDistributed(Flatten())(resblock2)
+        lstm3 = LSTM(128, dropout=0.5, return_sequences=True)(fltn3)
+        lstm3 = add([lstm2, lstm3])
+        resblock3 = TimeDistributed(residual_block(256, 8))(lstm3)
+        
+        conv3 = TimeDistributed(Conv2D(512, (3, 3), padding='same', activation='relu'))(resblock3)
+        conv4 = TimeDistributed(Conv2D(512, (3, 3), padding='same', activation='relu'))(conv3)
+
+        max_pool2 = TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2)))(conv4)
+        fltn4 = TimeDistributed(Flatten())(max_pool2)
+        lstm4 = LSTM(256, dropout=0.5, return_sequences=False)(fltn4)
+        
+        dense = Dense(self.output_shape, activation='linear')
+
+        model = Model(inputs=Input(shape=self.input_shape), outputs=dense)
+
         return model
