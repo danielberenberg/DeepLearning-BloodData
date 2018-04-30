@@ -1,5 +1,13 @@
 #!/bin/sh
 
+#<<<<<<< HEAD
+#screen python src/run_model.py CNN+LSTM rsz \
+#--train \
+#--test \
+#--partition_csv subject_data.csv \
+#--output_dir run_history/lrcn_4_color \
+#--epochs 50 \
+#=======
 python src/run_model.py ResidualLSTM rsz \
 --train \
 --test \
@@ -13,5 +21,4 @@ python src/run_model.py ResidualLSTM rsz \
 --shear_range 0 \
 --rotation_range 25 \
 --horizontal_flip \
---vertical_flip \
---greyscale_on
+--vertical_flip

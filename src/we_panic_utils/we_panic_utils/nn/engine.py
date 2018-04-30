@@ -72,7 +72,10 @@ class Engine():
 
         if self.train and not self.load:
             print("Training the model.")
-            train_set, test_set, val_set = ttswcvs3(self.data, self.metadata, self.outputs)
+            #train_set, test_set, val_set = ttswcvs3(self.data, self.metadata, self.outputs)
+            train_set = pd.read_csv(os.path.join(self.inputs, "train.csv"))
+            test_set = pd.read_csv(os.path.join(self.inputs, "test.csv"))
+            val_set = pd.read_csv(os.path.join(self.inputs, "val.csv"))
             
             train_generator = self.processor.train_generator_v3(train_set)
             val_generator = self.processor.testing_generator_v3(val_set)
@@ -85,7 +88,7 @@ class Engine():
             test_callback = TestResultsCallback(self.processor.testing_generator_v3(test_set), test_set, test_results_file, self.batch_size)
     
             model.fit_generator(generator=train_generator,
-                                steps_per_epoch=300,
+                                steps_per_epoch=400,
                                 epochs=self.epochs,
                                 verbose=1,
                                 callbacks=[csv_logger, checkpointer, test_callback],
