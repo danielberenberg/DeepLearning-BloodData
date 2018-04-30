@@ -104,11 +104,13 @@ if __name__ == "__main__":
             r = [subject, trial, os.path.join(output_directory, str(subject), str(trial)), t2_hrate, t2_resprate]
         
         frame_df.loc[i] = r
-
-        imgs = vc.video_file_to_frames(target, output_dir=output_directory, suppress=False)
-        print("-" * 78)
-        imgs_captured.extend(imgs)
-        i += 1
+        if not os.path.exists(target.replace(movie_dir, output_directory)):
+            imgs = vc.video_file_to_frames(target, output_dir=output_directory, suppress=False)
+            print("-" * 78)
+            imgs_captured.extend(imgs)
+            i += 1
+        else:
+            print("{} already exists, skipping".format(target.replace(movie_dir, output_directory)))
     
     frame_df.to_csv("subject_data.csv", index=False)
     print("[*] Extracted %d images from %d different video files" % (len(imgs_captured), i + 1))

@@ -66,7 +66,7 @@ if __name__ == "__main__":
                         
                         row[hr_index] = round(heart_rate * change, 1)
                         row[rr_index] = (heart_rate * change) / 4
-                        selected_df.loc[len(selected_df)] = [new_subj, 1]
+                        selected_df.loc[len(selected_df)] = [new_subj, trial]
 
                         vc.change_speed(subj_origin, subj_target, change)
                         master_writer.writerow(row) 
