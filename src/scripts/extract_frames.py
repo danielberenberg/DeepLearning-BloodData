@@ -86,9 +86,6 @@ if __name__ == "__main__":
     
     i = 0
     for index, row in selects_df.iterrows(): 
-        if i < 16:
-            i+=1
-            continue
         subject, trial = row['Subject'], int(row['Trial'])
         fmt_dir = 'S' + subject.zfill(4)
         target_dir = os.path.join(movie_dir, fmt_dir)
