@@ -139,7 +139,12 @@ class CNN_LSTM(RegressionModel):
         model.add(TimeDistributed(Flatten()))
 
         model.add(Dropout(0.5))
-        model.add(LSTM(256, return_sequences=False, dropout=0.5)) 
+        model.add(LSTM(512, return_sequences=False, dropout=0.5)) 
+        model.add(Dense(512, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(512, activation='relu'))
+        model.add(Dropout(0.5))
+
         model.add(Dense(self.output_shape, activation='linear'))
 
         return model
@@ -229,8 +234,8 @@ class ResidualLSTM(RegressionModel):
     def get_model(self):
         
         # model = Sequential()
-        conv1 = TimeDistributed(Conv2D(32, (7, 7), strides=(2, 2), activation='relu',
-                                padding='same'))
+        inputs = Input(shape=self.input_shape)
+        conv1 = TimeDistributed(Conv2D(32, (7, 7), strides=(2, 2), activation='relu', padding='same'))(inputs)
 
         conv2 = TimeDistributed(Conv2D(32, (3, 3), kernel_initializer="he_normal", activation="relu"))(conv1)
         max_pool1 = TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2)))(conv2)
