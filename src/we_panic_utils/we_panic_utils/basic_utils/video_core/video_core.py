@@ -11,7 +11,7 @@ from we_panic_utils.basic_utils.basics import check_exists_create_if_not
 import subprocess
 FPS = 30
 
-BASH_COMMAND = 'ffmpeg -i {} -vf setpts={}*PTS {}' 
+BASH_COMMAND = 'ffmpeg -i {} -q:v 1 -vf setpts={}*PTS {}' 
 GET_DURATION_COMMAND = "ffprobe -v error -show_entries format=duration \
         -of default=noprint_wrappers=1:nokey=1 {}"
 SPLIT_COMMAND = "ffmpeg -i {} -vcodec copy -acodec copy -ss {} -t {} {}"
@@ -335,8 +335,37 @@ def change_speed(video_path, new_name, factor):
     p = subprocess.Popen(command.split(' '), stdout=subprocess.PIPE)
     p.wait()
     p.kill()
-    handle(new_name, factor)
+    clip_video(new_name, factor)
 
+def clip_video(video_path, factor):
+    command = GET_DURATION_COMMAND.format(video_path)
+    p = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+    out, err = p.communicate()
+    print(out)
+    out = int(float(out))
+    print(out)
+    if factor < 1:
+        end_time = "00:00:" + str(int(out*factor))
+        command = HALVE_COMMAND.format(video_path, "00:00:00", end_time, 'temp.mov') 
+        p = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+        p.wait()
+        p.kill()
+        os.remove(video_path)
+        os.rename('temp.mov', video_path)
+    
+    if out > 30:
+        dif = int((float(out)-30)/2)
+        start = str(dif)
+        if len(start) == 1:
+            start = "0" + start
+        start = "00:00:" + start
+        command = HALVE_COMMAND.format(video_path, start, "00:00:30", 'temp.mov') 
+        p = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+        p.wait()
+        p.kill()
+        os.remove(video_path)
+        os.rename('temp.mov', video_path)
+        
 def handle(video_path, factor):
     command = GET_DURATION_COMMAND.format(video_path)
     p = subprocess.Popen(command.split(), stdout=subprocess.PIPE)

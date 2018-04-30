@@ -78,7 +78,6 @@ if __name__ == "__main__":
 
     frame_df = pd.DataFrame(columns=["Subject", "Trial", "Path", "Heart Rate", "Respiratory Rate"])
 
-    fmt_dir = "S%04d"
     fmt_file = "Trial%d.MOV"
     
     imgs_captured = []
@@ -87,16 +86,15 @@ if __name__ == "__main__":
     
     i = 0
     for index, row in selects_df.iterrows(): 
-        
-        subject, trial = int(row['Subject']), int(row['Trial'])
-        
-        target_dir = os.path.join(movie_dir, fmt_dir % subject)
+        subject, trial = row['Subject'], int(row['Trial'])
+        fmt_dir = 'S' + subject.zfill(4)
+        target_dir = os.path.join(movie_dir, fmt_dir)
         target_file = fmt_file % trial
 
         target = os.path.join(target_dir, target_file)
         
-        data = metadf[metadf['SUBJECT'] == subject]
-
+        data = metadf[metadf['SUBJECT'] == str(subject)]
+        
         subj, t1_hrate, t1_resprate, t2_hrate, t2_resprate = [list(data[col])[0] for col in columns]
         
         if trial == 1:
@@ -112,5 +110,5 @@ if __name__ == "__main__":
         imgs_captured.extend(imgs)
         i += 1
     
-    frame_df.to_csv("subject_data.csv")
+    frame_df.to_csv("subject_data.csv", index=False)
     print("[*] Extracted %d images from %d different video files" % (len(imgs_captured), i + 1))
