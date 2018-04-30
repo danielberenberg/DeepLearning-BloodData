@@ -1,5 +1,5 @@
 from .data_load import train_test_split_with_csv_support, ttswcsv2, ttswcvs3, data_set_to_csv, data_set_from_csv
-from .models import C3D, CNN_LSTM, CNN_3D, CNN_3D_small, dumb
+from .models import C3D, CNN_LSTM, CNN_3D, CNN_3D_small, dumb, ResidualLSTM
 from .processing import FrameProcessor
 from keras import models
 from keras.callbacks import CSVLogger, ModelCheckpoint, Callback
@@ -181,6 +181,9 @@ class Engine():
         
         if self.model_type == "CNN_3D_small":
             return CNN_3D_small(self.input_shape, self.output_shape)
+        
+        if self.model_type == "ResidualLSTM":
+            return ResidualLSTM(self.input_shape, self.output_shape)
 
         if self.model_type == "dumb":
             return dumb(self.input_shape, self.output_shape)

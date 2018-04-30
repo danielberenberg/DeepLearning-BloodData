@@ -1,10 +1,10 @@
 #!/bin/sh
 
-python src/run_model.py CNN+LSTM rsz \
+python src/run_model.py ResidualLSTM rsz \
 --train \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/lrcn_3_gray \
+--output_dir run_history/test_lstm_res \
 --epochs 1 \
 --batch_size 12 \
 --width_shift_range 0.10 \
