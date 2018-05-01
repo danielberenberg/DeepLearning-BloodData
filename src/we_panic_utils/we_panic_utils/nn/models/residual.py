@@ -23,7 +23,9 @@ from keras.layers.normalization import BatchNormalization
 from keras.regularizers import l2
 from keras import backend as K
 
-from keras_resnet.blocks import time_distributed_bottleneck2d
+from keras_resnet.blocks import time_distributed_bottleneck_2d
+
+K.set_image_data_format('channels_last')
 
 def batchnorm_relu(input_lyrs, channel_axis=2):
     """
@@ -196,10 +198,12 @@ def make_residual_LSTM_layers(inputs, rnn_width, rnn_depth, rnn_dropout):
 
 
 def residualLSTMblock(inputs, rnn_width, filters, dropout=0.5, return_sequences=True, **kwargs):
-    
+ 
     x = inputs
-    x_rnn = LSTM(rnn_width, dropout=dropout, return_sequences=return_sequences)(x)
-    time_dist = time_distributed_bottleneck2d(filters, **kwargs)(x_rnn)
+    #x_rnn = LSTM(rnn_width, dropout=dropout, return_sequences=return_sequences)(x)
+    #fltn = TimeDistributed(Flatten())(x)
+    
+    time_dist = time_distributed_bottleneck_2d(filters, freeze_bn=False)(x)
     
     return add([x_rnn, time_dist])
     
