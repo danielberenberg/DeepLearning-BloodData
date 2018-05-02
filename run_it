@@ -8,12 +8,12 @@
 #--output_dir run_history/lrcn_4_color \
 #--epochs 50 \
 #=======
-python src/run_model.py ResidualLSTM rsz \
+screen python src/run_model.py CNN+LSTM rsz \
 --train \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/test_lstm_res \
---epochs 1 \
+--output_dir run_history/post_datachange_lstm \
+--epochs 50 \
 --batch_size 12 \
 --width_shift_range 0.10 \
 --height_shift_range 0.10 \
@@ -21,4 +21,5 @@ python src/run_model.py ResidualLSTM rsz \
 --shear_range 0 \
 --rotation_range 25 \
 --horizontal_flip \
---vertical_flip
+--vertical_flip \
+--greyscale_on

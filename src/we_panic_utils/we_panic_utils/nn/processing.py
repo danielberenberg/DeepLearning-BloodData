@@ -379,7 +379,7 @@ class FrameProcessor:
             current_hr = hr[i]
             frame_dir = os.listdir(current_path)
             #hard-code to 2 for now, because there are a lot of samples
-            for _ in range(self.batch_size//4):
+            for _ in range(2):
                 start = random.randint(0, len(frame_dir)-self.sequence_length)
                 frames = frame_dir[start:start+self.sequence_length]
                 frames = [os.path.join(current_path, frame) for frame in frames]

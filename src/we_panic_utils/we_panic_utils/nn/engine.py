@@ -1,5 +1,5 @@
 from .data_load import train_test_split_with_csv_support, ttswcsv2, ttswcvs3, data_set_to_csv, data_set_from_csv, create_train_test_split_dataframes
-from .models import C3D, CNN_LSTM, CNN_3D, CNN_3D_small, ResidualLSTM
+from .models import C3D, CNN_LSTM, CNN_3D, CNN_3D_small, CNN_Stacked_GRU, ResidualLSTM
 from .processing import FrameProcessor
 from keras import models
 from keras.callbacks import CSVLogger, ModelCheckpoint, Callback
@@ -80,7 +80,7 @@ class Engine():
             test_callback = TestResultsCallback(self.processor.testing_generator_v3(test_set), test_set, test_results_file, self.batch_size)
     
             model.fit_generator(generator=train_generator,
-                                steps_per_epoch=500,
+                                steps_per_epoch=400,
                                 epochs=self.epochs,
                                 verbose=1,
                                 callbacks=[csv_logger, checkpointer, test_callback],
@@ -177,6 +177,9 @@ class Engine():
         if self.model_type == "CNN_3D_small":
             return CNN_3D_small(self.input_shape, self.output_shape)
         
+        if self.model_type == "CNN_Stacked_GRU":
+            return CNN_Stacked_GRU(self.input_shape, self.output_shape)
+        
         if self.model_type == "ResidualLSTM":
             return ResidualLSTM(self.input_shape, self.output_shape)
 
@@ -207,7 +210,7 @@ class TestResultsCallback(Callback):
                     val = p[0]
                     log.write(str(subj) + ', ' + str(tri) + '| prediction=' + str(p) + ', actual=' + str(h) + '\n')
                     i+=1
-                    if i % self.batch_size//4 == 0:
+                    if i % 2 == 0:
                         s += 1
                     if s == len(subjects):
                         s = 0
