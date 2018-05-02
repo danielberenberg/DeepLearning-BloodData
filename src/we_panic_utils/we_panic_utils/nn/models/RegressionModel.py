@@ -320,6 +320,7 @@ def time_distributed_bottleneck_1d(filters, stage=0, block=0, kernel_size=3, num
 
     return f
 
+
 class ResidualLSTM(RegressionModel):
     def __init__(self, input_shape, output_shape):
         RegressionModel.__init__(self, input_shape, output_shape)
