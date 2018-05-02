@@ -1,6 +1,6 @@
 from keras.layers import Dense, Flatten, Dropout, ZeroPadding3D, Input, Reshape
 from keras.layers.merge import add
-from keras.layers.recurrent import LSTM
+from keras.layers.recurrent import LSTM, GRU
 from keras.models import Sequential, load_model
 from keras.optimizers import SGD, Adam, RMSprop
 from keras.layers.wrappers import TimeDistributed
@@ -110,6 +110,47 @@ class C3D(RegressionModel):
 
         return model
 
+
+
+class CNN_Stacked_GRU(RegressionModel):
+    def __init__(self, input_shape, output_shape):
+        RegressionModel.__init__(self, input_shape, output_shape)
+
+    def instantiate(self):
+        return super(CNN_Stacked_GRU, self).instantiate()
+
+    def get_model(self):
+        model = Sequential()
+        model.add(TimeDistributed(Conv2D(32,(7,7),strides=(2,2),activation='relu',padding='same'), input_shape=self.input_shape))
+        model.add(TimeDistributed(Conv2D(32,(3,3),kernel_initializer="he_normal",activation="relu")))
+        model.add(TimeDistributed(MaxPooling2D((2,2),strides=(2,2))))
+
+        model.add(TimeDistributed(Conv2D(64,(3,3),padding="same",activation="relu")))
+        model.add(TimeDistributed(Conv2D(64,(3,3),padding="same",activation="relu")))
+        model.add(TimeDistributed(MaxPooling2D((2,2),strides=(2,2))))
+
+        model.add(TimeDistributed(Conv2D(256,(3,3),padding="same",activation="relu")))
+        model.add(TimeDistributed(Conv2D(256,(3,3),padding="same",activation="relu")))
+        model.add(TimeDistributed(MaxPooling2D((2,2),strides=(2,2))))
+        
+        model.add(TimeDistributed(Conv2D(512, (3,3),
+            padding='same', activation='relu')))
+        model.add(TimeDistributed(Conv2D(512, (3,3),
+            padding='same', activation='relu')))
+        model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
+        model.add(TimeDistributed(Flatten()))
+
+        model.add(Dropout(0.5))
+        model.add(GRU(400, return_sequences=True, dropout=0.5)) 
+        model.add(GRU(400, return_sequences=False, dropout=0.5)) 
+        model.add(Dense(512, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(512, activation='relu'))
+        model.add(Dropout(0.5))
+
+        model.add(Dense(self.output_shape, activation='linear'))
+
+        return model
 
 class CNN_LSTM(RegressionModel):
     def __init__(self, input_shape, output_shape):

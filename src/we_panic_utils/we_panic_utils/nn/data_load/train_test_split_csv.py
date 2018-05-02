@@ -78,10 +78,70 @@ def generate_paths2labels(df, data_path):
 
     return filtered_paths
 
+def __choose_rand_test_set(all_subs, set_size):
+    """
+    Simple utility method that creates a subset of data to be used for testing.
+    Reduces the size of the dataset passed in.
+    """
+
+    testing_set = []
+    while len(testing_set) < set_size:
+        rand_index = random.randint(0, len(all_subs)-1)
+        testing_set.append(all_subs[rand_index])
+        all_subs.pop(rand_index)
+    return testing_set
+
+def __dataframe_from_subject_info(metadf, subjects):
+    """
+    Utility method that, given a list of subject-trial pairs, extracts those pairs from
+    an existing data frame, and returns a data frame containing those subject-trial pairs,
+    along with their accompanying augmentations.
+    """
+
+    dfs = []
+    for sub, trial in subjects:
+        dfs.append(metadf[(metadf['Subject'] == sub) & (metadf['Trial'] == trial)])
+        #extract augmented videos associated with this particular subject-trial pair.
+        dfs.append(metadf[metadf['Subject'].apply(lambda x: not x.isdigit() and int(x[-2:]) == int(sub)) 
+            & (metadf['Trial'] == trial)])
+    return pd.concat(dfs)
+
+def create_train_test_split_dataframes(data_path, metadata, output_dir,
+            test_split=0.2, val_split=0.15, verbose=True):
+    """
+    Description coming soon!
+    """
+
+    metadf = pd.read_csv(metadata)
+    metadf['Path'] = metadf.apply (lambda row: os.path.join(data_path, "S" + row["Subject"].zfill(4), 
+        "Trial%d_frames" % row["Trial"]), axis=1)
+    
+    real_subjects_df = metadf[metadf['Subject'].apply(lambda x: x.isdigit())]
+    
+    real_subs = list(zip(real_subjects_df['Subject'], real_subjects_df['Trial']))
+    num_test, num_val = int(len(real_subjects_df) * test_split), int(len(real_subjects_df) * val_split)
+    
+    test_subs = __choose_rand_test_set(real_subs, num_test)
+    val_subs = __choose_rand_test_set(real_subs, num_val)
+    train_subs = real_subs
+
+    test_df    = __dataframe_from_subject_info(metadf, test_subs)
+    val_df     = __dataframe_from_subject_info(metadf, val_subs)
+    train_df   = __dataframe_from_subject_info(metadf, train_subs)
+    assert len(test_df) + len(val_df) + len(train_df) == len(metadf)
+    base.check_exists_create_if_not(output_dir)
+    test_df.to_csv(os.path.join(output_dir, 'test.csv'), index=False)
+    val_df.to_csv(os.path.join(output_dir, 'val.csv'), index=False)
+    train_df.to_csv(os.path.join(output_dir, 'train.csv'), index=False)
+
+    return train_df, test_df, val_df
+
 def ttswcvs3(data_path, metadata, output_dir,
              test_split=0.2, val_split=0.2, verbose=True):
 
     """
+    DEPRECATED (use create_train_test_split_dataframes)
+
     Train test split with CSV support version 3.
     Currently no support for ignoring augmented data!
 
@@ -111,6 +171,8 @@ def ttswcsv2(data_path, metadata, output_dir,
              test_split=0.2, val_split=0.1,
              csvnames={'train': 'train.csv', 'val': 'val.csv', 'test': 'test.csv'}, verbose=True):
     """
+    DEPRECATED (use create_train_test_split_dataframes)
+
     Train Test Split With Csv Support Version 2
     perform a split on metadata into separate sets, ensure that no 1 subject
     spans across 2 sets
@@ -205,6 +267,8 @@ def train_test_split_with_csv_support(regular_data_path, filtered_csv, consolida
         augmented_data_path=None, ignore_augmented=[], test_split=0.2, val_split=0.1, train_csv_out="train.csv", 
         test_csv_out="test.csv", val_csv_out="val.csv", verbose=True): 
     """
+    EXTREMELY DEPRECATED (do not use this, use create_train_test_split_dataframes)
+
     Split all available data into train, test, and validation sets.
     This splitting method does not allow the same trial of the same subject to appear in more than one set,
     e.g., if s1 t1 appears in the training set, then any partition of s1 t1 cannot appear in

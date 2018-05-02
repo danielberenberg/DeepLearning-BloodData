@@ -1,5 +1,5 @@
-from .data_load import train_test_split_with_csv_support, ttswcsv2, ttswcvs3, data_set_to_csv, data_set_from_csv
-from .models import C3D, CNN_LSTM, CNN_3D, CNN_3D_small, dumb, ResidualLSTM
+from .data_load import train_test_split_with_csv_support, ttswcsv2, ttswcvs3, data_set_to_csv, data_set_from_csv, create_train_test_split_dataframes
+from .models import C3D, CNN_LSTM, CNN_3D, CNN_3D_small, ResidualLSTM
 from .processing import FrameProcessor
 from keras import models
 from keras.callbacks import CSVLogger, ModelCheckpoint, Callback
@@ -27,8 +27,6 @@ class Engine():
     """
     def __init__(self, 
                  data,
-                 #regular_data, 
-                 #augmented_data, 
                  model_type, 
                  filtered_csv, 
                  batch_size, 
@@ -43,12 +41,9 @@ class Engine():
                  input_shape=(60, 100, 100, 3), 
                  output_shape=1):
 
-        #self.regular_data = regular_data
-        #self.augmented_data = augmented_data
         self.data = data
         self.model_type = model_type
         self.metadata = filtered_csv
-        # self.partition_csv = partition_csv
         self.batch_size = batch_size
         self.epochs = epochs
         self.train = train
@@ -72,10 +67,7 @@ class Engine():
 
         if self.train and not self.load:
             print("Training the model.")
-            #train_set, test_set, val_set = ttswcvs3(self.data, self.metadata, self.outputs)
-            train_set = pd.read_csv(os.path.join(self.inputs, "train.csv"))
-            test_set = pd.read_csv(os.path.join(self.inputs, "test.csv"))
-            val_set = pd.read_csv(os.path.join(self.inputs, "val.csv"))
+            train_set, test_set, val_set = create_train_test_split_dataframes(self.data, self.metadata, self.outputs)
             
             train_generator = self.processor.train_generator_v3(train_set)
             val_generator = self.processor.testing_generator_v3(val_set)
@@ -88,7 +80,7 @@ class Engine():
             test_callback = TestResultsCallback(self.processor.testing_generator_v3(test_set), test_set, test_results_file, self.batch_size)
     
             model.fit_generator(generator=train_generator,
-                                steps_per_epoch=400,
+                                steps_per_epoch=500,
                                 epochs=self.epochs,
                                 verbose=1,
                                 callbacks=[csv_logger, checkpointer, test_callback],
@@ -188,9 +180,6 @@ class Engine():
         if self.model_type == "ResidualLSTM":
             return ResidualLSTM(self.input_shape, self.output_shape)
 
-        if self.model_type == "dumb":
-            return dumb(self.input_shape, self.output_shape)
-        
         raise ValueError("Model type does not exist: {}".format(self.model_type))
 
 class TestResultsCallback(Callback):
@@ -218,7 +207,7 @@ class TestResultsCallback(Callback):
                     val = p[0]
                     log.write(str(subj) + ', ' + str(tri) + '| prediction=' + str(p) + ', actual=' + str(h) + '\n')
                     i+=1
-                    if i % self.batch_size == 0:
+                    if i % self.batch_size//4 == 0:
                         s += 1
                     if s == len(subjects):
                         s = 0

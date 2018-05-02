@@ -8,8 +8,8 @@ import string
 import we_panic_utils.basic_utils.basics as base
 import we_panic_utils.basic_utils.video_core as vc
 
-UPPER_THRESHOLD = 230
-LOWER_THRESHOLD = 35
+UPPER_THRESHOLD = 235
+LOWER_THRESHOLD = 25
 
 if __name__ == "__main__":
     try:
@@ -20,7 +20,8 @@ if __name__ == "__main__":
         print("\tUsage: <data_dir> <master_csv> <selected_subjects.csv>")
     else:       
         #gives a list of values between 0.5 and 2 without 1
-        speed_changes = [round(x*0.1, 1) for x in range(5, 21) if x != 10]
+        #speed_changes = [round(x*0.1, 1) for x in range(5, 21) if x != 10]
+        speed_changes = [0.5, 0.6, 0.7, 0.8, 0.9, 1.2, 1.4, 1.6, 1.8, 2.0]
         mapping = {key : letter for key, letter in zip(speed_changes, string.ascii_lowercase)}
         
         selected_df = pd.read_csv(selected)
@@ -48,9 +49,9 @@ if __name__ == "__main__":
                 assert os.path.exists(subj_origin)
                 
                 for change in speed_changes:
-                    if heart_rate * change > UPPER_THRESHOLD or heart_rate * change < LOWER_THRESHOLD:
+                    if heart_rate * (1/change) > UPPER_THRESHOLD or heart_rate * (1/change) < LOWER_THRESHOLD:
                         log_str = "Not changing the speed of subject {} trial {} by factor of {}: resulting" \
-                                " heart rate would have been {}".format(subj, trial, change, heart_rate * change)
+                                " heart rate would have been {}".format(subj, trial, change, heart_rate * (1/change))
                         print(log_str)
                         aug_log.write(log_str + '\n')
                     else:
@@ -64,8 +65,8 @@ if __name__ == "__main__":
                         base.check_exists_create_if_not(os.path.join(data_dir, new_subj_path))
                         row[0] = new_subj
                         
-                        row[hr_index] = round(heart_rate * change, 1)
-                        row[rr_index] = (heart_rate * change) / 4
+                        row[hr_index] = round(heart_rate * (1/change), 1)
+                        row[rr_index] = (heart_rate * (1/change)) / 4
                         selected_df.loc[len(selected_df)] = [new_subj, trial]
 
                         vc.change_speed(subj_origin, subj_target, change)

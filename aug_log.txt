@@ -1,0 +1,1 @@
+Not changing the speed of subject 2 trial 2 by factor of 0.5: resulting heart rate would have been 256.0
