@@ -8,11 +8,11 @@
 #--output_dir run_history/lrcn_4_color \
 #--epochs 50 \
 #=======
-screen python src/run_model.py CNN+LSTM rsz \
+screen python src/run_model.py CNN_Stacked_GRU rsz \
 --train \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/post_datachange_lstm \
+--output_dir run_history/stacked_gru \
 --epochs 50 \
 --batch_size 12 \
 --width_shift_range 0.10 \
