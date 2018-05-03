@@ -395,7 +395,6 @@ class ResidualLSTM_v02(RegressionModel):
         x_rnn = add([x_rnn, x_rnn1])
         
         fltn = TimeDistributed(Flatten())(x_rnn)
-        #fltn = Flatten()(x_rnn)
         drp = Dropout(0.5)(fltn)
         final_lstm = LSTM(256, recurrent_dropout=0.5, dropout=0.5, padding='same', return_sequences=False)(drp)
         dense = Dense(512, activation='relu')(final_lstm)
