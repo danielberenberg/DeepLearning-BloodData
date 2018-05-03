@@ -1,5 +1,5 @@
 from .data_load import train_test_split_with_csv_support, ttswcsv2, ttswcvs3, data_set_to_csv, data_set_from_csv, create_train_test_split_dataframes
-from .models import C3D, CNN_LSTM, CNN_3D, CNN_3D_small, CNN_Stacked_GRU, ResidualLSTM
+from .models import C3D, CNN_LSTM, CNN_3D, CNN_3D_small, CNN_Stacked_GRU, ResidualLSTM_v01
 from .processing import FrameProcessor
 from keras import models
 from keras.callbacks import CSVLogger, ModelCheckpoint, Callback
@@ -87,32 +87,6 @@ class Engine():
                                 validation_data=val_generator,
                                 validation_steps=len(val_set), workers=4)
         
-        if self.train and self.load:
-            print("Resuming training of existing model.")
-            model.load_weights(os.path.join(self.inputs, "models", self.model_type + ".h5"))
-            
-            print(K.eval(model.optimizer.lr))            
-
-            train_set = pd.read_csv(os.path.join(self.inputs, "train.csv"))
-            test_set = pd.read_csv(os.path.join(self.inputs, "test.csv"))
-            val_set = pd.read_csv(os.path.join(self.inputs, "val.csv"))
-
-            train_generator = self.processor.train_generator_v3(train_set)
-            val_generator = self.processor.testing_generator_v3(val_set)
-            
-            csv_logger = CSVLogger(os.path.join(self.outputs, "training.log"))
-            checkpointer = ModelCheckpoint(filepath=os.path.join(self.outputs, 'models', self.model_type + '.h5'), 
-                                           verbose=1, 
-                                           save_best_only=True)
-            
-            model.fit_generator(generator=train_generator,
-                                steps_per_epoch=300,
-                                epochs=self.epochs,
-                                verbose=1,
-                                callbacks=[csv_logger, checkpointer],
-                                validation_data=val_generator,
-                                validation_steps=len(val_set), workers=4)
-
         if self.test:
 
             # if the test set doesn't exist yet, it means we are testing without training
@@ -180,8 +154,8 @@ class Engine():
         if self.model_type == "CNN_Stacked_GRU":
             return CNN_Stacked_GRU(self.input_shape, self.output_shape)
         
-        if self.model_type == "ResidualLSTM":
-            return ResidualLSTM(self.input_shape, self.output_shape)
+        if self.model_type == "ResidualLSTM_v01":
+            return ResidualLSTM_v01(self.input_shape, self.output_shape)
 
         raise ValueError("Model type does not exist: {}".format(self.model_type))
 

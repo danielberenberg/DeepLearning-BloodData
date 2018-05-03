@@ -26,24 +26,6 @@ class RegressionModel():
     def get_model(self):
         raise NotImplementedError 
 
-class dumb(RegressionModel):
-    def __init__(self, input_shape, output_shape):
-        RegressionModel.__init__(self, input_shape, output_shape)
-
-    def instantiate(self):
-        return super(dumb, self).instantiate()
-    
-    def get_model(self):
-        model = Sequential()
-        model.add(Conv3D(64, 3, 3, 3, activation='relu',
-                         border_mode='same', name='conv1',
-                         subsample=(1, 1, 1),
-                         input_shape=self.input_shape))
-        model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2),
-                               border_mode='valid', name='pool1'))
-        model.add(Dense(self.output_shape, activation='linear'))
-        return model
-
 class C3D(RegressionModel):
     def __init__(self, input_shape, output_shape):
         RegressionModel.__init__(self, input_shape, output_shape)
@@ -365,26 +347,29 @@ class ResidualLSTM_v01(RegressionModel):
     def get_model(self):
         
         inputs = Input(self.input_shape)
+
         conv1 = TimeDistributed(Conv2D(32, (7, 7),
                                 strides=(1, 1),
                                 activation='tanh',
-                                padding='same'),
-                                kernel_initalizer='he_normal')(inputs)
+                                padding='same',
+                                kernel_initializer='he_normal'))(inputs)
     
         conv2 = TimeDistributed(Conv2D(64, (3, 3),
+                                #padding='same',
                                 kernel_initializer='he_normal',
                                 activation="relu"))(conv1)
         
         conv3 = TimeDistributed(Conv2D(128, (1, 1),
+                                #padding='same',
                                 kernel_initializer='he_normal',
                                 activation='relu'))(conv2)
+        print(conv3.shape)
+        #pool1 = TimeDistributed(MaxPooling2D((2, 2), strides=(1, 1)))(conv3)
 
-        pool1 = TimeDistributed(MaxPooling2D((2, 2), strides=(1, 1)))(conv3)
-
-        residual_lstms = residualLSTMblock(pool1,
+        residual_lstms = residualLSTMblock(conv3,
                                            self.rnn_depth,
                                            self.rnn_width,
-                                           self.kernel_size)
+                                           self.rnn_kernel)
         
         dense1 = Dense(256, activation='relu')(residual_lstms)
 

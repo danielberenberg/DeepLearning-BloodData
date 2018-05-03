@@ -208,6 +208,7 @@ def residualLSTMblock(inputs, rnn_depth, filters, kernel_size, dropout=0.5, retu
                            kernel_size,
                            recurrent_dropout=dropout,
                            dropout=dropout,
+                           padding='same',
                            return_sequences=return_sequences)(x)
 
         return_sequences = i < rnn_depth - 1
