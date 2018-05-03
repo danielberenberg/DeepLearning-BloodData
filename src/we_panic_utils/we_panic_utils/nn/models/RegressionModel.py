@@ -1,17 +1,13 @@
 from keras.layers import Dense, Flatten, Dropout, ZeroPadding3D, Input, Reshape
-from keras.layers.merge import add
 from keras.layers.recurrent import LSTM, GRU
-from keras.models import Sequential, load_model
-from keras.optimizers import SGD, Adam, RMSprop
+from keras.models import Sequential  # load_model
+from keras.optimizers import Adam  # RMSprop, SGD
 from keras.layers.wrappers import TimeDistributed
 from keras.layers.convolutional import Conv2D, MaxPooling2D, Conv3D, MaxPooling3D
-from collections import deque
-import sys
 from keras.models import Model
 from .residual import residualLSTMblock
-import keras_resnet.models 
+import keras_resnet.models
 import keras
-
 
 class RegressionModel():
     
@@ -321,12 +317,12 @@ def time_distributed_bottleneck_1d(filters, stage=0, block=0, kernel_size=3, num
     return f
 
 
-class ResidualLSTM(RegressionModel):
+class ResidualLSTM_v00(RegressionModel):
     def __init__(self, input_shape, output_shape):
         RegressionModel.__init__(self, input_shape, output_shape)
 
     def instantiate(self):
-        return super(ResidualLSTM, self).instantiate()
+        return super(ResidualLSTM_v00, self).instantiate()
 
     def make_block(self, x, features, blocks, blk_fun=keras_resnet.blocks.time_distributed_bottleneck_2d):
         for stage_id, iterations in enumerate(blocks):
@@ -354,3 +350,44 @@ class ResidualLSTM(RegressionModel):
         x_rnn = LSTM(64, dropout=0.5, return_sequences=False)(resblock1)
         
         model = Model(outputs=x_rnn)
+        
+
+class ResidualLSTM_v01(RegressionModel):
+    def __init__(self, input_shape, output_shape):
+        RegressionModel.__init__(self, input_shape, output_shape)
+        self.rnn_depth = 6
+        self.rnn_width = 256
+        self.rnn_kernel = (3, 3)
+
+    def instantiate(self):
+        return super(ResidualLSTM_v01, self).instantiate()
+
+    def get_model(self):
+        
+        inputs = Input(self.input_shape)
+        conv1 = TimeDistributed(Conv2D(32, (7, 7),
+                                strides=(1, 1),
+                                activation='tanh',
+                                padding='same'),
+                                kernel_initalizer='he_normal')(inputs)
+    
+        conv2 = TimeDistributed(Conv2D(64, (3, 3),
+                                kernel_initializer='he_normal',
+                                activation="relu"))(conv1)
+
+        pool1 = TimeDistributed(MaxPooling2D((2, 2), strides=(1, 1)))(conv2)
+        
+
+        
+        residual_lstms = residualLSTMblock(pool1,
+                                           self.rnn_depth,
+                                           self.rnn_width,
+                                           self.kernel_size)
+        
+        dense1 = Dense(256, activation='relu')(residual_lstms)
+
+        outputs = Dense(self.output_shape, activation='relu')(dense1)
+                                            
+        model = Model(inputs=inputs, outputs=outputs)
+
+
