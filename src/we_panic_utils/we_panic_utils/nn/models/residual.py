@@ -225,7 +225,7 @@ def residualLSTMblock(inputs, rnn_depth, filters, kernel_size, dropout=0.5, retu
             def slice_last(x):
                 return x[..., -1, :]
 
-            x = add([Lambda(slice_last)(x), x_rnn])
+            x = add([Lambda(slice_last)(x), Lambda(slice_last)(x_rnn)])
 
     return x 
 
