@@ -318,8 +318,9 @@ class FrameProcessor:
             current += 1
             
             # print(selected_path) 
-            if current == len(sequence_paths):
-                current = 0
+            if current == len(sequence_paths):   
+                 current = 0
+            
             yield np.array(X), np.array(y)
 
     
@@ -389,6 +390,8 @@ class FrameProcessor:
             i+=1
             if i == len(test_df):
                 i = 0
+            
+            #print(np.array(X).shape, np.array(y).shape, " (test generator)")
             yield np.array(X), np.array(y)
             
     def train_generator_v3(self, train_df):
@@ -399,6 +402,7 @@ class FrameProcessor:
             for _ in range(self.batch_size):
                 rand_bucket = bucket_list[random.randint(0, len(bucket_list)-1)]
                 df = train_df[buckets(train_df, rand_bucket)]
+                #print(len(df))
                 rand_subj_index = random.randint(0, len(df)-1)
                 rand_subj_df = df[rand_subj_index:rand_subj_index+1]
  
@@ -440,7 +444,8 @@ class FrameProcessor:
 
                 X.append(sequence)
                 y.append(hr)
-
+            
+            print(np.array(X).shape, np.array(y).shape, " (train generator)")
             yield np.array(X), np.array(y)
 
     @threadsafe_generator    

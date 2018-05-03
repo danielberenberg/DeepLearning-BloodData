@@ -85,7 +85,7 @@ class Engine():
                                 verbose=1,
                                 callbacks=[csv_logger, checkpointer, test_callback],
                                 validation_data=val_generator,
-                                validation_steps=len(val_set), workers=4)
+                                validation_steps=len(val_set), workers=1)
         
         if self.test:
 

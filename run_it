@@ -18,7 +18,7 @@ python src/run_model.py ResidualLSTM_v01 rsz \
 --output_dir run_history/res_lstm_v01 \
 --input_dir run_history/res_lstm_v01 \
 --epochs 50 \
---batch_size 12 \
+--batch_size 6 \
 --width_shift_range 0.10 \
 --height_shift_range 0.10 \
 --zoom_range 0.10 \
