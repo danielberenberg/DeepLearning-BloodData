@@ -234,9 +234,9 @@ def process_img(frame, input_shape, greyscale_on=False):
     
     x = (img_arr / 255.).astype(np.float32)
 
-    #print(seq[0]) 
     if greyscale_on:
-        x = (0.21 * x[:,:,:1]) + (0.72 * x[:,:,1:2]) + (0.07 * x[:,:,-1:])
+        x = (0.21 * x[:, :, :1]) + (0.72 * x[:, :, 1:2]) + (0.07 * x[:, :, -1:])
+
     return x
 
 

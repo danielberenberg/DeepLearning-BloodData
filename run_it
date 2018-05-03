@@ -8,11 +8,15 @@
 #--output_dir run_history/lrcn_4_color \
 #--epochs 50 \
 #=======
-screen python src/run_model.py CNN+LSTM rsz \
+
+./update_code
+
+python src/run_model.py ResidualLSTM_v01 rsz \
 --train \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/post_datachange_lstm \
+--output_dir run_history/res_lstm_v01 \
+--input_dir run_history/res_lstm_v01 \
 --epochs 50 \
 --batch_size 12 \
 --width_shift_range 0.10 \

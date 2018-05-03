@@ -15,7 +15,7 @@ noteworthy citations:
 
 from __future__ import division
 from keras.models import Model
-from keras.layers import Input, Activation, Dense, Flatten, Lambda, LSTM
+from keras.layers import Input, Activation, Dense, Flatten, Lambda, LSTM, ConvLSTM2D
 from keras.layers.convolutional import Conv2D, MaxPooling2D, AveragePooling2D
 from keras.layers.merge import add
 from keras.layers.wrappers import TimeDistributed
@@ -197,14 +197,36 @@ def make_residual_LSTM_layers(inputs, rnn_width, rnn_depth, rnn_dropout):
     return x
 
 
-def residualLSTMblock(inputs, rnn_width, filters, dropout=0.5, return_sequences=True, **kwargs):
- 
+def residualLSTMblock(inputs, rnn_depth, filters, kernel_size, dropout=0.5, return_sequences=True):
+    """
+    see [7]
+    """
     x = inputs
-    #x_rnn = LSTM(rnn_width, dropout=dropout, return_sequences=return_sequences)(x)
-    #fltn = TimeDistributed(Flatten())(x)
-    
-    time_dist = time_distributed_bottleneck_2d(filters, freeze_bn=False)(x)
-    
-    return add([x_rnn, time_dist])
-    
+
+    for i in range(rnn_depth):
+        x_rnn = ConvLSTM2D(filters,
+                           kernel_size,
+                           recurrent_dropout=dropout,
+                           dropout=dropout,
+                           padding='same',
+                           return_sequences=return_sequences)(x)
+
+        return_sequences = i < rnn_depth - 1
+
+        if return_sequences:
+            if i > 0 or inputs.shape[-1] == filters:
+                x = add([x, x_rnn])
+
+            else:
+                x = x_rnn
+
+        else:
+
+            def slice_last(x):
+                return x[..., -1, :]
+
+            x = add([Lambda(slice_last)(x), x_rnn])
+
+    return x 
+
 
