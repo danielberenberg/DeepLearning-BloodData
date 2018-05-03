@@ -80,7 +80,7 @@ class Engine():
             test_callback = TestResultsCallback(self.processor.testing_generator_v3(test_set), test_set, test_results_file, self.batch_size)
     
             model.fit_generator(generator=train_generator,
-                                steps_per_epoch=400,
+                                steps_per_epoch=1000,
                                 epochs=self.epochs,
                                 verbose=1,
                                 callbacks=[csv_logger, checkpointer, test_callback],

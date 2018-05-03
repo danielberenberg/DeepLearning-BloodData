@@ -445,7 +445,7 @@ class FrameProcessor:
                 X.append(sequence)
                 y.append(hr)
             
-            print(np.array(X).shape, np.array(y).shape, " (train generator)")
+            #print(np.array(X).shape, np.array(y).shape, " (train generator)")
             yield np.array(X), np.array(y)
 
     @threadsafe_generator    
