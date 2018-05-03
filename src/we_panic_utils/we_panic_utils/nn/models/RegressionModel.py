@@ -356,3 +356,52 @@ class ResidualLSTM_v01(RegressionModel):
         model = Model(inputs=inputs, outputs=outputs)
 
         return model
+
+class ResidualLSTM_v02(RegressionModel):
+    def __init__(self, input_shape, output_shape):
+        RegressionModel.__init__(self, input_shape, output_shape)
+        self.rnn_depth = 6
+        self.rnn_width = 128
+        self.rnn_kernel = (3, 3)
+
+    def instantiate(self):
+        return super(ResidualLSTM_v02, self).instantiate()
+    
+        inputs = Input(self.input_shape) 
+        
+        x_rnn = ConvLSTM2D(32,
+                           (7,7),
+                           recurrent_dropout=0.5,
+                           dropout=0.5,
+                           padding='same',
+                           return_sequences=True)(pool1)
+        
+        x_rnn1 = ConvLSTM2D(64,
+                            (5,5),
+                            recurrent_dropout=0.5,
+                            dropout=0.5,
+                            padding='same',
+                            return_sequences=True)(x_rnn)
+
+        x_rnn = add([x_rnn, x_rnn1])
+                            
+        x_rnn1 = ConvLSTM2D(128,
+                            (3,3),
+                            recurrent_dropout=0.5,
+                            dropout=0.5,
+                            padding='same',
+                            return_sequences=True)(x_rnn)
+
+        x_rnn = add([x_rnn, x_rnn1])
+        
+        fltn = TimeDistributed(Flatten())(x_rnn)
+        #fltn = Flatten()(x_rnn)
+        drp = Dropout(0.5)(fltn)
+        final_lstm = LSTM(256, recurrent_dropout=0.5, dropout=0.5, padding='same', return_sequences=False)(drp)
+        dense = Dense(512, activation='relu')(final_lstm)
+        drp2 = Dropout(0.5)(dense)
+
+        outputs = Dense(self.output_shape, activation='linear')(drp2)
+
+        model = Model(inputs=inputs, outputs=outputs)
+        return model
