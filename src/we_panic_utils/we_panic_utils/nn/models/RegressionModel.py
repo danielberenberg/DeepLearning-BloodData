@@ -374,11 +374,13 @@ class ResidualLSTM_v01(RegressionModel):
         conv2 = TimeDistributed(Conv2D(64, (3, 3),
                                 kernel_initializer='he_normal',
                                 activation="relu"))(conv1)
-
-        pool1 = TimeDistributed(MaxPooling2D((2, 2), strides=(1, 1)))(conv2)
         
+        conv3 = TimeDistributed(Conv2D(128, (1, 1),
+                                kernel_initializer='he_normal',
+                                activation='relu'))(conv2)
 
-        
+        pool1 = TimeDistributed(MaxPooling2D((2, 2), strides=(1, 1)))(conv3)
+
         residual_lstms = residualLSTMblock(pool1,
                                            self.rnn_depth,
                                            self.rnn_width,
@@ -390,4 +392,4 @@ class ResidualLSTM_v01(RegressionModel):
                                             
         model = Model(inputs=inputs, outputs=outputs)
 
-
+        return model
