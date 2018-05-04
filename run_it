@@ -11,14 +11,15 @@
 
 ./update_code
 
-screen python src/run_model.py ResidualLSTM_v01 rsz \
+screen python src/run_model.py ResidualLSTM_v02 rsz \
 --train \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/res_lstm_v01 \
---input_dir run_history/res_lstm_v01 \
---epochs 50 \
---batch_size 2 \
+--output_dir run_history/res_lstm_v02 \
+--input_dir run_history/res_lstm_v02 \
+--epochs 300 \
+--steps_per_epoch 50 \
+--batch_size 10 \
 --width_shift_range 0.10 \
 --height_shift_range 0.10 \
 --zoom_range 0.10 \

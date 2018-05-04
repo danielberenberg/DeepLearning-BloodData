@@ -135,7 +135,11 @@ def parse_input():
                         help="convert images to greyscale at runtime",
                         default=False,
                         action="store_true")
-
+    
+    parser.add_argument("--steps_per_epoch",
+                        help="steps per epoch during training",
+                        default=100,
+                        type=int)
     return parser
 
 
@@ -372,7 +376,8 @@ if __name__ == "__main__":
                     outputs=outputs,
                     frameproc=fp,
                     ignore_augmented=args.ignore_augmented,
-                    input_shape=input_shape)
+                    input_shape=input_shape,
+                    steps_per_epoch=args.steps_per_epoch)
 
     print("starting ... ")
     start = time.time()

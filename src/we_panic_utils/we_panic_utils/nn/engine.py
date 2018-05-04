@@ -1,5 +1,5 @@
 from .data_load import train_test_split_with_csv_support, ttswcsv2, ttswcvs3, data_set_to_csv, data_set_from_csv, create_train_test_split_dataframes
-from .models import C3D, CNN_LSTM, CNN_3D, CNN_3D_small, CNN_Stacked_GRU, ResidualLSTM_v01
+from .models import C3D, CNN_LSTM, CNN_3D, CNN_3D_small, CNN_Stacked_GRU, ResidualLSTM_v01, ResidualLSTM_v02
 from .processing import FrameProcessor
 from keras import models
 from keras.callbacks import CSVLogger, ModelCheckpoint, Callback
@@ -37,6 +37,7 @@ class Engine():
                  inputs, 
                  outputs,
                  frameproc,
+                 steps_per_epoch=100,
                  ignore_augmented=[""], 
                  input_shape=(60, 100, 100, 3), 
                  output_shape=1):
@@ -55,6 +56,7 @@ class Engine():
         self.input_shape = input_shape
         self.output_shape = output_shape
         self.processor = frameproc
+        self.steps_per_epoch = steps_per_epoch
      
     def run2(self):
 
@@ -80,7 +82,7 @@ class Engine():
             test_callback = TestResultsCallback(self.processor.testing_generator_v3(test_set), test_set, test_results_file, self.batch_size)
     
             model.fit_generator(generator=train_generator,
-                                steps_per_epoch=1000,
+                                steps_per_epoch=self.steps_per_epoch,
                                 epochs=self.epochs,
                                 verbose=1,
                                 callbacks=[csv_logger, checkpointer, test_callback],
@@ -156,6 +158,9 @@ class Engine():
         
         if self.model_type == "ResidualLSTM_v01":
             return ResidualLSTM_v01(self.input_shape, self.output_shape)
+
+        if self.model_type == "ResidualLSTM_v02":
+            return ResidualLSTM_v02(self.input_shape, self.output_shape)
 
         raise ValueError("Model type does not exist: {}".format(self.model_type))
 

@@ -2,7 +2,7 @@ from keras.layers import Dense, Flatten, Dropout, ZeroPadding3D, Input, Reshape,
 from keras.layers.recurrent import LSTM, GRU
 from keras.layers.merge import add
 from keras.models import Sequential  # load_model
-from keras.optimizers import Adam  # RMSprop, SGD
+from keras.optimizers import Adam,  RMSprop, SGD
 from keras.layers.wrappers import TimeDistributed
 from keras.layers.convolutional import Conv2D, MaxPooling2D, Conv3D, MaxPooling3D
 from keras.models import Model
@@ -365,26 +365,34 @@ class ResidualLSTM_v02(RegressionModel):
         self.rnn_kernel = (3, 3)
 
     def instantiate(self):
-        return super(ResidualLSTM_v02, self).instantiate()
-    
+        model = self.get_model() 
+        optimizer = Adam(lr=1e-5, decay=1e-6)
+        metrics = ['mse']
+        model.compile(loss='mean_squared_error', optimizer=optimizer, metrics=metrics)
+        print(model.summary())
+        return model
+ 
+    def get_model(self): 
         inputs = Input(self.input_shape) 
-        
+        """ 
         x_rnn = ConvLSTM2D(32,
                            (7,7),
                            recurrent_dropout=0.5,
                            dropout=0.5,
                            padding='same',
-                           return_sequences=True)(pool1)
-        
+                           return_sequences=True)(inputs)
+
+        conv = TimeDistributed(Conv2D(64, (1,1), kernel_initializer='he_normal', activation='relu'))(x_rnn) 
         x_rnn1 = ConvLSTM2D(64,
                             (5,5),
                             recurrent_dropout=0.5,
                             dropout=0.5,
                             padding='same',
-                            return_sequences=True)(x_rnn)
+                            return_sequences=True)(conv)
 
-        x_rnn = add([x_rnn, x_rnn1])
-                            
+        x_rnn = add([x_rnn1, conv])
+        
+        conv2 = TimeDistributed(Conv2D(128, (1,1), kernel_initializer='he_normal', activation='relu'))(x_rnn)                    
         x_rnn1 = ConvLSTM2D(128,
                             (3,3),
                             recurrent_dropout=0.5,
@@ -392,15 +400,37 @@ class ResidualLSTM_v02(RegressionModel):
                             padding='same',
                             return_sequences=True)(x_rnn)
 
-        x_rnn = add([x_rnn, x_rnn1])
-        
-        fltn = TimeDistributed(Flatten())(x_rnn)
-        drp = Dropout(0.5)(fltn)
-        final_lstm = LSTM(256, recurrent_dropout=0.5, dropout=0.5, padding='same', return_sequences=False)(drp)
-        dense = Dense(512, activation='relu')(final_lstm)
-        drp2 = Dropout(0.5)(dense)
+        """
 
-        outputs = Dense(self.output_shape, activation='linear')(drp2)
+        inputs = Input(self.input_shape)
+        x = TimeDistributed(Conv2D(32,(7,7),strides=(2,2), kernel_initializer='he_normal', activation='relu',padding='same'))(inputs)
+        x = TimeDistributed(Conv2D(32,(3,3),kernel_initializer="he_normal",activation="relu"))(x)
+        x = TimeDistributed(MaxPooling2D((2,2),strides=(2,2)))(x)
+
+        x = TimeDistributed(Conv2D(64,(3,3),padding="same",activation="relu"))(x)
+        x = TimeDistributed(Conv2D(64,(3,3),padding="same",activation="relu"))(x)
+        x = TimeDistributed(MaxPooling2D((2,2),strides=(2,2)))(x)
+
+        x = TimeDistributed(Conv2D(256,(3,3),padding="same",activation="relu"))(x)
+        x = TimeDistributed(Conv2D(256,(3,3),padding="same",activation="relu"))(x)
+        x = TimeDistributed(MaxPooling2D((2,2),strides=(2,2)))(x) 
+        x = TimeDistributed(Conv2D(512, (3,3), padding='same', activation='relu'))(x)
+        x = TimeDistributed(Conv2D(512, (3,3), padding='same', activation='relu'))(x)
+        x = TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2)))(x)
+        x = TimeDistributed(Flatten())(x)
+
+        lstm1 = LSTM(512, return_sequences=True, dropout=0.5)(x)
+        lstm2 = LSTM(512, return_sequences=True, dropout=0.5)(lstm1)
+        
+        x = add([lstm1, lstm2])
+         
+        fltn = TimeDistributed(Flatten())(x)
+        drp = Dropout(0.5)(fltn)
+        final_lstm = LSTM(1024, recurrent_dropout=0.5, dropout=0.5, return_sequences=False)(drp)
+        dense = Dropout(0.5)(final_lstm)
+        dense = Dense(1024, activation='relu')(dense)
+        #dense = Dense(2048, activation='relu')(dense)
+        outputs = Dense(self.output_shape, activation='linear')(dense)
 
         model = Model(inputs=inputs, outputs=outputs)
         return model
