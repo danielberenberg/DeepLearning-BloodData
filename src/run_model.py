@@ -140,6 +140,10 @@ def parse_input():
                         help="steps per epoch during training",
                         default=100,
                         type=int)
+    
+    parser.add_argument("--cyclic_learning_rate",
+                        help="enable cyclic learning rate",
+                        nargs=2)
     return parser
 
 
@@ -363,6 +367,8 @@ if __name__ == "__main__":
     else:
         input_shape = (60, 100, 100, 3)
     print(input_shape)
+    cyclic_lr = [float(i) for i in args.cyclic_learning_rate]
+
     engine = Engine(data=regular,
                     #augmented_data=augmented,
                     model_type=args.model_type,
@@ -377,7 +383,8 @@ if __name__ == "__main__":
                     frameproc=fp,
                     ignore_augmented=args.ignore_augmented,
                     input_shape=input_shape,
-                    steps_per_epoch=args.steps_per_epoch)
+                    steps_per_epoch=args.steps_per_epoch,
+                    cyclic_lr=cyclic_lr)
 
     print("starting ... ")
     start = time.time()

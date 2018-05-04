@@ -366,7 +366,8 @@ class ResidualLSTM_v02(RegressionModel):
 
     def instantiate(self):
         model = self.get_model() 
-        optimizer = Adam(lr=1e-5, decay=1e-6)
+        optimizer = SGD(lr=1e-5, decay=1e-8, momentum=0.9)
+        
         metrics = ['mse']
         model.compile(loss='mean_squared_error', optimizer=optimizer, metrics=metrics)
         print(model.summary())

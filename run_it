@@ -15,11 +15,12 @@ screen python src/run_model.py ResidualLSTM_v02 rsz \
 --train \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/res_lstm_v02 \
---input_dir run_history/res_lstm_v02 \
+--output_dir run_history/res_lstm_v02_cylic_lr \
+--input_dir run_history/res_lstm_v02_cyclic_lr \
 --epochs 300 \
 --steps_per_epoch 50 \
 --batch_size 10 \
+--cyclic_learning_rate 0.00001 0.00006 \
 --width_shift_range 0.10 \
 --height_shift_range 0.10 \
 --zoom_range 0.10 \

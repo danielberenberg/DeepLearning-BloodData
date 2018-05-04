@@ -1,5 +1,6 @@
 from .data_load import train_test_split_with_csv_support, ttswcsv2, ttswcvs3, data_set_to_csv, data_set_from_csv, create_train_test_split_dataframes
 from .models import C3D, CNN_LSTM, CNN_3D, CNN_3D_small, CNN_Stacked_GRU, ResidualLSTM_v01, ResidualLSTM_v02
+from .models.cyclic import CyclicLR
 from .processing import FrameProcessor
 from keras import models
 from keras.callbacks import CSVLogger, ModelCheckpoint, Callback
@@ -39,7 +40,8 @@ class Engine():
                  frameproc,
                  steps_per_epoch=100,
                  ignore_augmented=[""], 
-                 input_shape=(60, 100, 100, 3), 
+                 input_shape=(60, 100, 100, 3),
+                 cyclic_lr=[], 
                  output_shape=1):
 
         self.data = data
@@ -57,7 +59,8 @@ class Engine():
         self.output_shape = output_shape
         self.processor = frameproc
         self.steps_per_epoch = steps_per_epoch
-     
+        self.cyclic_lr = cyclic_lr
+ 
     def run2(self):
 
         """
@@ -78,14 +81,25 @@ class Engine():
             checkpointer = ModelCheckpoint(filepath=os.path.join(self.outputs, 'models', self.model_type + '.h5'), 
                                            verbose=1, 
                                            save_best_only=True)
+
+                
             test_results_file = os.path.join(self.outputs, "test_results.log")
             test_callback = TestResultsCallback(self.processor.testing_generator_v3(test_set), test_set, test_results_file, self.batch_size)
-    
+            
+            callbacks = [csv_logger, checkpointer, test_callback]    
+             
+            if self.cyclic_lr != []:
+                base, mx = self.cyclic_lr
+
+                cyclic_lr = CyclicLR(base_lr=base, max_lr=mx, step_size=self.steps_per_epoch * 4)
+                
+                callbacks.append(cyclic_lr)
+
             model.fit_generator(generator=train_generator,
                                 steps_per_epoch=self.steps_per_epoch,
                                 epochs=self.epochs,
                                 verbose=1,
-                                callbacks=[csv_logger, checkpointer, test_callback],
+                                callbacks=callbacks,
                                 validation_data=val_generator,
                                 validation_steps=len(val_set), workers=4)
         
