@@ -8,24 +8,23 @@
 #--output_dir run_history/lrcn_4_color \
 #--epochs 50 \
 #=======
+# --zoom_range 0.10 \
+# --shear_range 0 \
+#--width_shift_range 0.10 \
+#--height_shift_range 0.10 \
+#--rotation_range 25 \
+#--cyclic_learning_rate 0.00001 0.00009 \
+#--horizontal_flip \
+#--vertical_flip \
 
 ./update_code
 
-screen python src/run_model.py ResidualLSTM_v02 rsz \
---train \
+python src/run_model.py ResidualLSTM_v02 rsz \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/res_lstm_v02_cylic_lr \
---input_dir run_history/res_lstm_v02_cyclic_lr \
---epochs 300 \
---steps_per_epoch 50 \
+--output_dir run_history/res_lstm_v02_batchnorm_sparseaug \
+--input_dir run_history/res_lstm_v02_batchnorm_sparseaug \
+--epochs 400 \
+--steps_per_epoch 75 \
 --batch_size 10 \
---cyclic_learning_rate 0.00001 0.00006 \
---width_shift_range 0.10 \
---height_shift_range 0.10 \
---zoom_range 0.10 \
---shear_range 0 \
---rotation_range 25 \
---horizontal_flip \
---vertical_flip \
 --greyscale_on

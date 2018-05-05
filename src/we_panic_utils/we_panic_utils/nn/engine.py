@@ -91,7 +91,7 @@ class Engine():
             if self.cyclic_lr != []:
                 base, mx = self.cyclic_lr
 
-                cyclic_lr = CyclicLR(base_lr=base, max_lr=mx, step_size=self.steps_per_epoch * 4)
+                cyclic_lr = CyclicLR(base_lr=base, max_lr=mx, step_size=self.steps_per_epoch * 2)
                 
                 callbacks.append(cyclic_lr)
 

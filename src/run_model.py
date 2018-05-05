@@ -143,7 +143,8 @@ def parse_input():
     
     parser.add_argument("--cyclic_learning_rate",
                         help="enable cyclic learning rate",
-                        nargs=2)
+                        nargs=2,
+                        default=[])
     return parser
 
 
