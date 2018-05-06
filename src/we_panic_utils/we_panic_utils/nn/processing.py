@@ -280,7 +280,7 @@ class FrameProcessor:
         self.greyscale_on = greyscale_on 
         self.sequence_length = sequence_length
         self.batch_size = batch_size
-        
+
         assert type(self.rotation_range) == int, "rotation_range should be integer valued"
 
         assert type(self.width_shift_range) == float, "width_shift_range should be a float"
@@ -371,6 +371,7 @@ class FrameProcessor:
 
             yield np.array(X), np.array(y)
 
+    @threadsafe_generator    
     def testing_generator_v3(self, test_df):
         paths, hr = list(test_df["Path"]), list(test_df["Heart Rate"])
         i = 0
@@ -393,7 +394,110 @@ class FrameProcessor:
             
             #print(np.array(X).shape, np.array(y).shape, " (test generator)")
             yield np.array(X), np.array(y)
+           
+    @threadsafe_generator    
+    def test_generator_optical_flow(self, test_df):
+        paths, hr = list(test_df["Path"]), list(test_df["Heart Rate"])
+        i = 0
+        self.greyscale_on = False
+
+        while True:
+            X, y = [], []
+            current_path = paths[i]
+            current_hr = hr[i]
+            frame_hor_dir = os.listdir(os.path.join(current_path, 'flow_h'))
+            frame_ver_dir = os.listdir(os.path.join(current_path, 'flow_v'))
+            #hard-code to 2 for now, because there are a lot of samples
+            for _ in range(2):
+                start = random.randint(0, len(frame_hor_dir)-self.sequence_length)
+                frames_hor = frame_hor_dir[start:start+self.sequence_length]
+                frames_hor = [os.path.join(current_path, frame) for frame in frames_hor]
+                frames_ver = frame_ver_dir[start:start+self.sequence_length]
+                frames_ver = [os.path.join(current_path, frame) for frame in frames_ver]
+
+                sequence_hor = build_image_sequence(frames_hor, greyscale_on=self.greyscale_on)
+                sequence_ver = build_image_sequence(frames_ver, greyscale_on=self.greyscale_on)
+                
+                #flowX = np.dstack(sequence_hor)
+                #flowY = np.dstack(sequence_ver)
+                X.append(np.concatenate([sequence_hor, sequence_ver], axis=3))
+                y.append(current_hr)
+                
+
+            i+=1
+            if i == len(test_df):
+                i = 0
             
+            #print(np.array(X).shape, np.array(y).shape, " (test generator)")
+            yield np.array(X), np.array(y)
+
+    @threadsafe_generator    
+    def train_generator_optical_flow(self, train_df):
+        bucket_list = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]
+        self.greyscale_on = False
+
+        while True:
+            X, y = [], []
+            for _ in range(self.batch_size):
+                
+                rand_bucket = bucket_list[random.randint(0, len(bucket_list)-1)]
+                df = train_df[buckets(train_df, rand_bucket)]
+                rand_subj_index = random.randint(0, len(df)-1)
+                rand_subj_df = df[rand_subj_index:rand_subj_index+1]
+
+                path = list(rand_subj_df["Path"])[0]
+                hr = list(rand_subj_df["Heart Rate"])[0]
+                
+                frame_hor_dir = os.listdir(os.path.join(path,'flow_h'))
+                frame_ver_dir = os.listdir(os.path.join(path,'flow_v'))
+
+                start = random.randint(0, len(frame_hor_dir)-self.sequence_length)
+                frames_hor = frame_hor_dir[start:start+self.sequence_length]
+                frames_hor = [os.path.join(path, frame) for frame in frames_hor]
+                frames_ver = frame_ver_dir[start:start+self.sequence_length]
+                frames_ver = [os.path.join(path, frame) for frame in frames_ver]
+
+                sequence_hor = build_image_sequence(frames_hor, greyscale_on=self.greyscale_on)
+                sequence_ver = build_image_sequence(frames_ver, greyscale_on=self.greyscale_on)
+
+                # now we want to apply the augmentation
+                if self.rotation_range > 0.0:
+                    sequence_hor = random_sequence_rotation(sequence_hor, self.rotation_range)
+                    sequence_ver = random_sequence_rotation(sequence_ver, self.rotation_range)
+
+                if self.width_shift_range > 0.0 or self.height_shift_range > 0.0:
+                    sequence_hor = random_sequence_shift(sequence_hor, self.width_shift_range, self.height_shift_range)
+                    sequence_ver = random_sequence_shift(sequence_ver, self.width_shift_range, self.height_shift_range)
+
+                if self.shear_range > 0.0:
+                    sequence_hor = random_sequence_shear(sequence_hor, self.shear_range)
+                    sequence_ver = random_sequence_shear(sequence_ver, self.shear_range)
+
+                if self.zoom_range > 0.0:
+                    sequence_hor = random_sequence_zoom(sequence_hor, self.zoom_range)
+                    sequence_ver = random_sequence_zoom(sequence_ver, self.zoom_range)
+
+                if self.vertical_flip:
+                    # with probability 0.5, flip vertical axis
+                    coin_flip = np.random.random_sample() > 0.5
+                    if coin_flip:
+                        sequence_hor = sequence_flip_axis(sequence_hor, 1)   # flip on the row axis
+                        sequence_ver = sequence_flip_axis(sequence_ver, 1)   # flip on the row axis
+
+                if self.horizontal_flip:
+                    # with probability 0.5, flip horizontal axis (cols)
+                    coin_flip - np.random.random_sample() > 0.5
+
+                    if coin_flip:
+                        sequence_hor = sequence_flip_axis(sequence_hor, 2)   # flip on the column axis
+                        sequence_ver = sequence_flip_axis(sequence_ver, 2)   # flip on the column axis
+
+                X.append(np.concatenate([sequence_hor, sequence_ver], axis=3))
+                y.append(hr)
+            
+            #print(np.array(X).shape, np.array(y).shape, " (train generator)")
+            yield np.array(X), np.array(y)
+
     def train_generator_v3(self, train_df):
         bucket_list = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]
         while True:

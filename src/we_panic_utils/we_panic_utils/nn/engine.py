@@ -1,5 +1,5 @@
 from .data_load import train_test_split_with_csv_support, ttswcsv2, ttswcvs3, data_set_to_csv, data_set_from_csv, create_train_test_split_dataframes
-from .models import C3D, CNN_LSTM, CNN_3D, CNN_3D_small, CNN_Stacked_GRU, ResidualLSTM_v01, ResidualLSTM_v02
+from .models import C3D, CNN_LSTM, CNN_3D, CNN_3D_small, CNN_Stacked_GRU, ResidualLSTM_v01, ResidualLSTM_v02, OpticalFlowCNN
 from .models.cyclic import CyclicLR
 from .processing import FrameProcessor
 from keras import models
@@ -60,7 +60,10 @@ class Engine():
         self.processor = frameproc
         self.steps_per_epoch = steps_per_epoch
         self.cyclic_lr = cyclic_lr
- 
+        
+        self.optical_flow_models = ["OpticalFlowCNN"]
+
+        
     def run2(self):
 
         """
@@ -74,8 +77,17 @@ class Engine():
             print("Training the model.")
             train_set, test_set, val_set = create_train_test_split_dataframes(self.data, self.metadata, self.outputs)
             
-            train_generator = self.processor.train_generator_v3(train_set)
-            val_generator = self.processor.testing_generator_v3(val_set)
+            if not (self.model_type in self.optical_flow_models):
+                
+                train_generator = self.processor.train_generator_v3(train_set)
+                val_generator = self.processor.testing_generator_v3(val_set)
+                test_generator = self.processor.testing_generator_v3(test_set)
+
+            else:
+                train_generator = self.processor.train_generator_optical_flow(train_set)
+                val_generator = self.processor.test_generator_optical_flow(test_set)
+                test_generator = self.processor.testing_generator_optical_flow(test_set)
+
 
             csv_logger = CSVLogger(os.path.join(self.outputs, "training.log"))
             checkpointer = ModelCheckpoint(filepath=os.path.join(self.outputs, 'models', self.model_type + '.h5'), 
@@ -84,7 +96,7 @@ class Engine():
 
                 
             test_results_file = os.path.join(self.outputs, "test_results.log")
-            test_callback = TestResultsCallback(self.processor.testing_generator_v3(test_set), test_set, test_results_file, self.batch_size)
+            test_callback = TestResultsCallback(test_generator, test_set, test_results_file, self.batch_size)
             
             callbacks = [csv_logger, checkpointer, test_callback]    
              
@@ -126,7 +138,6 @@ class Engine():
                 
                 test_set = pd.read_csv(test_dir)
 
-                test_generator = self.processor.testing_generator_v3(test_set)
                 loss = model.evaluate_generator(test_generator, len(test_set))
                 
                 pred = model.predict_generator(test_generator, len(test_set))
@@ -140,7 +151,6 @@ class Engine():
             # otherwise, we can use the existing test set that was generated during the training phase
             else:
                 print("Testing model after training.")
-                test_generator = self.processor.testing_generator_v3(test_set)
                 loss = model.evaluate_generator(test_generator, len(test_set))
                 pred = model.predict_generator(test_generator, len(test_set))
                 
@@ -175,6 +185,9 @@ class Engine():
 
         if self.model_type == "ResidualLSTM_v02":
             return ResidualLSTM_v02(self.input_shape, self.output_shape)
+        
+        if self.model_type == "OpticalFlowCNN":
+            return OpticalFlowCNN((self.batch_size, 100, 100, 60, 2), self.output_shape)
 
         raise ValueError("Model type does not exist: {}".format(self.model_type))
 
@@ -200,7 +213,7 @@ class TestResultsCallback(Callback):
                     subj = subjects[s]
                     tri = trial[s]
                     h = hr[s]
-                    val = p[0]
+                    #val = p[0]
                     log.write(str(subj) + ', ' + str(tri) + '| prediction=' + str(p) + ', actual=' + str(h) + '\n')
                     i+=1
                     if i % 2 == 0:

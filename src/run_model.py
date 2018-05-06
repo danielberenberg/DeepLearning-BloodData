@@ -145,6 +145,7 @@ def parse_input():
                         help="enable cyclic learning rate",
                         nargs=2,
                         default=[])
+
     return parser
 
 
