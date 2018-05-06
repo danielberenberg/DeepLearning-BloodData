@@ -280,6 +280,7 @@ class FrameProcessor:
         self.greyscale_on = greyscale_on 
         self.sequence_length = sequence_length
         self.batch_size = batch_size
+        self.test_iter = 0
 
         assert type(self.rotation_range) == int, "rotation_range should be integer valued"
 
@@ -399,7 +400,7 @@ class FrameProcessor:
     def test_generator_optical_flow(self, test_df):
         paths, hr = list(test_df["Path"]), list(test_df["Heart Rate"])
         i = 0
-        self.greyscale_on = False
+        self.greyscale_on = True
 
         while True:
             X, y = [], []
@@ -423,18 +424,17 @@ class FrameProcessor:
                 X.append(np.concatenate([sequence_hor, sequence_ver], axis=3))
                 y.append(current_hr)
                 
-
             i+=1
             if i == len(test_df):
                 i = 0
-            
+            self.test_iter = i
+ 
             #print(np.array(X).shape, np.array(y).shape, " (test generator)")
             yield np.array(X), np.array(y)
 
     @threadsafe_generator    
     def train_generator_optical_flow(self, train_df):
         bucket_list = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]
-        self.greyscale_on = False
 
         while True:
             X, y = [], []

@@ -17,14 +17,15 @@
 #--horizontal_flip \
 #--vertical_flip \
 
-./update_code
+pip install --upgrade src/we_panic_utils/
 
-python src/run_model.py ResidualLSTM_v02 rsz \
+screen python src/run_model.py OpticalFlowCNN rsz \
+--train \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/res_lstm_v02_batchnorm_sparseaug \
---input_dir run_history/res_lstm_v02_batchnorm_sparseaug \
---epochs 400 \
---steps_per_epoch 75 \
---batch_size 10 \
+--output_dir run_history/optflow_test \
+--input_dir run_history/optflow_test \
+--epochs 100 \
+--steps_per_epoch 400 \
+--batch_size 4 \
 --greyscale_on

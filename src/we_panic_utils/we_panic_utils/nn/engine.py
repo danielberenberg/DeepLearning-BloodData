@@ -86,7 +86,7 @@ class Engine():
             else:
                 train_generator = self.processor.train_generator_optical_flow(train_set)
                 val_generator = self.processor.test_generator_optical_flow(test_set)
-                test_generator = self.processor.testing_generator_optical_flow(test_set)
+                test_generator = self.processor.test_generator_optical_flow(test_set)
 
 
             csv_logger = CSVLogger(os.path.join(self.outputs, "training.log"))
@@ -96,7 +96,7 @@ class Engine():
 
                 
             test_results_file = os.path.join(self.outputs, "test_results.log")
-            test_callback = TestResultsCallback(test_generator, test_set, test_results_file, self.batch_size)
+            test_callback = TestResultsCallback(self.processor, test_set, test_results_file, self.batch_size)
             
             callbacks = [csv_logger, checkpointer, test_callback]    
              
@@ -187,7 +187,7 @@ class Engine():
             return ResidualLSTM_v02(self.input_shape, self.output_shape)
         
         if self.model_type == "OpticalFlowCNN":
-            return OpticalFlowCNN((self.batch_size, 100, 100, 60, 2), self.output_shape)
+            return OpticalFlowCNN((60, 100, 100, 2), self.output_shape)
 
         raise ValueError("Model type does not exist: {}".format(self.model_type))
 
@@ -202,12 +202,13 @@ class TestResultsCallback(Callback):
         if (epoch+1) % 5 == 0:
             print('Logging tests at epoch', epoch)
             with open(self.log_file, 'a') as log:
-                pred = self.model.predict_generator(self.test_gen, len(self.test_set))
+                pred = self.model.predict_generator(self.test_gen.test_generator_optical_flow(self.test_set), len(self.test_set))
                 subjects = list(self.test_set['Subject'])
                 trial = list(self.test_set['Trial'])
                 hr = list(self.test_set['Heart Rate'])
                 i = 0
                 s = 0
+                print(self.test_gen.test_iter)
                 log.write("Epoch: " + str(epoch+1) + '\n')
                 for p in pred:
                     subj = subjects[s]
