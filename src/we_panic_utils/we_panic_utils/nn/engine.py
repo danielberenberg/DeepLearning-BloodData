@@ -233,7 +233,7 @@ class TestResultsCallback(Callback):
         self.gen_type = gen_type
 
     def on_epoch_end(self, epoch, logs):
-        if (epoch+1) % 1 == 0:
+        if (epoch+1) % 5 == 0:
             print('Logging tests at epoch', epoch)
             with open(self.log_file, 'a') as log:
                 gen = None

@@ -7,6 +7,7 @@ from ..basic_utils.video_core import optical_flow_of_first_and_rest
 import threading 
 import os
 import random
+random.seed(7)
 import numpy as np
 
 from keras.preprocessing.image import load_img, img_to_array

@@ -6,6 +6,7 @@ import os
 import sys
 import pandas as pd
 import random
+random.seed(7)
 import numpy as np
 
 """
