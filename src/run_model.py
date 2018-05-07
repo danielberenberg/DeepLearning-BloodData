@@ -146,6 +146,10 @@ def parse_input():
                         nargs=2,
                         default=[])
 
+    parser.add_argument("--alt_opt_flow",
+                        help="use alternative optical flow method",
+                        default=False,
+                        action="store_true")
     return parser
 
 
@@ -172,6 +176,7 @@ def summarize_arguments(args):
     print(formatter % ("batch_size", args.batch_size))
     print(formatter % ("epochs", args.epochs)) 
     print(formatter % ("greyscale_on", args.greyscale_on)) 
+    print(formatter % ("alt_opt_flow", args.alt_opt_flow)) 
 
 class ArgumentError(Exception):
     """
@@ -386,7 +391,8 @@ if __name__ == "__main__":
                     ignore_augmented=args.ignore_augmented,
                     input_shape=input_shape,
                     steps_per_epoch=args.steps_per_epoch,
-                    cyclic_lr=cyclic_lr)
+                    cyclic_lr=cyclic_lr,
+                    alt_opt_flow=args.alt_opt_flow)
 
     print("starting ... ")
     start = time.time()

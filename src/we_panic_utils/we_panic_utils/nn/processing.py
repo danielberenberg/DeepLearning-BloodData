@@ -3,7 +3,7 @@ A module for processing frames as a sequence
 """
 
 from .data_load import buckets
-
+from ..basic_utils.video_core import optical_flow_of_first_and_rest
 import threading 
 import os
 import random
@@ -217,6 +217,11 @@ def build_image_sequence(frames, input_shape=(100, 100, 3), greyscale_on=False):
     return [process_img(frame, input_shape, greyscale_on=greyscale_on) for frame in frames]
 
 
+def just_greyscale(arr):
+    x = (arr / 255.).astype(np.float32)
+    x = (0.21 * x[:, :, :1]) + (0.72 * x[:, :, 1:2]) + (0.07 * x[:, :, -1:])
+    return x
+
 def process_img(frame, input_shape, greyscale_on=False):
     """
     load up an image as a numpy array
@@ -236,7 +241,6 @@ def process_img(frame, input_shape, greyscale_on=False):
 
     if greyscale_on:
         x = (0.21 * x[:, :, :1]) + (0.72 * x[:, :, 1:2]) + (0.07 * x[:, :, -1:])
-
     return x
 
 
@@ -380,7 +384,7 @@ class FrameProcessor:
             X, y = [], []
             current_path = paths[i]
             current_hr = hr[i]
-            frame_dir = os.listdir(current_path)
+            frame_dir = sorted(os.listdir(current_path))
             #hard-code to 2 for now, because there are a lot of samples
             for _ in range(2):
                 start = random.randint(0, len(frame_dir)-self.sequence_length)
@@ -395,7 +399,109 @@ class FrameProcessor:
             
             #print(np.array(X).shape, np.array(y).shape, " (test generator)")
             yield np.array(X), np.array(y)
-           
+
+
+    @threadsafe_generator    
+    def test_generator_alt_optical_flow(self, test_df):
+        paths, hr = list(test_df["Path"]), list(test_df["Heart Rate"])
+        i = 0
+        self.greyscale_on = True
+
+        while True:
+            X, y = [], []
+            current_path = paths[i]
+            current_hr = hr[i]
+            #hard-code to 2 for now, because there are a lot of samples
+            for _ in range(2):
+
+                all_frames = sorted(os.listdir(current_path))
+                start = random.randint(0, len(all_frames)-self.sequence_length-1)
+                frames = all_frames[start:start+self.sequence_length+1]
+                frames = [os.path.join(current_path, frame) for frame in frames]
+                
+                flows_x, flows_y = optical_flow_of_first_and_rest(frames)
+                sequence_hor = np.array(flows_x)
+                sequence_ver = np.array(flows_y)
+
+                sequence_hor = np.expand_dims(np.array(flows_x), axis=3)
+                sequence_ver = np.expand_dims(np.array(flows_y), axis=3)
+                
+                X.append(np.concatenate([sequence_hor, sequence_ver], axis=3))
+                y.append(current_hr)
+                
+            i+=1
+            if i == len(test_df):
+                i = 0
+            self.test_iter = i
+ 
+            #print(np.array(X).shape, np.array(y).shape, " (test generator)")
+            yield np.array(X), np.array(y)
+
+    @threadsafe_generator    
+    def train_generator_alt_optical_flow(self, train_df):
+        bucket_list = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]
+
+        while True:
+            X, y = [], []
+            for _ in range(self.batch_size):
+                
+                rand_bucket = bucket_list[random.randint(0, len(bucket_list)-1)]
+                df = train_df[buckets(train_df, rand_bucket)]
+                rand_subj_index = random.randint(0, len(df)-1)
+                rand_subj_df = df[rand_subj_index:rand_subj_index+1]
+
+                path = list(rand_subj_df["Path"])[0]
+                hr = list(rand_subj_df["Heart Rate"])[0]
+                all_frames = sorted(os.listdir(path))
+                start = random.randint(0, len(all_frames)-self.sequence_length-1)
+                frames = all_frames[start:start+self.sequence_length+1]
+                frames = [os.path.join(path, frame) for frame in frames]
+                flows_x, flows_y = optical_flow_of_first_and_rest(frames)
+                sequence_hor = np.expand_dims(np.array(flows_x), axis=3)
+                sequence_ver = np.expand_dims(np.array(flows_y), axis=3)
+                            
+                #sequence_hor = np.array([just_greyscale(hor) for hor in flows_x])
+                #sequence_ver = np.array([just_greyscale(ver) for ver in flows_y])
+
+                # now we want to apply the augmentation
+                if self.rotation_range > 0.0:
+                    sequence_hor = random_sequence_rotation(sequence_hor, self.rotation_range)
+                    sequence_ver = random_sequence_rotation(sequence_ver, self.rotation_range)
+
+                if self.width_shift_range > 0.0 or self.height_shift_range > 0.0:
+                    sequence_hor = random_sequence_shift(sequence_hor, self.width_shift_range, self.height_shift_range)
+                    sequence_ver = random_sequence_shift(sequence_ver, self.width_shift_range, self.height_shift_range)
+
+                if self.shear_range > 0.0:
+                    sequence_hor = random_sequence_shear(sequence_hor, self.shear_range)
+                    sequence_ver = random_sequence_shear(sequence_ver, self.shear_range)
+
+                if self.zoom_range > 0.0:
+                    sequence_hor = random_sequence_zoom(sequence_hor, self.zoom_range)
+                    sequence_ver = random_sequence_zoom(sequence_ver, self.zoom_range)
+
+                if self.vertical_flip:
+                    # with probability 0.5, flip vertical axis
+                    coin_flip = np.random.random_sample() > 0.5
+                    if coin_flip:
+                        sequence_hor = sequence_flip_axis(sequence_hor, 1)   # flip on the row axis
+                        sequence_ver = sequence_flip_axis(sequence_ver, 1)   # flip on the row axis
+
+                if self.horizontal_flip:
+                    # with probability 0.5, flip horizontal axis (cols)
+                    coin_flip - np.random.random_sample() > 0.5
+
+                    if coin_flip:
+                        sequence_hor = sequence_flip_axis(sequence_hor, 2)   # flip on the column axis
+                        sequence_ver = sequence_flip_axis(sequence_ver, 2)   # flip on the column axis
+
+                X.append(np.concatenate([sequence_hor, sequence_ver], axis=3))
+                y.append(hr)
+            
+            #print(np.array(X).shape, np.array(y).shape, " (train generator)")
+            yield np.array(X), np.array(y)
+
+
     @threadsafe_generator    
     def test_generator_optical_flow(self, test_df):
         paths, hr = list(test_df["Path"]), list(test_df["Heart Rate"])
@@ -406,8 +512,8 @@ class FrameProcessor:
             X, y = [], []
             current_path = paths[i]
             current_hr = hr[i]
-            frame_hor_dir = os.listdir(os.path.join(current_path, 'flow_h'))
-            frame_ver_dir = os.listdir(os.path.join(current_path, 'flow_v'))
+            frame_hor_dir = sorted(os.listdir(os.path.join(current_path, 'flow_h')))
+            frame_ver_dir = sorted(os.listdir(os.path.join(current_path, 'flow_v')))
             #hard-code to 2 for now, because there are a lot of samples
             for _ in range(2):
                 start = random.randint(0, len(frame_hor_dir)-self.sequence_length)
@@ -418,7 +524,7 @@ class FrameProcessor:
 
                 sequence_hor = build_image_sequence(frames_hor, greyscale_on=self.greyscale_on)
                 sequence_ver = build_image_sequence(frames_ver, greyscale_on=self.greyscale_on)
-                
+                #print(sequence_hor.shape)            
                 #flowX = np.dstack(sequence_hor)
                 #flowY = np.dstack(sequence_ver)
                 X.append(np.concatenate([sequence_hor, sequence_ver], axis=3))
@@ -448,8 +554,8 @@ class FrameProcessor:
                 path = list(rand_subj_df["Path"])[0]
                 hr = list(rand_subj_df["Heart Rate"])[0]
                 
-                frame_hor_dir = os.listdir(os.path.join(path,'flow_h'))
-                frame_ver_dir = os.listdir(os.path.join(path,'flow_v'))
+                frame_hor_dir = sorted(os.listdir(os.path.join(path,'flow_h')))
+                frame_ver_dir = sorted(os.listdir(os.path.join(path,'flow_v')))
 
                 start = random.randint(0, len(frame_hor_dir)-self.sequence_length)
                 frames_hor = frame_hor_dir[start:start+self.sequence_length]
@@ -513,7 +619,7 @@ class FrameProcessor:
                 path = list(rand_subj_df["Path"])[0]
                 hr = list(rand_subj_df["Heart Rate"])[0]
 
-                frame_dir = os.listdir(path)
+                frame_dir = sorted(os.listdir(path))
                 start = random.randint(0, len(frame_dir)-self.sequence_length)
                 frames = frame_dir[start:start+self.sequence_length]
                 frames = [os.path.join(path, frame) for frame in frames]

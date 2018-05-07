@@ -42,7 +42,8 @@ class Engine():
                  ignore_augmented=[""], 
                  input_shape=(60, 100, 100, 3),
                  cyclic_lr=[], 
-                 output_shape=1):
+                 output_shape=1,
+                 alt_opt_flow=False):
 
         self.data = data
         self.model_type = model_type
@@ -60,6 +61,7 @@ class Engine():
         self.processor = frameproc
         self.steps_per_epoch = steps_per_epoch
         self.cyclic_lr = cyclic_lr
+        self.alt_opt_flow = alt_opt_flow
         
         self.optical_flow_models = ["OpticalFlowCNN"]
 
@@ -82,11 +84,18 @@ class Engine():
                 train_generator = self.processor.train_generator_v3(train_set)
                 val_generator = self.processor.testing_generator_v3(val_set)
                 test_generator = self.processor.testing_generator_v3(test_set)
-
+                gen_type = 'regular'
             else:
-                train_generator = self.processor.train_generator_optical_flow(train_set)
-                val_generator = self.processor.test_generator_optical_flow(test_set)
-                test_generator = self.processor.test_generator_optical_flow(test_set)
+                if self.alt_opt_flow:
+                    train_generator = self.processor.train_generator_alt_optical_flow(train_set)
+                    val_generator = self.processor.test_generator_alt_optical_flow(val_set)
+                    test_generator = self.processor.test_generator_alt_optical_flow(test_set)
+                    gen_type = 'alt_opt_flow'
+                else:
+                    train_generator = self.processor.train_generator_optical_flow(train_set)
+                    val_generator = self.processor.test_generator_optical_flow(val_set)
+                    test_generator = self.processor.test_generator_optical_flow(test_set)
+                    gen_type = 'opt_flow'
 
 
             csv_logger = CSVLogger(os.path.join(self.outputs, "training.log"))
@@ -96,7 +105,7 @@ class Engine():
 
                 
             test_results_file = os.path.join(self.outputs, "test_results.log")
-            test_callback = TestResultsCallback(self.processor, test_set, test_results_file, self.batch_size)
+            test_callback = TestResultsCallback(self.processor, test_set, test_results_file, self.batch_size, gen_type)
             
             callbacks = [csv_logger, checkpointer, test_callback]    
              
@@ -198,23 +207,34 @@ class Engine():
         raise ValueError("Model type does not exist: {}".format(self.model_type))
 
 class TestResultsCallback(Callback):
-    def __init__(self, test_gen, test_set, log_file, batch_size):
+    def __init__(self, test_gen, test_set, log_file, batch_size, gen_type):
         self.test_gen = test_gen
         self.test_set = test_set
         self.log_file = log_file
         self.batch_size = batch_size
+        self.gen_type = gen_type
 
     def on_epoch_end(self, epoch, logs):
         if (epoch+1) % 5 == 0:
             print('Logging tests at epoch', epoch)
             with open(self.log_file, 'a') as log:
-                pred = self.model.predict_generator(self.test_gen.test_generator_optical_flow(self.test_set), len(self.test_set))
+                gen = None
+                if self.gen_type == 'alt_opt_flow':
+                    gen = self.test_gen.test_generator_alt_optical_flow(self.test_set)
+                elif self.gen_type == 'opt_flow':
+                    gen = self.test_gen.test_generator_optical_flow(self.test_set)
+                elif self.gen_type == 'regular':
+                    gen = self.test_gen.testing_generator_v3(self.test_set)
+                else:
+                    raise ValueError("{} is not a valid generator type".format(self.gen_type))
+                
+                print('Gen type {}'.format(self.gen_type))
+                pred = self.model.predict_generator(gen, len(self.test_set))
                 subjects = list(self.test_set['Subject'])
                 trial = list(self.test_set['Trial'])
                 hr = list(self.test_set['Heart Rate'])
                 i = 0
                 s = 0
-                print(self.test_gen.test_iter)
                 log.write("Epoch: " + str(epoch+1) + '\n')
                 for p in pred:
                     subj = subjects[s]

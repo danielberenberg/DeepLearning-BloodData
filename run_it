@@ -23,11 +23,9 @@ screen python src/run_model.py OpticalFlowCNN rsz \
 --train \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/optflow_test2 \
---input_dir run_history/optflow_test2 \
+--output_dir run_history/optflow_test_fixed \
+--input_dir run_history/optflow_test_fixed \
 --epochs 100 \
 --steps_per_epoch 400 \
 --batch_size 4 \
 --greyscale_on \
---horizontal_flip \
---vertical_flip \

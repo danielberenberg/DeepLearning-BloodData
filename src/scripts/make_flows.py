@@ -3,7 +3,7 @@ import os
 import sys
 
 
-path = 'rsz/'
+path = 'frames/'
 subjects = os.listdir(path)
 subjects = [os.path.join(path, subject) for subject in subjects]
 
@@ -13,6 +13,6 @@ for subject in subjects:
     trials = [os.path.join(subject, trial) for trial in trials]
     for trial in trials:
         pth = trial
-        write_optical_flow(pth, 3)
+        write_optical_flow(pth, 2)
 
 
