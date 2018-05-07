@@ -88,12 +88,12 @@ class Engine():
             else:
                 if self.alt_opt_flow:
                     train_generator = self.processor.train_generator_alt_optical_flow(train_set)
-                    val_generator = self.processor.test_generator_alt_optical_flow(test_set)
+                    val_generator = self.processor.test_generator_alt_optical_flow(val_set)
                     test_generator = self.processor.test_generator_alt_optical_flow(test_set)
                     gen_type = 'alt_opt_flow'
                 else:
                     train_generator = self.processor.train_generator_optical_flow(train_set)
-                    val_generator = self.processor.test_generator_optical_flow(test_set)
+                    val_generator = self.processor.test_generator_optical_flow(val_set)
                     test_generator = self.processor.test_generator_optical_flow(test_set)
                     gen_type = 'opt_flow'
 
@@ -214,16 +214,16 @@ class TestResultsCallback(Callback):
             with open(self.log_file, 'a') as log:
                 gen = None
                 if self.gen_type == 'alt_opt_flow':
-                    gen = self.test_gen.test_generator_alt_optical_flow(self.test_set), len(self.test_set)
+                    gen = self.test_gen.test_generator_alt_optical_flow(self.test_set)
                 elif self.gen_type == 'opt_flow':
-                    gen = self.test_gen.test_generator_optical_flow(self.test_set), len(self.test_set)
+                    gen = self.test_gen.test_generator_optical_flow(self.test_set)
                 elif self.gen_type == 'regular':
-                    gen = self.test_gen.testing_generator_v3(self.test_set), len(self.test_set)
+                    gen = self.test_gen.testing_generator_v3(self.test_set)
                 else:
                     raise ValueError("{} is not a valid generator type".format(self.gen_type))
                 
-                print('Gen type {}, starting at {}'.format(self.gen_type, self.test_gen.test_iter))
-                pred = self.model.predict_generator(gen)
+                print('Gen type {}'.format(self.gen_type))
+                pred = self.model.predict_generator(gen, len(self.test_set))
                 subjects = list(self.test_set['Subject'])
                 trial = list(self.test_set['Trial'])
                 hr = list(self.test_set['Heart Rate'])

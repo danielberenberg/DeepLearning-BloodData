@@ -241,7 +241,6 @@ def process_img(frame, input_shape, greyscale_on=False):
 
     if greyscale_on:
         x = (0.21 * x[:, :, :1]) + (0.72 * x[:, :, 1:2]) + (0.07 * x[:, :, -1:])
-
     return x
 
 
@@ -385,7 +384,7 @@ class FrameProcessor:
             X, y = [], []
             current_path = paths[i]
             current_hr = hr[i]
-            frame_dir = os.listdir(current_path)
+            frame_dir = sorted(os.listdir(current_path))
             #hard-code to 2 for now, because there are a lot of samples
             for _ in range(2):
                 start = random.randint(0, len(frame_dir)-self.sequence_length)
@@ -414,17 +413,19 @@ class FrameProcessor:
             current_hr = hr[i]
             #hard-code to 2 for now, because there are a lot of samples
             for _ in range(2):
-                all_frames = os.listdir(current_path)
+
+                all_frames = sorted(os.listdir(current_path))
                 start = random.randint(0, len(all_frames)-self.sequence_length-1)
-                frames = current_path[start:start+self.sequence_length+1]
+                frames = all_frames[start:start+self.sequence_length+1]
                 frames = [os.path.join(current_path, frame) for frame in frames]
                 
                 flows_x, flows_y = optical_flow_of_first_and_rest(frames)
-                sequence_hor = np.array([just_greyscale(hor) for hor in flows_x])
-                sequence_ver = np.array([just_greyscale(ver) for ver in flows_y])
+                sequence_hor = np.array(flows_x)
+                sequence_ver = np.array(flows_y)
+
+                sequence_hor = np.expand_dims(np.array(flows_x), axis=3)
+                sequence_ver = np.expand_dims(np.array(flows_y), axis=3)
                 
-                #flowX = np.dstack(sequence_hor)
-                #flowY = np.dstack(sequence_ver)
                 X.append(np.concatenate([sequence_hor, sequence_ver], axis=3))
                 y.append(current_hr)
                 
@@ -451,15 +452,16 @@ class FrameProcessor:
 
                 path = list(rand_subj_df["Path"])[0]
                 hr = list(rand_subj_df["Heart Rate"])[0]
-                
-                all_frames = os.listdir(path)
+                all_frames = sorted(os.listdir(path))
                 start = random.randint(0, len(all_frames)-self.sequence_length-1)
                 frames = all_frames[start:start+self.sequence_length+1]
                 frames = [os.path.join(path, frame) for frame in frames]
-                
                 flows_x, flows_y = optical_flow_of_first_and_rest(frames)
-                sequence_hor = np.array([just_greyscale(hor) for hor in flows_x])
-                sequence_ver = np.array([just_greyscale(ver) for ver in flows_y])
+                sequence_hor = np.expand_dims(np.array(flows_x), axis=3)
+                sequence_ver = np.expand_dims(np.array(flows_y), axis=3)
+                            
+                #sequence_hor = np.array([just_greyscale(hor) for hor in flows_x])
+                #sequence_ver = np.array([just_greyscale(ver) for ver in flows_y])
 
                 # now we want to apply the augmentation
                 if self.rotation_range > 0.0:
@@ -510,8 +512,8 @@ class FrameProcessor:
             X, y = [], []
             current_path = paths[i]
             current_hr = hr[i]
-            frame_hor_dir = os.listdir(os.path.join(current_path, 'flow_h'))
-            frame_ver_dir = os.listdir(os.path.join(current_path, 'flow_v'))
+            frame_hor_dir = sorted(os.listdir(os.path.join(current_path, 'flow_h')))
+            frame_ver_dir = sorted(os.listdir(os.path.join(current_path, 'flow_v')))
             #hard-code to 2 for now, because there are a lot of samples
             for _ in range(2):
                 start = random.randint(0, len(frame_hor_dir)-self.sequence_length)
@@ -522,7 +524,7 @@ class FrameProcessor:
 
                 sequence_hor = build_image_sequence(frames_hor, greyscale_on=self.greyscale_on)
                 sequence_ver = build_image_sequence(frames_ver, greyscale_on=self.greyscale_on)
-                
+                #print(sequence_hor.shape)            
                 #flowX = np.dstack(sequence_hor)
                 #flowY = np.dstack(sequence_ver)
                 X.append(np.concatenate([sequence_hor, sequence_ver], axis=3))
@@ -552,8 +554,8 @@ class FrameProcessor:
                 path = list(rand_subj_df["Path"])[0]
                 hr = list(rand_subj_df["Heart Rate"])[0]
                 
-                frame_hor_dir = os.listdir(os.path.join(path,'flow_h'))
-                frame_ver_dir = os.listdir(os.path.join(path,'flow_v'))
+                frame_hor_dir = sorted(os.listdir(os.path.join(path,'flow_h')))
+                frame_ver_dir = sorted(os.listdir(os.path.join(path,'flow_v')))
 
                 start = random.randint(0, len(frame_hor_dir)-self.sequence_length)
                 frames_hor = frame_hor_dir[start:start+self.sequence_length]
@@ -617,7 +619,7 @@ class FrameProcessor:
                 path = list(rand_subj_df["Path"])[0]
                 hr = list(rand_subj_df["Heart Rate"])[0]
 
-                frame_dir = os.listdir(path)
+                frame_dir = sorted(os.listdir(path))
                 start = random.randint(0, len(frame_dir)-self.sequence_length)
                 frames = frame_dir[start:start+self.sequence_length]
                 frames = [os.path.join(path, frame) for frame in frames]
