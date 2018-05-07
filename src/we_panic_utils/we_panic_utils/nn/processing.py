@@ -16,6 +16,7 @@ from skimage.color import rgb2grey
 from PIL import ImageEnhance
 from PIL import Image as pil_image
 
+from sklearn.preprocessing import MinMaxScaler
 
 class threadsafe_iterator:
     """

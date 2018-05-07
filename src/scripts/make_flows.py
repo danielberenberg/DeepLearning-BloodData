@@ -3,7 +3,7 @@ import os
 import sys
 
 
-path = 'frames/'
+path = 'rsz/'
 subjects = os.listdir(path)
 subjects = [os.path.join(path, subject) for subject in subjects]
 
