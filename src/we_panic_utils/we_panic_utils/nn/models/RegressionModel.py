@@ -435,12 +435,12 @@ class ResidualLSTM_v02(RegressionModel):
         
         x = TimeDistributed(BatchNormalization())(x) 
         x = TimeDistributed(Conv2D(256,(3,3), padding="same",activation="relu",kernel_initializer="he_normal"))(x)
-        x = TimeDistributed(Conv2D(256,(3,3), padding="same",kernel_initializer="he_normal",activation="relu"))(x)
+        #x = TimeDistributed(Conv2D(256,(3,3), padding="same",kernel_initializer="he_normal",activation="relu"))(x)
         x = TimeDistributed(MaxPooling2D((2,2), strides=(2,2)))(x)  
 
         x = TimeDistributed(BatchNormalization())(x) 
         x = TimeDistributed(Conv2D(512, (3,3), padding='same', kernel_initializer="he_normal",activation='relu'))(x)
-        x = TimeDistributed(Conv2D(512, (3,3), padding='same', kernel_initializer="he_normal",activation='relu'))(x)
+        #x = TimeDistributed(Conv2D(512, (3,3), padding='same', kernel_initializer="he_normal",activation='relu'))(x)
 
         x = TimeDistributed(Flatten())(x)
 

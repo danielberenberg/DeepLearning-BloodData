@@ -23,8 +23,8 @@ screen python src/run_model.py OpticalFlowCNN rsz \
 --train \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/optflow_norm \
---input_dir run_history/optflow_norm \
+--output_dir run_history/residual_lstmv02_fix \
+--input_dir run_history/residual_lstmv02_fix \
 --epochs 100 \
 --steps_per_epoch 400 \
 --batch_size 4 \
