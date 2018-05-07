@@ -138,6 +138,12 @@ class Engine():
                 
                 test_set = pd.read_csv(test_dir)
 
+                if not (self.model_type in self.optical_flow_models):
+                    test_generator = self.processor.testing_generator_v3(test_set)
+
+                else:
+                    test_generator = self.processor.test_generator_optical_flow(test_set)
+            
                 loss = model.evaluate_generator(test_generator, len(test_set))
                 
                 pred = model.predict_generator(test_generator, len(test_set))

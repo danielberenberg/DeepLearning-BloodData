@@ -8,7 +8,7 @@ import gc
 import sys
 from ..basics import check_exists_create_if_not 
 
-def write_optical_flow(path):
+def write_optical_flow(path, width):
     count = 0
 
     try:
@@ -31,7 +31,7 @@ def write_optical_flow(path):
             fname = pth.split('/')[-1]
             count += 1
 
-            if count % 1 == 0:
+            if count % width == 0:
                 sys.stdout.write("[\r%s : %04d]" % (pth, count))
                 sys.stdout.flush()
                 
