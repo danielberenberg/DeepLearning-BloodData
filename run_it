@@ -18,7 +18,6 @@
 #--vertical_flip \
 
 pip install --upgrade src/we_panic_utils/
-
 python src/run_model.py CNN+LSTM rsz \
 --train \
 --test \
@@ -26,7 +25,7 @@ python src/run_model.py CNN+LSTM rsz \
 --output_dir run_history/lrcn_norm \
 --input_dir run_history/lrcn_norm \
 --epochs 100 \
---steps_per_epoch 400 \
---batch_size 4 \
+--steps_per_epoch 1 \
+--batch_size 12 \
 --greyscale_on \
 --normalize \

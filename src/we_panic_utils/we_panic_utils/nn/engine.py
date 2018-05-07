@@ -107,10 +107,18 @@ class Engine():
 
                 
             test_results_file = os.path.join(self.outputs, "test_results.log")
+            train_results = None
+            train_callback = None
+            if self.processor.scaler:
+                train_results = os.path.join(self.outputs, "unnormalized_training.log")
+                train_callback = TestResultsCallback(self.processor, train_set, 
+                        train_results, self.batch_size, gen_type, epochs=1)
             test_callback = TestResultsCallback(self.processor, test_set, test_results_file, self.batch_size, gen_type)
             
             callbacks = [csv_logger, checkpointer, test_callback]    
-             
+            if train_callback:
+                callbacks.append(train_callback)
+
             if self.cyclic_lr != []:
                 base, mx = self.cyclic_lr
 
@@ -225,15 +233,17 @@ class Engine():
         raise ValueError("Model type does not exist: {}".format(self.model_type))
 
 class TestResultsCallback(Callback):
-    def __init__(self, test_gen, test_set, log_file, batch_size, gen_type):
+    def __init__(self, test_gen, test_set, log_file, batch_size, gen_type, epochs = 5):
         self.test_gen = test_gen
         self.test_set = test_set
         self.log_file = log_file
         self.batch_size = batch_size
         self.gen_type = gen_type
+        self.epochs=epochs
 
     def on_epoch_end(self, epoch, logs):
-        if (epoch+1) % 5 == 0:
+        #get the actual mse
+        if (epoch+1) % self.epochs == 0:
             print('Logging tests at epoch', epoch)
             with open(self.log_file, 'a') as log:
                 gen = None
