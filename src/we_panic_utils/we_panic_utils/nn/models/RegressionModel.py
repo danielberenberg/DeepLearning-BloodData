@@ -65,7 +65,7 @@ class OpticalFlowCNN(RegressionModel):
         model.add(TimeDistributed(MaxPooling2D(pool_size=(2, 2))))
         
         model.add(TimeDistributed(Flatten()))
-        model.add(LSTM(256, activation='tanh', kernel_initializer='he_normal', return_sequences=True))
+        #model.add(LSTM(256, activation='tanh', kernel_initializer='he_normal', return_sequences=True))
         model.add(LSTM(256, activation='tanh', kernel_initializer='he_normal'))
         #model.add(Dense(512, activation='relu', kernel_initializer='he_normal',))
         #model.add(Dropout(0.8))

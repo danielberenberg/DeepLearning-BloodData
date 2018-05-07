@@ -7,6 +7,8 @@ from keras.callbacks import CSVLogger, ModelCheckpoint, Callback
 from keras import backend as K
 import os
 import pandas as pd
+from sklearn.metrics import mean_squared_error
+import numpy as np
 
 class Engine():
     """
@@ -230,16 +232,22 @@ class TestResultsCallback(Callback):
                 
                 print('Gen type {}'.format(self.gen_type))
                 pred = self.model.predict_generator(gen, len(self.test_set))
+                
+                if self.test_gen.scaler:
+                    pred = self.test_gen.scaler.inverse_transform(pred)
+
                 subjects = list(self.test_set['Subject'])
                 trial = list(self.test_set['Trial'])
                 hr = list(self.test_set['Heart Rate'])
                 i = 0
                 s = 0
-                log.write("Epoch: " + str(epoch+1) + '\n')
+                error = mean_squared_error(np.reshape(hr, (-1, 1)), pred)
+                log.write("Epoch: " + str(epoch+1) + ', Error: ' + error + '\n')
                 for p in pred:
                     subj = subjects[s]
                     tri = trial[s]
                     h = hr[s]
+                    
                     #val = p[0]
                     log.write(str(subj) + ', ' + str(tri) + '| prediction=' + str(p) + ', actual=' + str(h) + '\n')
                     i+=1

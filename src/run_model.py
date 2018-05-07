@@ -6,6 +6,9 @@ import argparse
 import sys
 import os
 import time
+from sklearn.preprocessing import MinMaxScaler
+import numpy as np
+import pandas as pd
 
 import we_panic_utils.basic_utils as basic_utils
 from we_panic_utils.nn.data_load.train_test_split_csv import train_test_split_with_csv_support
@@ -150,6 +153,11 @@ def parse_input():
                         help="use alternative optical flow method",
                         default=False,
                         action="store_true")
+    
+    parser.add_argument("--normalize",
+                        help="squash labels down to -1 to 1 range, good for LSTM",
+                        default=False,
+                        action="store_true")
     return parser
 
 
@@ -177,7 +185,7 @@ def summarize_arguments(args):
     print(formatter % ("epochs", args.epochs)) 
     print(formatter % ("greyscale_on", args.greyscale_on)) 
     print(formatter % ("alt_opt_flow", args.alt_opt_flow)) 
-
+    print(formatter % ("normalize", args.normalize)) 
 class ArgumentError(Exception):
     """
     custom exception to thrown due to bad parameter input
@@ -358,7 +366,14 @@ if __name__ == "__main__":
     regular, augmented, filtered_csv, partition_csv, batch_size, epochs, train, load, test, inputs, outputs, greyscale_on = validate_arguments(args)
     
     summarize_arguments(args)
-    fp = FrameProcessor(rotation_range=args.rotation_range,
+    scaler = None
+    if args.normalize:
+        scaler = MinMaxScaler(feature_range=(-1,1))
+        sd = pd.read_csv(partition_csv)
+        values = np.array(list(sd['Heart Rate'])).reshape(-1,1)
+        scaler.fit(values)
+    fp = FrameProcessor(scaler,
+                        rotation_range=args.rotation_range,
                         width_shift_range=args.width_shift_range,
                         height_shift_range=args.height_shift_range,
                         shear_range=args.shear_range,
@@ -377,7 +392,6 @@ if __name__ == "__main__":
     cyclic_lr = [float(i) for i in args.cyclic_learning_rate]
 
     engine = Engine(data=regular,
-                    #augmented_data=augmented,
                     model_type=args.model_type,
                     filtered_csv=partition_csv,
                     batch_size=batch_size,

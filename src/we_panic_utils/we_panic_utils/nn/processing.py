@@ -264,6 +264,7 @@ class FrameProcessor:
         shear_range: Float. Shear Intensity (Shear angle in counter-clockwise direction in degrees)
     """
     def __init__(self,
+                 scaler=None,
                  rotation_range=0,
                  width_shift_range=0.,
                  height_shift_range=0.,
@@ -274,7 +275,7 @@ class FrameProcessor:
                  batch_size=4,
                  sequence_length=60,
                  greyscale_on=False):
-
+        self.scaler = scaler
         self.rotation_range = rotation_range
         self.width_shift_range = width_shift_range
         self.height_shift_range = height_shift_range
@@ -412,6 +413,8 @@ class FrameProcessor:
             X, y = [], []
             current_path = paths[i]
             current_hr = hr[i]
+            if self.scaler:
+                current_hr = self.scaler.transform(current_hr)[0][0]
             #hard-code to 2 for now, because there are a lot of samples
             for _ in range(2):
 
@@ -453,6 +456,10 @@ class FrameProcessor:
 
                 path = list(rand_subj_df["Path"])[0]
                 hr = list(rand_subj_df["Heart Rate"])[0]
+
+                if self.scaler:
+                    hr = self.scaler.transform(hr)[0][0]
+                
                 all_frames = sorted(os.listdir(path))
                 start = random.randint(0, len(all_frames)-self.sequence_length-1)
                 frames = all_frames[start:start+self.sequence_length+1]
@@ -461,9 +468,6 @@ class FrameProcessor:
                 sequence_hor = np.expand_dims(np.array(flows_x), axis=3)
                 sequence_ver = np.expand_dims(np.array(flows_y), axis=3)
                             
-                #sequence_hor = np.array([just_greyscale(hor) for hor in flows_x])
-                #sequence_ver = np.array([just_greyscale(ver) for ver in flows_y])
-
                 # now we want to apply the augmentation
                 if self.rotation_range > 0.0:
                     sequence_hor = random_sequence_rotation(sequence_hor, self.rotation_range)
@@ -513,6 +517,10 @@ class FrameProcessor:
             X, y = [], []
             current_path = paths[i]
             current_hr = hr[i]
+            
+            if self.scaler:
+                current_hr = self.scaler.transform(current_hr)[0][0]
+
             frame_hor_dir = sorted(os.listdir(os.path.join(current_path, 'flow_h')))
             frame_ver_dir = sorted(os.listdir(os.path.join(current_path, 'flow_v')))
             #hard-code to 2 for now, because there are a lot of samples
@@ -554,6 +562,9 @@ class FrameProcessor:
 
                 path = list(rand_subj_df["Path"])[0]
                 hr = list(rand_subj_df["Heart Rate"])[0]
+                
+                if self.scaler:
+                    hr = self.scaler.transform(hr)[0][0]
                 
                 frame_hor_dir = sorted(os.listdir(os.path.join(path,'flow_h')))
                 frame_ver_dir = sorted(os.listdir(os.path.join(path,'flow_v')))
