@@ -33,17 +33,19 @@ class OpticalFlowCNN(RegressionModel):
         RegressionModel.__init__(self, input_shape, output_shape)
 
     def instantiate(self):
-        #  return super(OpticalFlowCNN, self).instantiate()
-        metrics = ['mse']
+        return super(OpticalFlowCNN, self).instantiate()
+        #model = self.get_model() 
+        #metrics = ['mse']
 
-        sgd = SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=0.1)
-        model.compile(loss='mean_squared_error', optimizer=sgd, metrics=metrics)
-        print(model.summary())
-        return model
+        #sgd = SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=0.1)
+        #model.compile(loss='mean_squared_error', optimizer=sgd, metrics=metrics)
+        #print(model.summary())
+        #return model
+
     def get_model(self):
         model = Sequential()
 
-        model.add(TimeDistributed(Conv2D(48, 7, 7, activation='relu', kernel_initializer='he_normal', border_mode='same',input_shape=self.input_shape)))
+        model.add(TimeDistributed(Conv2D(48, 7, 7, activation='relu', kernel_initializer='he_normal', border_mode='same'), input_shape=self.input_shape))
         model.add(TimeDistributed(BatchNormalization()))
         model.add(TimeDistributed(MaxPooling2D(pool_size=(2, 2))))
 
@@ -60,14 +62,17 @@ class OpticalFlowCNN(RegressionModel):
         model.add(TimeDistributed(Conv2D(512, 3, 3, activation='relu', kernel_initializer='he_normal',border_mode='same')))
         model.add(TimeDistributed(BatchNormalization()))
         model.add(TimeDistributed(MaxPooling2D(pool_size=(2, 2))))
-
-        model.add(Flatten())
-        model.add(Dense(512, activation='relu', kernel_initializer='he_normal',))
+        
+        model.add(TimeDistributed(Flatten()))
+        model.add(LSTM(128, activation='tanh', kernel_initializer='he_normal'))
+        model.add(Dense(512, activation='tanh', kernel_initializer='he_normal',))
         model.add(Dropout(0.7))
-        model.add(Dense(512, activation='relu', kernel_initializer='he_normal',))
+        model.add(Dense(512, activation='tanh', kernel_initializer='he_normal',))
         model.add(Dropout(0.8))
 
         model.add(Dense(1, activation='linear'))
+        
+        return model
 
 class C3D(RegressionModel):
     def __init__(self, input_shape, output_shape):
