@@ -414,10 +414,10 @@ class ResidualLSTM_v02(RegressionModel):
     def instantiate(self):
         model = self.get_model() 
         #optimizer = RMSprop(lr=0.0001, rho=0.9, decay=0.0, epsilon=1e-08)
-        #optimizer = Adam(lr=1e-5, decay=1e-6)
+        optimizer = Adam(lr=1e-5, decay=1e-6)
         #optimizer = SGD(lr=0.001, momentum=0.0, decay=0.0)
         metrics = ['mse']
-        model.compile(loss='mean_squared_error', optimizer='adam', metrics=metrics)
+        model.compile(loss='mean_squared_error', optimizer=optimizer, metrics=metrics)
         print(model.summary())
         return model
  
@@ -444,19 +444,19 @@ class ResidualLSTM_v02(RegressionModel):
 
         x = TimeDistributed(Flatten())(x)
 
-        lstm1 = LSTM(256, return_sequences=True, kernel_initializer="he_normal",dropout=0.5)(x)
-        lstm2 = LSTM(256, return_sequences=True, kernel_initializer="he_normal",dropout=0.5)(lstm1)
+        lstm1 = LSTM(256, return_sequences=True, kernel_initializer="he_normal",activation='tanh', dropout=0.5)(x)
+        lstm2 = LSTM(256, return_sequences=True, kernel_initializer="he_normal",activation='tanh', dropout=0.5)(lstm1)
         
         x = add([lstm1, lstm2])
          
         fltn = TimeDistributed(Flatten())(x)
-        drp = Dropout(0.5)(fltn)
-        final_lstm = LSTM(256, kernel_initializer="he_normal",dropout=0.5, return_sequences=False)(fltn) 
+        drp = Dropout(0.6)(fltn)
+        final_lstm = LSTM(256, kernel_initializer="he_normal",dropout=0.5, activation='tanh', return_sequences=False)(fltn) 
 
-        lstm1 = TimeDistributed(BatchNormalization())(lstm1) 
-        dense = Dropout(0.5)(final_lstm)
-        dense = Dense(1024,kernel_initializer="he_normal", activation='relu')(dense)
-        dense = Dense(1024,kernel_initializer="he_normal", activation='relu')(dense)
+        #lstm1 = TimeDistributed(BatchNormalization())(lstm1) 
+        #dense = Dropout(0.5)(final_lstm)
+        #dense = Dense(1024,kernel_initializer="he_normal", activation='relu')(dense)
+        #dense = Dense(1024,kernel_initializer="he_normal", activation='relu')(dense)
         #dense = Dense(2048, activation='relu')(dense)
         outputs = Dense(self.output_shape, kernel_initializer="he_normal",activation='linear')(dense)
 
