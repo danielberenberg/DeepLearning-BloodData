@@ -217,7 +217,7 @@ class TestResultsCallback(Callback):
         self.gen_type = gen_type
 
     def on_epoch_end(self, epoch, logs):
-        if (epoch+1) % 5 == 0:
+        if (epoch+1) % 1 == 0:
             print('Logging tests at epoch', epoch)
             with open(self.log_file, 'a') as log:
                 gen = None
@@ -241,8 +241,8 @@ class TestResultsCallback(Callback):
                 hr = list(self.test_set['Heart Rate'])
                 i = 0
                 s = 0
-                error = mean_squared_error(np.reshape(hr, (-1, 1)), pred)
-                log.write("Epoch: " + str(epoch+1) + ', Error: ' + error + '\n')
+                error = mean_squared_error(np.reshape([i for t in zip(hr,hr) for i in t], (-1, 1)), pred)
+                log.write("Epoch: " + str(epoch+1) + ', Error: ' + str(error) + '\n')
                 for p in pred:
                     subj = subjects[s]
                     tri = trial[s]

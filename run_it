@@ -19,13 +19,14 @@
 
 pip install --upgrade src/we_panic_utils/
 
-screen python src/run_model.py OpticalFlowCNN rsz \
+python src/run_model.py OpticalFlowCNN rsz \
 --train \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/optflow_test_fixed \
---input_dir run_history/optflow_test_fixed \
+--output_dir run_history/optflow_norm \
+--input_dir run_history/optflow_norm \
 --epochs 100 \
---steps_per_epoch 400 \
+--steps_per_epoch 2 \
 --batch_size 4 \
 --greyscale_on \
+--normalize
