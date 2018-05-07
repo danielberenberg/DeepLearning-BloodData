@@ -387,6 +387,10 @@ class FrameProcessor:
             X, y = [], []
             current_path = paths[i]
             current_hr = hr[i]
+            
+            if self.scaler:
+                current_hr = self.scaler.transform(current_hr)[0][0]
+            
             frame_dir = sorted(os.listdir(current_path))
             #hard-code to 2 for now, because there are a lot of samples
             for _ in range(2):
@@ -632,6 +636,9 @@ class FrameProcessor:
                 path = list(rand_subj_df["Path"])[0]
                 hr = list(rand_subj_df["Heart Rate"])[0]
 
+                if self.scaler:
+                    hr = self.scaler.transform(hr)[0][0]
+               
                 frame_dir = sorted(os.listdir(path))
                 start = random.randint(0, len(frame_dir)-self.sequence_length)
                 frames = frame_dir[start:start+self.sequence_length]
