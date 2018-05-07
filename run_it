@@ -19,14 +19,13 @@
 
 pip install --upgrade src/we_panic_utils/
 
-python src/run_model.py CNN+LSTM rsz \
---train \
+python src/run_model.py CNN+LSTM rsz2 \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/lrcn_norm \
---input_dir run_history/lrcn_norm \
+--output_dir run_history/lrcn_4_gray_fix \
+--input_dir run_history/lrcn_4_gray_fix \
 --epochs 100 \
 --steps_per_epoch 400 \
---batch_size 4 \
---greyscale_on \
---normalize \
+--batch_size 8 \
+--greyscale_on
+#--normalize \

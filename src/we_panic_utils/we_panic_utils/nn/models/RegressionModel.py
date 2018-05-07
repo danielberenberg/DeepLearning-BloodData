@@ -459,7 +459,7 @@ class ResidualLSTM_v02(RegressionModel):
         #dense = Dense(1024,kernel_initializer="he_normal", activation='relu')(dense)
         #dense = Dense(1024,kernel_initializer="he_normal", activation='relu')(dense)
         #dense = Dense(2048, activation='relu')(dense)
-        outputs = Dense(self.output_shape, kernel_initializer="he_normal",activation='linear')(dense)
+        outputs = Dense(self.output_shape, kernel_initializer="he_normal",activation='linear')(final_lstm)
 
         model = Model(inputs=inputs, outputs=outputs)
         return model
