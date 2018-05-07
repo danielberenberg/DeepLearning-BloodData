@@ -150,17 +150,27 @@ class Engine():
                 test_set = pd.read_csv(test_dir)
 
                 if not (self.model_type in self.optical_flow_models):
+
                     test_generator = self.processor.testing_generator_v3(test_set)
 
                 else:
-                    test_generator = self.processor.test_generator_optical_flow(test_set)
-            
-                loss = model.evaluate_generator(test_generator, len(test_set))
+
+                    if self.alt_opt_flow:
+                        test_generator = self.processor.test_generator_alt_optical_flow(test_set)
+                    else:
+                        test_generator = self.processor.test_generator_optical_flow(test_set)
                 
                 pred = model.predict_generator(test_generator, len(test_set))
 
+                if self.processor.scaler:
+                    pred = self.processor.scaler.inverse_transform(pred)
+                    hr = list(test_set['Heart Rate'])
+                    loss = mean_squared_error(np.reshape([i for t in zip(hr,hr) for i in t], (-1, 1)), pred)
+                else:
+                    loss = model.evaluate_generator(test_generator, len(test_set))[0]
+                
                 with open(os.path.join(self.outputs, "test.log"), 'w') as log:
-                    log.write(str(loss[0]) + "," + str(loss[1])) 
+                    log.write(str(loss)) 
 
                 print(loss)
                 print(pred) 
@@ -168,11 +178,17 @@ class Engine():
             # otherwise, we can use the existing test set that was generated during the training phase
             else:
                 print("Testing model after training.")
-                loss = model.evaluate_generator(test_generator, len(test_set))
                 pred = model.predict_generator(test_generator, len(test_set))
                 
+                if self.processor.scaler:
+                    pred = self.processor.scaler.inverse_transform(pred)
+                    hr = list(test_set['Heart Rate'])
+                    loss = mean_squared_error(np.reshape([i for t in zip(hr,hr) for i in t], (-1, 1)), pred)
+                else:
+                    loss = model.evaluate_generator(test_generator, len(test_set))[0]
+                
                 with open(os.path.join(self.outputs, "test.log"), 'w') as log:
-                    log.write(str(loss[0]) + "," + str(loss[1])) 
+                    log.write(str(loss)) 
 
                 print(loss)
                 print(pred) 

@@ -25,7 +25,7 @@ python src/run_model.py OpticalFlowCNN rsz \
 --partition_csv subject_data.csv \
 --output_dir run_history/optflow_norm \
 --input_dir run_history/optflow_norm \
---epochs 100 \
+--epochs 2 \
 --steps_per_epoch 2 \
 --batch_size 4 \
 --greyscale_on \
