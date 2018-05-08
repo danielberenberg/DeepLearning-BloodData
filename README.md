@@ -48,19 +48,19 @@ pip install src/we_panic_utils/
 
 Once you have the above steps completed, you can begin preprocessing data. Run the following command:
 ```{r, engine='bash'}
-./preprocess.sh <movie_directory/> <subjects_for_training.csv>
+./run_setups.sh
 ```
 This does the following:
+* augment the speed of the each of the subject videos ten times 
 * convert each .mov file into a directory of frames and convert each .mov file into 30 fps
-* partition each frame directory into 2 second partitions
-* resize all frames to 225x225x3
+* resize all frames to 32x32x3
 
-This may take upwards of 30 minutes to finish.
+This may take upwards of an hour to finish.
 
-## Tasks (As of 3/31/18):
+## Tasks (As of 5/7/18):
 
 - [x] resize frames
 - [x] partition videos
 - [x] train classifier
-- [ ] introduce data augmentation
-- [ ] train regression model
+- [x] introduce data augmentation
+- [x] train regression model
