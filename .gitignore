@@ -27,4 +27,5 @@ run_history/
 rsz_augmented
 **/*.swp*
 run_it
-rsz32
+rsz32/
+rsz32_optflow/
