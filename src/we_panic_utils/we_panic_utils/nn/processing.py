@@ -563,13 +563,17 @@ class FrameProcessor:
             X, y = [], []
             for _ in range(self.batch_size):
                 
-                rand_bucket = bucket_list[random.randint(0, len(bucket_list)-1)]
-                df = train_df[buckets(train_df, rand_bucket)]
-                rand_subj_index = random.randint(0, len(df)-1)
-                rand_subj_df = df[rand_subj_index:rand_subj_index+1]
+                #rand_bucket = bucket_list[random.randint(0, len(bucket_list)-1)]
+                #df = train_df[buckets(train_df, rand_bucket)]
+                #rand_subj_index = random.randint(0, len(df)-1)
+                #rand_subj_df = df[rand_subj_index:rand_subj_index+1]
 
-                path = list(rand_subj_df["Path"])[0]
-                hr = list(rand_subj_df["Heart Rate"])[0]
+                #path = list(rand_subj_df["Path"])[0]
+                #hr = list(rand_subj_df["Heart Rate"])[0]
+                
+                random_index = random.randint(0, len(train_df))
+                path = list(train_df['Path'])[0]
+                hr = list(train_df['Heart Rate'])[0]
                 
                 if self.scaler:
                     hr = self.scaler.transform(hr)[0][0]
@@ -634,14 +638,17 @@ class FrameProcessor:
             X, y = [], []
 
             for _ in range(self.batch_size):
-                rand_bucket = bucket_list[random.randint(0, len(bucket_list)-1)]
-                df = train_df[buckets(train_df, rand_bucket)]
-                #print(len(df))
-                rand_subj_index = random.randint(0, len(df)-1)
-                rand_subj_df = df[rand_subj_index:rand_subj_index+1]
- 
-                path = list(rand_subj_df["Path"])[0]
-                hr = list(rand_subj_df["Heart Rate"])[0]
+                #rand_bucket = bucket_list[random.randint(0, len(bucket_list)-1)]
+                #df = train_df[buckets(train_df, rand_bucket)]
+                #rand_subj_index = random.randint(0, len(df)-1)
+                #rand_subj_df = df[rand_subj_index:rand_subj_index+1]
+                
+                #path = list(rand_subj_df["Path"])[0]
+                #hr = list(rand_subj_df["Heart Rate"])[0]
+                
+                random_index = random.randint(0, len(train_df))
+                path = list(train_df['Path'])[0]
+                hr = list(train_df['Heart Rate'])[0]
 
                 if self.scaler:
                     hr = self.scaler.transform(hr)[0][0]
