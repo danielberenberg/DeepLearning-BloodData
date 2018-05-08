@@ -26,3 +26,5 @@ run_history/
 *.h5
 rsz_augmented
 **/*.swp*
+run_it
+rsz32

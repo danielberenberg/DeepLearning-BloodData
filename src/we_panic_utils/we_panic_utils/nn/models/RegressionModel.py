@@ -232,26 +232,34 @@ class CNN_3D(RegressionModel):
         model.add(Conv3D(64, kernel_size=(3, 3, 3), 
                   input_shape=self.input_shape, activation='relu'))
         model.add(MaxPooling3D(pool_size=2, strides=(1, 2, 2)))
+
         model.add(Dropout(0.5)) 
         model.add(Conv3D(128, kernel_size=(3, 3, 3), 
                   activation='relu')) 
+        model.add(BatchNormalization()) 
+
         model.add(MaxPooling3D(pool_size=2, strides=2))
         model.add(Dropout(0.5))
         model.add(Conv3D(128, kernel_size=(3, 3, 3), 
                   activation='relu')) 
+        model.add(BatchNormalization())        
+
         model.add(Conv3D(256, kernel_size=(3, 3, 3), 
-                  activation='relu'))
+                  activation='relu')) 
+        model.add(BatchNormalization())
+
         model.add(MaxPooling3D(pool_size=2, strides=2)) 
         model.add(Conv3D(256, kernel_size=(3, 3, 3), 
                  activation='relu')) 
         model.add(MaxPooling3D(pool_size=2, strides=2))
-       
+        model.add(BatchNormalization()) 
+
         model.add(Flatten()) 
-        model.add(Dense(1024, activation='relu'))
+        model.add(Dense(512, activation='relu'))
         model.add(Dropout(0.5))
-        model.add(Dense(1024, activation='relu'))
+        model.add(Dense(512, activation='relu'))
         model.add(Dropout(0.5))
-        model.add(Dense(self.output_shape, activation='linear'))
+        model.add(Dense(self.output_shape, activation='sigmoid'))
         return model
 
 
@@ -459,7 +467,7 @@ class ResidualLSTM_v02(RegressionModel):
         #dense = Dense(1024,kernel_initializer="he_normal", activation='relu')(dense)
         #dense = Dense(1024,kernel_initializer="he_normal", activation='relu')(dense)
         #dense = Dense(2048, activation='relu')(dense)
-        outputs = Dense(self.output_shape, kernel_initializer="he_normal",activation='linear')(dense)
+        outputs = Dense(self.output_shape, kernel_initializer="he_normal",activation='linear')(final_lstm)
 
         model = Model(inputs=inputs, outputs=outputs)
         return model

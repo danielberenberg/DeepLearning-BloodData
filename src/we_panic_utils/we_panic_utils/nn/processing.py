@@ -622,7 +622,8 @@ class FrameProcessor:
             yield np.array(X), np.array(y)
 
     def train_generator_v3(self, train_df):
-        bucket_list = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]
+        #bucket_list = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]
+        bucket_list = [.1, .2, .3, .4, .5, .6]
         while True:
             X, y = [], []
 

@@ -79,8 +79,8 @@ class Engine():
 
         if self.train and not self.load:
             print("Training the model.")
-            train_set, test_set, val_set = create_train_test_split_dataframes(self.data, self.metadata, self.outputs)
-            
+            #train_set, test_set, val_set = create_train_test_split_dataframes(self.data, self.metadata, self.outputs)
+            train_set, test_set, val_set = ttswcvs3(self.data, self.metadata, self.outputs)
             if not (self.model_type in self.optical_flow_models):
                 
                 train_generator = self.processor.train_generator_v3(train_set)
