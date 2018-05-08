@@ -48,7 +48,7 @@ pip install src/we_panic_utils/
 
 Once you have the above steps completed, you can begin preprocessing data. Run the following command:
 ```{r, engine='bash'}
-./preprocess.sh
+./run_setups.sh
 ```
 This does the following:
 * augment the speed of the each of the subject videos ten times 
