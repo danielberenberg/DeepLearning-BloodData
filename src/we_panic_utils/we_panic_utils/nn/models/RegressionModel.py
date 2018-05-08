@@ -248,11 +248,11 @@ class CNN_3D(RegressionModel):
                   activation='relu')) 
         model.add(BatchNormalization())
 
-        model.add(MaxPooling3D(pool_size=2, strides=2)) 
-        model.add(Conv3D(256, kernel_size=(3, 3, 3), 
-                 activation='relu')) 
-        model.add(MaxPooling3D(pool_size=2, strides=2))
-        model.add(BatchNormalization()) 
+        #model.add(MaxPooling3D(pool_size=2, strides=2)) 
+        #model.add(Conv3D(256, kernel_size=(3, 3, 3), 
+        #         activation='relu')) 
+        #model.add(MaxPooling3D(pool_size=2, strides=2))
+        #model.add(BatchNormalization()) 
 
         model.add(Flatten()) 
         model.add(Dense(512, activation='relu'))

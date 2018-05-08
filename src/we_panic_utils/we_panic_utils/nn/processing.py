@@ -212,7 +212,7 @@ def get_sample_frames(sample):
     return filenames
   
 
-def build_image_sequence(frames, input_shape=(100, 100, 3), greyscale_on=False):
+def build_image_sequence(frames, input_shape=(32, 32, 3), greyscale_on=False):
     """
     return a list of images from filenames
     """
