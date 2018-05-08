@@ -45,7 +45,8 @@ class Engine():
                  input_shape=(60, 100, 100, 3),
                  cyclic_lr=[], 
                  output_shape=1,
-                 alt_opt_flow=False):
+                 alt_opt_flow=False,
+                 opt_flow=False):
 
         self.data = data
         self.model_type = model_type
@@ -64,8 +65,9 @@ class Engine():
         self.steps_per_epoch = steps_per_epoch
         self.cyclic_lr = cyclic_lr
         self.alt_opt_flow = alt_opt_flow
+        self.opt_flow = opt_flow
         
-        self.optical_flow_models = ["OpticalFlowCNN"]
+        self.optical_flow_models = ["OpticalFlowCNN", "3D-CNN"]
 
         
     def run2(self):
@@ -81,7 +83,7 @@ class Engine():
             print("Training the model.")
             #train_set, test_set, val_set = create_train_test_split_dataframes(self.data, self.metadata, self.outputs)
             train_set, test_set, val_set = ttswcvs3(self.data, self.metadata, self.outputs)
-            if not (self.model_type in self.optical_flow_models):
+            if not self.model_type in self.optical_flow_models and not self.opt_flow:
                 
                 train_generator = self.processor.train_generator_v3(train_set)
                 val_generator = self.processor.testing_generator_v3(val_set)
@@ -228,7 +230,7 @@ class Engine():
             return ResidualLSTM_v02(self.input_shape, self.output_shape)
         
         if self.model_type == "OpticalFlowCNN":
-            return OpticalFlowCNN((60, 100, 100, 2), self.output_shape)
+            return OpticalFlowCNN(self.input_shape, self.output_shape)
 
         raise ValueError("Model type does not exist: {}".format(self.model_type))
 

@@ -223,9 +223,19 @@ class CNN_3D(RegressionModel):
     def __init__(self, input_shape, output_shape):
         RegressionModel.__init__(self, input_shape, output_shape)
 
+
     def instantiate(self):
-        return super(CNN_3D, self).instantiate()
+        #return super(CNN_3D, self).instantiate()
     
+        model = self.get_model() 
+        metrics = ['mse']
+
+        optimizer = Adam(lr=1e-5, decay=1e-6)
+        #sgd = SGD(lr=0.0001, decay=1e-6, nesterov=True, clipnorm=0.1)
+        model.compile(loss='mean_squared_error', optimizer=optimizer, metrics=metrics)
+        print(model.summary())
+        return model
+
     def get_model(self):
         model = Sequential()
         
@@ -254,11 +264,19 @@ class CNN_3D(RegressionModel):
         model.add(BatchNormalization()) 
 
         model.add(Flatten()) 
-        model.add(Dense(512, activation='relu'))
+        model.add(Dense(512, activation='tanh'))
         model.add(Dropout(0.5))
-        model.add(Dense(512, activation='relu'))
+        model.add(Dense(512, activation='tanh'))
         model.add(Dropout(0.5))
+<<<<<<< HEAD
         model.add(Dense(self.output_shape, activation='linear'))
+=======
+<<<<<<< HEAD
+        model.add(Dense(self.output_shape, activation='linear'))
+=======
+        model.add(Dense(self.output_shape, activation='tanh'))
+>>>>>>> f407d0ddd1c55ab130795d30e0bb30f193d75ea5
+>>>>>>> 461d8720339f540588c99842e79b743a01aa2523
         return model
 
 

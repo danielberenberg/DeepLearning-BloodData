@@ -528,13 +528,16 @@ class FrameProcessor:
 
             frame_hor_dir = sorted(os.listdir(os.path.join(current_path, 'flow_h')))
             frame_ver_dir = sorted(os.listdir(os.path.join(current_path, 'flow_v')))
+
+            frame_hor_dir = [path for path in frame_hor_dir if path != 'flow_h' and path != 'flow_v']
+            frame_ver_dir = [path for path in frame_ver_dir if path != 'flow_h' and path != 'flow_v']
             #hard-code to 2 for now, because there are a lot of samples
             for _ in range(2):
                 start = random.randint(0, len(frame_hor_dir)-self.sequence_length)
                 frames_hor = frame_hor_dir[start:start+self.sequence_length]
-                frames_hor = [os.path.join(current_path, frame) for frame in frames_hor]
+                frames_hor = [os.path.join(os.path.join(current_path, 'flow_h'), frame) for frame in frames_hor]
                 frames_ver = frame_ver_dir[start:start+self.sequence_length]
-                frames_ver = [os.path.join(current_path, frame) for frame in frames_ver]
+                frames_ver = [os.path.join(os.path.join(current_path, 'flow_v'), frame) for frame in frames_ver]
 
                 sequence_hor = build_image_sequence(frames_hor, greyscale_on=self.greyscale_on)
                 sequence_ver = build_image_sequence(frames_ver, greyscale_on=self.greyscale_on)
@@ -554,7 +557,7 @@ class FrameProcessor:
 
     @threadsafe_generator    
     def train_generator_optical_flow(self, train_df):
-        bucket_list = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]
+        bucket_list = [.1, .2, .3, .4, .5, .6]
 
         while True:
             X, y = [], []
@@ -577,12 +580,15 @@ class FrameProcessor:
                 
                 frame_hor_dir = sorted(os.listdir(os.path.join(path,'flow_h')))
                 frame_ver_dir = sorted(os.listdir(os.path.join(path,'flow_v')))
-
+                
+                frame_hor_dir = [path for path in frame_hor_dir if path != 'flow_h' and path != 'flow_v']
+                frame_ver_dir = [path for path in frame_ver_dir if path != 'flow_h' and path != 'flow_v']
+                
                 start = random.randint(0, len(frame_hor_dir)-self.sequence_length)
                 frames_hor = frame_hor_dir[start:start+self.sequence_length]
-                frames_hor = [os.path.join(path, frame) for frame in frames_hor]
+                frames_hor = [os.path.join(os.path.join(path, 'flow_h'), frame) for frame in frames_hor]
                 frames_ver = frame_ver_dir[start:start+self.sequence_length]
-                frames_ver = [os.path.join(path, frame) for frame in frames_ver]
+                frames_ver = [os.path.join(os.path.join(path, 'flow_v'), frame) for frame in frames_ver]
 
                 sequence_hor = build_image_sequence(frames_hor, greyscale_on=self.greyscale_on)
                 sequence_ver = build_image_sequence(frames_ver, greyscale_on=self.greyscale_on)
