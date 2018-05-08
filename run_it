@@ -19,6 +19,7 @@
 
 pip install --upgrade src/we_panic_utils/
 <<<<<<< HEAD
+<<<<<<< HEAD
 python src/run_model.py 3D-CNN rsz32_optflow \
 --test \
 --partition_csv subject_data.csv \
@@ -28,6 +29,8 @@ python src/run_model.py 3D-CNN rsz32_optflow \
 --steps_per_epoch 400 \
 --batch_size 5 \
 =======
+=======
+>>>>>>> bc78e919c0a49fed8820e613df1e02f3629ad799
 python src/run_model.py 3D-CNN rsz \
 --train \
 --test \
@@ -37,6 +40,9 @@ python src/run_model.py 3D-CNN rsz \
 --epochs 200 \
 --steps_per_epoch 500 \
 --batch_size 2 \
+<<<<<<< HEAD
+>>>>>>> bc78e919c0a49fed8820e613df1e02f3629ad799
+=======
 >>>>>>> bc78e919c0a49fed8820e613df1e02f3629ad799
 --greyscale_on \
 --opt_flow \
