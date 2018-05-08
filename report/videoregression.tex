@@ -53,11 +53,47 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section[3]{Experimental Evaluation}
 \subsection[3.1] {Methodology}
-\subsection[3.2] {Results}
+\noindent Since our output is a single, real valued number, we use the mean squared error (MSE) and root mean squared error (RMSE) metrics in order to summarize the performance of the model at a given point.
+
+\noindent Since our dataset consisted of about 16 videos altogether, we used various on-the-fly (runtime) and offline (hard disk) augmentation techniques. Through several iterations, we eventually settled on scaling the speed of all videos in our dataset by all decade factors $a \in [0.5, 2.0]$ and assigning each of those newly augmented videos a label of $h_{r}a$, where $h_{r}$ is the heart rate of the original video. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection[3.2] {Experiments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection[3.2.1]{Preliminary Investigation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection[3.2.2]{Intermediary Experiments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection[3.2.3]{Temporal Stream}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection[3.2.4]{3D CNN Experiments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection[3.3]{Results}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection[3.3] {Discussion}
+Our results show a promising glimpse of possible optimal behavior when training on our modified 3D convolutional architecture using temporal stream data. We attribute this added performance to the fact that optical flow data not only embeds more information per frame, but it also simply has a richer, more spatially unique feature set than that of the raw blood data. This allows the model to not only use the nature of 3D convolutions to extract temporal data, but to benefit from the fact that optical flow data is more informative on the frame level.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section[4]{Code and Datasets}
 \noindent The code base consists of a library called we\_panic\_utils, which contains several subpackages and modules for various forms of augmentation, preprocessing scripts, and architecture descriptions, video editing, dataset manipulation and creation, and other general utilities. Our library can be found \href{https://github.com/danielberenberg/DeepLearning-BloodData}{here}. After obtaining the data and organizing it correctly, the data must be preprocessed by running the \texttt{generate\_dataset} in a bash or simialar unix terminal. After preprocessing the data, use the \texttt{run\_it} bash script to interact with our codebase.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section[5]{Conclusion}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Bibliography}
+\begin{enumerate}
+\item ``Facts \& Statistics.? Anxiety and Depression Association of America, ADAA, adaa.org/about-adaa/press-room/facts-statistics\#.%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item ``Panic Disorder.'' Anxiety and Depression Association of America, ADAA, adaa.org/understanding-anxiety/panic-disorder\#.%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item ``Panic Disorder: When Fear Overwhelms.'' National Institute of Mental Health, U.S. Department of Health and Human Services, \\ \href{www.nimh.nih.gov/health/publications/panic-disorder-when-fear-overwhelms/index.shtml}{link}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item  Ehlers, Anke, and Peter Breuer. ``How Good Are Patients with Panic Disorder at Perceiving Their Heartbeats?'' Biological Psychology 42, no. 1-2 (1996): 165-82. doi:10.1016/0301-0511(95)05153-8.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item Donahue, Jeff, et al. ``Long-Term Recurrent Convolutional Networks for Visual Recognition and Description.'' 2015 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2015, doi:10.1109/cvpr.2015.7298878.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item  Zhao, Rui, et al. ``Two-Stream RNN/CNN for Action Recognition in 3D Videos.'' 2017 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2017, doi:10.1109/iros.2017.8206288.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item Li, Chao, et al. ``End-to-End Learning of Deep Convolutional Neural Network for 3D Human Action Recognition.'' 2017 IEEE International Conference on Multimedia \& Expo Workshops (ICMEW), 2017, doi:10.1109/icmew.2017.8026281.
+\item Kelson R. T. Aires; Andre M. Santana; Adelardo A. D. Medeiros (2008). Optical Flow Using Color Information. ACM New York, NY, USA. ISBN 978-1-59593-753-7.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item D. Tran, L. Bourdev, R. Fergus, L. Torresani, and M. Paluri, Learning Spatiotemporal Features with 3D Convolutional Networks, ICCV 2015,
+\end{enumerate}
 \end{document}
