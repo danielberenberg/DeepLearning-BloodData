@@ -18,14 +18,14 @@
 #--vertical_flip \
 
 pip install --upgrade src/we_panic_utils/
-
-python src/run_model.py CNN+LSTM rsz2 \
+python src/run_model.py 3D-CNN rsz32 \
+--train \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/lrcn_4_gray_fix \
---input_dir run_history/lrcn_4_gray_fix \
+--output_dir run_history/CNN_3D_32x32 \
+--input_dir run_history/CNN_3D_32x32 \
 --epochs 100 \
---steps_per_epoch 400 \
---batch_size 8 \
---greyscale_on
-#--normalize \
+--steps_per_epoch 1 \
+--batch_size 12 \
+--greyscale_on \
+--normalize \
