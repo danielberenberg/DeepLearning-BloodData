@@ -220,9 +220,9 @@ class CNN_LSTM(RegressionModel):
 
 class CNN_3D(RegressionModel):
    
-    def __init__(self, input_shape, output_shape):
+    def __init__(self, input_shape, output_shape, norm=False):
         RegressionModel.__init__(self, input_shape, output_shape)
-
+        self.norm = norm
 
     def instantiate(self):
         #return super(CNN_3D, self).instantiate()
@@ -268,15 +268,10 @@ class CNN_3D(RegressionModel):
         model.add(Dropout(0.5))
         model.add(Dense(512, activation='tanh'))
         model.add(Dropout(0.5))
-<<<<<<< HEAD
-        model.add(Dense(self.output_shape, activation='linear'))
-=======
-<<<<<<< HEAD
-        model.add(Dense(self.output_shape, activation='linear'))
-=======
-        model.add(Dense(self.output_shape, activation='tanh'))
->>>>>>> f407d0ddd1c55ab130795d30e0bb30f193d75ea5
->>>>>>> 461d8720339f540588c99842e79b743a01aa2523
+        if self.norm:
+            model.add(Dense(self.output_shape, activation='tanh'))
+        else:
+            model.add(Dense(self.output_shape, activation='linear'))
         return model
 
 
