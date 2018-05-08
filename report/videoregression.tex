@@ -7,6 +7,7 @@
 \usepackage{algorithmicx}
 \usepackage[noend]{algpseudocode}
 \usepackage{hyperref}
+\usepackage{graphicx}
 \hypersetup{
     colorlinks=true,
     linkcolor=blue,
@@ -55,20 +56,37 @@
 \subsection[3.1] {Methodology}
 \noindent Since our output is a single, real valued number, we use the mean squared error (MSE) and root mean squared error (RMSE) metrics in order to summarize the performance of the model at a given point.
 
-\noindent Since our dataset consisted of about 16 videos altogether, we used various on-the-fly (runtime) and offline (hard disk) augmentation techniques. Through several iterations, we eventually settled on scaling the speed of all videos in our dataset by all decade factors $a \in [0.5, 2.0]$ and assigning each of those newly augmented videos a label of $h_{r}a$, where $h_{r}$ is the heart rate of the original video. 
+\noindent Since our dataset consisted of about 16 videos altogether, we used various on-the-fly (runtime) and offline (hard disk) augmentation techniques. Our runtime techniques consisted mainly of random perturbations to images in the way of aphine transformations such as rotation, shear. Through several iterations, we eventually settled on scaling the speed of all videos in our dataset by all decade factors $a \in [0.5, 2.0]$ and assigning each of those newly augmented videos a label of $h_{r}a$, where $h_{r}$ is the heart rate of the original video. 
 
+Below shows the dataset distribution before and after the augmentation steps. The left shows that the original distribution was sparsely, unevenly distributed and the resulting augmented set seems to simulate a more densely a uniformly distributed dataset.
+\begin{center}
+\begin{figure}[htb]
+\includegraphics[width=0.7\textwidth]{figs/dataset_distrib.pdf}
+\label{fig:distrib}
+\caption{Dataset distribution before and after augmentation.}
+\end{figure}
+\end{center}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection[3.2] {Experiments}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection[3.2.1]{Preliminary Investigation}
+In order to assess the feasibility of this task, we aimed to build a simple classifier to differentiate between low and high heart rates. We explored two models of the three: the Long-term Recurrent CNN (LRCN), and a variant of a 3D CNN.
+Our results proved to be fairly promising. The LRCN yielded a 90\% classification accuracy, while the 3D CNN yielded around 70\%.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection[3.2.2]{Intermediary Experiments}
+Given the initial success of the LRCN in classifying low and high heart rates, we naturally were interested in extending its capabilities for regression. To do so, we simply replaced the 2 node softmax activation dense layer with a 1 node linear activation dense layer. We tested several variants of LRCN models repurposed for regression-- namely, a LRCN with two extra dense layers before the output neuron, and a LRCN that employed a stacked LSTM.
+
+Given the power of 3D CNNs in exploiting the temporal nature of videos, we also explored various 3D CNN architectures. These included the C3D network [9], and a slightly stripped down variant. The C3D model, while powerful, proved to be incredibly cumbersome to run. 50 epochs-- around 20,000 iterations through the data-- took 50 hours to complete.
+\includegraphics[width=0.8\textwidth]{figs/losses.png}
+
+In retrospect, it may not be a wise choice to use LSTMs for this type of task, given that the LSTM seeks to discover long term dependencies, which are at best very week in a regular motion such as the beating of a pulse. Hence, we were directed towards the 3D CNN, despite its computational load. The threat of computational load caused us to experiment with CNNs and LSTMs further to no avail, the results of which are omitted due to irrelevance.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection[3.2.3]{Temporal Stream}
+We decided to investigate optical flow by computing adjacent optical flow (the motion relative displacement between two adjacent frames) using python's \texttt{cv2} library. The rationale behind this choice was the fact that optical flow data not only embeds the temporality in the spatial, frame level context, but also because the shear pixel variation applied 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection[3.2.4]{3D CNN Experiments}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection[3.3]{Results}
+In the $11^{th}$ hour of the project?s deadline, we revisited the 3D CNN, addressing the previous challenge of its computational demand by decreasing the size of our sequence frames to 32x32x1 and decreasing the size of our original network. This reduction in size brought increased our processing time by at least 100 fold, meaning the 3D CNN was suddenly viable for training. This iteration of experimental models were meant to determine whether or not the 3D CNN was viable. The results are forthcoming and will be provided in a subsequent release regarding this work, but they look quite promising, reaching best-yet MSE.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection[3.3] {Discussion}
 Our results show a promising glimpse of possible optimal behavior when training on our modified 3D convolutional architecture using temporal stream data. We attribute this added performance to the fact that optical flow data not only embeds more information per frame, but it also simply has a richer, more spatially unique feature set than that of the raw blood data. This allows the model to not only use the nature of 3D convolutions to extract temporal data, but to benefit from the fact that optical flow data is more informative on the frame level.
@@ -77,8 +95,9 @@ Our results show a promising glimpse of possible optimal behavior when training 
 \noindent The code base consists of a library called we\_panic\_utils, which contains several subpackages and modules for various forms of augmentation, preprocessing scripts, and architecture descriptions, video editing, dataset manipulation and creation, and other general utilities. Our library can be found \href{https://github.com/danielberenberg/DeepLearning-BloodData}{here}. After obtaining the data and organizing it correctly, the data must be preprocessed by running the \texttt{generate\_dataset} in a bash or simialar unix terminal. After preprocessing the data, use the \texttt{run\_it} bash script to interact with our codebase.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section[5]{Conclusion}
-
+Our project shows significant project in the way of developing accessible tools for mitigating health risks associated with panic disorder in that we are on the horizon of perhaps meaningful, generalized results of video heart rate regression by using deep three dimensional convolutional  neural networks. Though we did not perfectly meet a criterion ``good'' predictions as of present, we hope to continue our work by tweaking our highest performing 3D CNN architecture and adjusting hyper parameters. Overall, this work shows various possible frameworks for a neural video tasks. In addition we have contributed a significantly large, relatively easy and intuitive high level API for building and training video regression networks with the hope that this code can be used in future projects.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 \section*{Bibliography}
 \begin{enumerate}
 \item ``Facts \& Statistics.? Anxiety and Depression Association of America, ADAA, adaa.org/about-adaa/press-room/facts-statistics\#.%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
