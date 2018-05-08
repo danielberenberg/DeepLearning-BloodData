@@ -65,7 +65,7 @@ class Engine():
         self.cyclic_lr = cyclic_lr
         self.alt_opt_flow = alt_opt_flow
         
-        self.optical_flow_models = ["OpticalFlowCNN"]
+        self.optical_flow_models = ["OpticalFlowCNN", "3D-CNN"]
 
         
     def run2(self):
@@ -213,7 +213,7 @@ class Engine():
             return CNN_LSTM(self.input_shape, self.output_shape)
 
         if self.model_type == "3D-CNN":
-            return CNN_3D(self.input_shape, self.output_shape)
+            return CNN_3D((60, 32, 32, 2), self.output_shape)
         
         if self.model_type == "CNN_3D_small":
             return CNN_3D_small(self.input_shape, self.output_shape)

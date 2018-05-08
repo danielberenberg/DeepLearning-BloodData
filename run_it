@@ -18,14 +18,14 @@
 #--vertical_flip \
 
 pip install --upgrade src/we_panic_utils/
-python src/run_model.py 3D-CNN rsz32 \
+screen python src/run_model.py 3D-CNN rsz32_optflow \
 --train \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/CNN_3D_32x32 \
---input_dir run_history/CNN_3D_32x32 \
+--output_dir run_history/CNN_3D_32x32_optflow \
+--input_dir run_history/CNN_3D_32x32_optflow \
 --epochs 100 \
 --steps_per_epoch 400 \
---batch_size 12 \
+--batch_size 5 \
 --greyscale_on \
 --normalize \
