@@ -23,10 +23,10 @@ python src/run_model.py 3D-CNN rsz \
 --train \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/CNN_3D_32x32 \
---input_dir run_history/CNN_3D_32x32 \
---epochs 100 \
---steps_per_epoch 400 \
+--output_dir run_history/CNN_3D_32x32_nobuck \
+--input_dir run_history/CNN_3D_32x32_nobuck \
+--epochs 200 \
+--steps_per_epoch 500 \
 --batch_size 14 \
 --greyscale_on \
 --normalize \

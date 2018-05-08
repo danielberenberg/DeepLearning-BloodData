@@ -158,6 +158,12 @@ def parse_input():
                         help="squash labels down to -1 to 1 range, good for LSTM",
                         default=False,
                         action="store_true")
+    
+    parser.add_argument("--dimensions",
+                        help="frame dims",
+                        type=int,
+                        nargs=2,
+                        default=(32,32))
     return parser
 
 
@@ -384,10 +390,11 @@ if __name__ == "__main__":
                         greyscale_on=greyscale_on)
 
     input_shape = None
+    x, y = args.dimensions
     if greyscale_on:
-        input_shape = (60, 100, 100, 1)
+        input_shape = (60, y, x, 1)
     else:
-        input_shape = (60, 100, 100, 3)
+        input_shape = (60, x, y, 3)
     print(input_shape)
     cyclic_lr = [float(i) for i in args.cyclic_learning_rate]
 
