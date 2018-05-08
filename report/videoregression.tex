@@ -87,7 +87,7 @@ Given the power of 3D CNNs in exploiting the temporal nature of videos, we also 
 \end{figure}
 \end{center}
 
-In retrospect, it may not be a wise choice to use LSTMs for this type of task, given that the LSTM seeks to discover long term dependencies, which are at best very week in a regular motion such as the beating of a pulse. Hence, we were directed towards the 3D CNN, despite its computational load. The threat of computational load caused us to experiment with CNNs and LSTMs further to no avail, the results of which are omitted due to irrelevance.
+In retrospect, it may not be a wise choice to use LSTMs for this type of task, given that the LSTM seeks to discover long term dependencies, which are at best very weak in a regular motion such as the beating of a pulse. Hence, we were directed towards the 3D CNN, despite its computational load. The threat of computational load caused us to experiment with CNNs and LSTMs further to no avail, the results of which are omitted due to irrelevance.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection[3.2.3]{Temporal Stream}
 We decided to investigate optical flow by computing adjacent optical flow (the motion relative displacement between two adjacent frames) using python's \texttt{cv2} library. The rationale behind this choice was the fact that optical flow data not only embeds the temporality in the spatial, frame level context, but also because the shear pixel variation applied 
