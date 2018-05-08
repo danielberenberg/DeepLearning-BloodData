@@ -48,9 +48,10 @@
 
 \noindent A \textbf{two stream network} uses two forms of input: raw frame sequences and the corresponding sequence of optical flow images that describes the change between some pair of frames. Formally, optical flow is defined as the pattern of apparent motion of objects, surfaces, and edges in a visual scene caused by the relative motion between an observer and the scene [8]. Since the optical flow transformation embeds temporal data in a 2D image, the two stream CNN is entirely a convolutional neural network with some sequence of dense layers at the end. Our adaptation of the two stream CNN adopts the temporal stream of the data and leaves the spatial stream. As noted previously, each frame is inconsequential in determining the heart rate of the video; the temporal correlations and color variations over time are much more semantically meaningful.
 
-\noindent Finally, our third perspective on video regression stems from the \textbf{3D convolutional network}, which considers a volume and convolves throughout it, learning hierarchical features as per 2D. We use a stripped down, version of the C3D  [9], a commonly known and ?general purpose? 3D convolutional network, in which we several layers of filters in order to allow it to fit on our single Tesla K80.
+Finally, our third perspective on video regression stems from the 3D convolutional network, which considers a volume and convolves throughout it, learning hierarchical features and passing it to the next layer. Initially, each of these models was a network which had a single, linearly activated output node for regression. Ultimately, we also experimented with scaling the data to fall within the range of -1 to 1, which our LSTM models benefitted from. Out of all the models that were each tested, the 3D CNN ultimately performed the best.
 
-\noindent Each of these models is a network which has a single, linearly activated output node for regression. These algorithms were each tested, with the 3D CNN ultimately performing the best.
+Initially, each of these models was a network which had a single, linearly activated output node for regression. Ultimately, we also experimented with scaling the data to fall within the range of -1 to 1, which our LSTM models benefitted from. Out of all the models that were each tested, the 3D CNN ultimately performed the best.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section[3]{Experimental Evaluation}
 \subsection[3.1] {Methodology}

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  8 MAY 2018 03:56
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  8 MAY 2018 04:13
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -380,15 +380,20 @@ LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <6> not available
 File: figs/dataset_distrib.pdf Graphic file (type pdf)
 
 <use figs/dataset_distrib.pdf>
-Package pdftex.def Info: figs/dataset_distrib.pdf used on input line 64.
+Package pdftex.def Info: figs/dataset_distrib.pdf used on input line 65.
 (pdftex.def)             Requested size: 241.49895pt x 161.00148pt.
  [3]
 <figs/losses.png, id=85, 433.62pt x 289.08pt>
 File: figs/losses.png Graphic file (type png)
  <use figs/losses.png>
-Package pdftex.def Info: figs/losses.png used on input line 85.
+Package pdftex.def Info: figs/losses.png used on input line 82.
 (pdftex.def)             Requested size: 276.00105pt x 184.00926pt.
- [4 <./figs/dataset_distrib.pdf>] [5 <./figs/losses.png>]
+
+Overfull \hbox (127.40887pt too wide) in paragraph at lines 81--83
+\OT1/cmr/m/n/10 through the data-- took 50 hours to com-plete. [] 
+ []
+
+[4 <./figs/dataset_distrib.pdf>] [5 <./figs/losses.png>] [6]
 Overfull \hbox (1.90802pt too wide) in paragraph at lines 105--106
 []\OT1/cmr/m/n/10 ``Panic Dis-or-der.'' Anx-i-ety and De-pres-sion As-so-ci-a-t
 ion of Amer-ica, ADAA,
@@ -400,7 +405,7 @@ Overfull \hbox (20.88971pt too wide) in paragraph at lines 110--112
 pr.2015.7298878. 
  []
 
-[6]
+
 Overfull \hbox (82.33427pt too wide) in paragraph at lines 114--115
 \OT1/cmr/m/n/10 fer-ence on Mul-ti-me-dia & Expo Work-shops (ICMEW), 2017, doi:
 10.1109/icmew.2017.8026281. 
@@ -423,11 +428,11 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 119.
 Here is how much of TeX's memory you used:
  6711 strings out of 492995
  96972 string characters out of 6132704
- 186465 words of memory out of 5000000
+ 187465 words of memory out of 5000000
  10141 multiletter control sequences out of 15000+600000
  13383 words of font info for 53 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 31i,11n,28p,899b,1300s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 31i,11n,28p,899b,1231s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts
 /cm/cmbx10.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/
 cm/cmbx12.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/c
@@ -440,7 +445,7 @@ b></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
 ></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb><
 /usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></
 usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
-Output written on videoregression.pdf (7 pages, 188416 bytes).
+Output written on videoregression.pdf (7 pages, 188972 bytes).
 PDF statistics:
  202 PDF objects out of 1000 (max. 8388607)
  148 compressed objects within 2 object streams
