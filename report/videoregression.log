@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  8 MAY 2018 01:53
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  8 MAY 2018 04:23
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -278,27 +278,30 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 )
 \Hy@SectionHShift=\skip49
 )
-Package hyperref Info: Option `colorlinks' set `true' on input line 15.
+Package hyperref Info: Option `colorlinks' set `true' on input line 16.
 
-(./videoregression.aux)
+(./videoregression.aux
+
+LaTeX Warning: Label `fig:distrib' multiply defined.
+
+)
 \openout1 = `videoregression.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-
-(/usr/local/texlive/2017/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+ (/usr/local/texlive/2017/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count119
 \scratchdimen=\dimen118
@@ -338,7 +341,7 @@ File: color.cfg 2016/01/02 v1.6 sample color configuration
 )
 Package color Info: Driver file: pdftex.def on input line 147.
 )
-Package hyperref Info: Link coloring ON on input line 26.
+Package hyperref Info: Link coloring ON on input line 27.
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
@@ -348,64 +351,90 @@ Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
 \c@section@level=\count125
 )
-LaTeX Info: Redefining \ref on input line 26.
-LaTeX Info: Redefining \pageref on input line 26.
-LaTeX Info: Redefining \nameref on input line 26.
+LaTeX Info: Redefining \ref on input line 27.
+LaTeX Info: Redefining \pageref on input line 27.
+LaTeX Info: Redefining \nameref on input line 27.
 
 (./videoregression.out) (./videoregression.out)
 \@outlinefile=\write3
 \openout3 = `videoregression.out'.
 
-LaTeX Font Info:    Try loading font information for U+msa on input line 28.
+LaTeX Font Info:    Try loading font information for U+msa on input line 29.
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 28.
+LaTeX Font Info:    Try loading font information for U+msb on input line 29.
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 28.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 29.
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <6> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 28.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 29.
  [1
 
 {/usr/local/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 63.
+<figs/dataset_distrib.pdf, id=79, 433.62pt x 289.08pt>
+File: figs/dataset_distrib.pdf Graphic file (type pdf)
+
+<use figs/dataset_distrib.pdf>
+Package pdftex.def Info: figs/dataset_distrib.pdf used on input line 65.
+(pdftex.def)             Requested size: 241.49895pt x 161.00148pt.
  [3]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 63.
+<figs/losses.png, id=85, 433.62pt x 289.08pt>
+File: figs/losses.png Graphic file (type png)
+ <use figs/losses.png>
+Package pdftex.def Info: figs/losses.png used on input line 84.
+(pdftex.def)             Requested size: 276.00105pt x 184.00926pt.
+ [4 <./figs/dataset_distrib.pdf>] [5 <./figs/losses.png>] [6]
+Overfull \hbox (1.90802pt too wide) in paragraph at lines 111--112
+[]\OT1/cmr/m/n/10 ``Panic Dis-or-der.'' Anx-i-ety and De-pres-sion As-so-ci-a-t
+ion of Amer-ica, ADAA,
+ []
 
-(./videoregression.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 63.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 63.
+
+Overfull \hbox (20.88971pt too wide) in paragraph at lines 116--118
+\OT1/cmr/m/n/10 Vi-sion and Pat-tern Recog-ni-tion (CVPR), 2015, doi:10.1109/cv
+pr.2015.7298878. 
+ []
 
 
-Package rerunfilecheck Warning: File `videoregression.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
+Overfull \hbox (82.33427pt too wide) in paragraph at lines 120--121
+\OT1/cmr/m/n/10 fer-ence on Mul-ti-me-dia & Expo Work-shops (ICMEW), 2017, doi:
+10.1109/icmew.2017.8026281. 
+ []
 
-Package rerunfilecheck Info: Checksums for `videoregression.out':
-(rerunfilecheck)             Before: D41D8CD98F00B204E9800998ECF8427E;0
-(rerunfilecheck)             After:  8F567A2F85BE1C4BBA44DB3C74DE8CB7;441.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 63.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 125.
+[7]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 125.
+ (./videoregression.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 125.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 125.
+Package rerunfilecheck Info: File `videoregression.out' has not changed.
+(rerunfilecheck)             Checksum: BC13E1BF02C2C686D5FFBEDAE5B50768;701.
+
+
+LaTeX Warning: There were multiply-defined labels.
+
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 125.
  )
 (\end occurred inside a group at level 1)
 
-### semi simple group (level 1) entered at line 25 (\begingroup)
+### semi simple group (level 1) entered at line 26 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 6661 strings out of 492995
- 96302 string characters out of 6132704
- 186438 words of memory out of 5000000
- 10114 multiletter control sequences out of 15000+600000
+ 6712 strings out of 492995
+ 96980 string characters out of 6132704
+ 187513 words of memory out of 5000000
+ 10141 multiletter control sequences out of 15000+600000
  13383 words of font info for 53 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 31i,11n,28p,899b,1234s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 31i,11n,28p,899b,1231s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts
 /cm/cmbx10.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/
 cm/cmbx12.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/c
@@ -414,13 +443,14 @@ m/cmmi10.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm
 mr10.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmr
 12.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17
 .pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pf
-b></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb>
-</usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb><
-/usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
-Output written on videoregression.pdf (3 pages, 138809 bytes).
+b></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
+></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb><
+/usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></
+usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
+Output written on videoregression.pdf (7 pages, 189077 bytes).
 PDF statistics:
- 79 PDF objects out of 1000 (max. 8388607)
- 62 compressed objects within 1 object stream
- 14 named destinations out of 1000 (max. 500000)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 203 PDF objects out of 1000 (max. 8388607)
+ 149 compressed objects within 2 object streams
+ 34 named destinations out of 1000 (max. 500000)
+ 123 words of extra memory for PDF output out of 10000 (max. 10000000)
 
