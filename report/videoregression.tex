@@ -79,7 +79,13 @@ Our results proved to be fairly promising. The LRCN yielded a 90\% classificatio
 Given the initial success of the LRCN in classifying low and high heart rates, we naturally were interested in extending its capabilities for regression. To do so, we simply replaced the 2 node softmax activation dense layer with a 1 node linear activation dense layer. We tested several variants of LRCN models repurposed for regression-- namely, a LRCN with two extra dense layers before the output neuron, and a LRCN that employed a stacked LSTM.
 
 Given the power of 3D CNNs in exploiting the temporal nature of videos, we also explored various 3D CNN architectures. These included the C3D network [9], and a slightly stripped down variant. The C3D model, while powerful, proved to be incredibly cumbersome to run. 50 epochs-- around 20,000 iterations through the data-- took 50 hours to complete.
+\begin{center}
+\begin{figure}[htb]
 \includegraphics[width=0.8\textwidth]{figs/losses.png}
+\label{fig:distrib}
+\caption{Dataset distribution before and after augmentation.}
+\end{figure}
+\end{center}
 
 In retrospect, it may not be a wise choice to use LSTMs for this type of task, given that the LSTM seeks to discover long term dependencies, which are at best very week in a regular motion such as the beating of a pulse. Hence, we were directed towards the 3D CNN, despite its computational load. The threat of computational load caused us to experiment with CNNs and LSTMs further to no avail, the results of which are omitted due to irrelevance.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
