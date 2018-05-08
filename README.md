@@ -53,7 +53,7 @@ Once you have the above steps completed, you can begin preprocessing data. Run t
 This does the following:
 * augment the speed of the each of the subject videos ten times 
 * convert each .mov file into a directory of frames and convert each .mov file into 30 fps
-* resize all frames to 100x100x1
+* resize all frames to 32x32x3
 
 This may take upwards of an hour to finish.
 
