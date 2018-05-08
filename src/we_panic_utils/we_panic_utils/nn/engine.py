@@ -83,7 +83,7 @@ class Engine():
             print("Training the model.")
             #train_set, test_set, val_set = create_train_test_split_dataframes(self.data, self.metadata, self.outputs)
             train_set, test_set, val_set = ttswcvs3(self.data, self.metadata, self.outputs)
-            if not self.model_type in self.optical_flow_models and not self.opt_flow:
+            if not (self.model_type in self.optical_flow_models and self.opt_flow):
                 
                 train_generator = self.processor.train_generator_v3(train_set)
                 val_generator = self.processor.testing_generator_v3(val_set)
@@ -208,6 +208,9 @@ class Engine():
         """
         choose a model based on preferences
         """
+        norm=False
+        if self.processor.scaler:
+            norm = True
         if self.model_type == "C3D": 
             return C3D(self.input_shape, self.output_shape)
         
@@ -215,7 +218,7 @@ class Engine():
             return CNN_LSTM(self.input_shape, self.output_shape)
 
         if self.model_type == "3D-CNN":
-            return CNN_3D(self.input_shape, self.output_shape)
+            return CNN_3D(self.input_shape, self.output_shape, norm=norm)
         
         if self.model_type == "CNN_3D_small":
             return CNN_3D_small(self.input_shape, self.output_shape)
