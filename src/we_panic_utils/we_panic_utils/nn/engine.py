@@ -109,7 +109,7 @@ class Engine():
             test_results_file = os.path.join(self.outputs, "test_results.log")
             train_results = None
             train_callback = None
-            if self.processor.scaler:
+            if True:
                 train_results = os.path.join(self.outputs, "unnormalized_training.log")
                 train_callback = TestResultsCallback(self.processor, train_set, 
                         train_results, self.batch_size, gen_type, epochs=1)

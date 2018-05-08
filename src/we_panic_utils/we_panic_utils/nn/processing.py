@@ -568,9 +568,9 @@ class FrameProcessor:
                 #path = list(rand_subj_df["Path"])[0]
                 #hr = list(rand_subj_df["Heart Rate"])[0]
                 
-                random_index = random.randint(0, len(train_df))
-                path = list(train_df['Path'])[0]
-                hr = list(train_df['Heart Rate'])[0]
+                random_index = random.randint(0, len(train_df)-1)
+                path = list(train_df['Path'])[random_index]
+                hr = list(train_df['Heart Rate'])[random_index]
                 
                 if self.scaler:
                     hr = self.scaler.transform(hr)[0][0]
@@ -640,9 +640,9 @@ class FrameProcessor:
                 #path = list(rand_subj_df["Path"])[0]
                 #hr = list(rand_subj_df["Heart Rate"])[0]
                 
-                random_index = random.randint(0, len(train_df))
-                path = list(train_df['Path'])[0]
-                hr = list(train_df['Heart Rate'])[0]
+                random_index = random.randint(0, len(train_df)-1)
+                path = list(train_df['Path'])[random_index]
+                hr = list(train_df['Heart Rate'])[random_index]
 
                 if self.scaler:
                     hr = self.scaler.transform(hr)[0][0]
