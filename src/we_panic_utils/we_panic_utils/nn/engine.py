@@ -45,7 +45,8 @@ class Engine():
                  input_shape=(60, 100, 100, 3),
                  cyclic_lr=[], 
                  output_shape=1,
-                 alt_opt_flow=False):
+                 alt_opt_flow=False,
+                 opt_flow=False):
 
         self.data = data
         self.model_type = model_type
@@ -64,8 +65,9 @@ class Engine():
         self.steps_per_epoch = steps_per_epoch
         self.cyclic_lr = cyclic_lr
         self.alt_opt_flow = alt_opt_flow
+        self.opt_flow = opt_flow
         
-        self.optical_flow_models = ["OpticalFlowCNN"]
+        self.optical_flow_models = ["OpticalFlowCNN", "3D-CNN"]
 
         
     def run2(self):
@@ -79,9 +81,9 @@ class Engine():
 
         if self.train and not self.load:
             print("Training the model.")
-            train_set, test_set, val_set = create_train_test_split_dataframes(self.data, self.metadata, self.outputs)
-            
-            if not (self.model_type in self.optical_flow_models):
+            #train_set, test_set, val_set = create_train_test_split_dataframes(self.data, self.metadata, self.outputs)
+            train_set, test_set, val_set = ttswcvs3(self.data, self.metadata, self.outputs)
+            if not (self.model_type in self.optical_flow_models and self.opt_flow):
                 
                 train_generator = self.processor.train_generator_v3(train_set)
                 val_generator = self.processor.testing_generator_v3(val_set)
@@ -107,10 +109,18 @@ class Engine():
 
                 
             test_results_file = os.path.join(self.outputs, "test_results.log")
+            train_results = None
+            train_callback = None
+            if True:
+                train_results = os.path.join(self.outputs, "unnormalized_training.log")
+                train_callback = TestResultsCallback(self.processor, train_set, 
+                        train_results, self.batch_size, gen_type, epochs=1)
             test_callback = TestResultsCallback(self.processor, test_set, test_results_file, self.batch_size, gen_type)
             
             callbacks = [csv_logger, checkpointer, test_callback]    
-             
+            if train_callback:
+                callbacks.append(train_callback)
+
             if self.cyclic_lr != []:
                 base, mx = self.cyclic_lr
 
@@ -198,6 +208,9 @@ class Engine():
         """
         choose a model based on preferences
         """
+        norm=False
+        if self.processor.scaler:
+            norm = True
         if self.model_type == "C3D": 
             return C3D(self.input_shape, self.output_shape)
         
@@ -205,7 +218,7 @@ class Engine():
             return CNN_LSTM(self.input_shape, self.output_shape)
 
         if self.model_type == "3D-CNN":
-            return CNN_3D(self.input_shape, self.output_shape)
+            return CNN_3D(self.input_shape, self.output_shape, norm=norm)
         
         if self.model_type == "CNN_3D_small":
             return CNN_3D_small(self.input_shape, self.output_shape)
@@ -220,20 +233,22 @@ class Engine():
             return ResidualLSTM_v02(self.input_shape, self.output_shape)
         
         if self.model_type == "OpticalFlowCNN":
-            return OpticalFlowCNN((60, 100, 100, 2), self.output_shape)
+            return OpticalFlowCNN(self.input_shape, self.output_shape)
 
         raise ValueError("Model type does not exist: {}".format(self.model_type))
 
 class TestResultsCallback(Callback):
-    def __init__(self, test_gen, test_set, log_file, batch_size, gen_type):
+    def __init__(self, test_gen, test_set, log_file, batch_size, gen_type, epochs = 5):
         self.test_gen = test_gen
         self.test_set = test_set
         self.log_file = log_file
         self.batch_size = batch_size
         self.gen_type = gen_type
+        self.epochs=epochs
 
     def on_epoch_end(self, epoch, logs):
-        if (epoch+1) % 5 == 0:
+        #get the actual mse
+        if (epoch+1) % self.epochs == 0:
             print('Logging tests at epoch', epoch)
             with open(self.log_file, 'a') as log:
                 gen = None

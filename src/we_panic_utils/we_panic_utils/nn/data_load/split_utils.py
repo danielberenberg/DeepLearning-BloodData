@@ -27,6 +27,7 @@ def get_testing_set(df_in, size):
     selected = []
     while(len(selected) < size):
         chosen_bucket = l[random.randint(0, len(l)-1)]
+        
         bucket = df_in[buckets(df_in, chosen_bucket)]
         if (len(bucket) > 1 and chosen_bucket not in selected):
             selected.append(chosen_bucket)

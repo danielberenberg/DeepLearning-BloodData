@@ -207,11 +207,12 @@ class CNN_LSTM(RegressionModel):
         model.add(TimeDistributed(Flatten()))
 
         model.add(Dropout(0.5))
+        model.add(LSTM(512, return_sequences=True, dropout=0.5)) 
         model.add(LSTM(512, return_sequences=False, dropout=0.5)) 
-        model.add(Dense(512, activation='relu'))
-        model.add(Dropout(0.5))
-        model.add(Dense(512, activation='relu'))
-        model.add(Dropout(0.5))
+        #model.add(Dense(512, activation='relu'))
+        #model.add(Dropout(0.5))
+        #model.add(Dense(512, activation='relu'))
+        #model.add(Dropout(0.5))
 
         model.add(Dense(self.output_shape, activation='linear'))
 
@@ -219,38 +220,58 @@ class CNN_LSTM(RegressionModel):
 
 class CNN_3D(RegressionModel):
    
-    def __init__(self, input_shape, output_shape):
+    def __init__(self, input_shape, output_shape, norm=False):
         RegressionModel.__init__(self, input_shape, output_shape)
+        self.norm = norm
 
     def instantiate(self):
-        return super(CNN_3D, self).instantiate()
+        #return super(CNN_3D, self).instantiate()
     
+        model = self.get_model() 
+        metrics = ['mse']
+
+        optimizer = Adam(lr=1e-5, decay=1e-6)
+        #sgd = SGD(lr=0.0001, decay=1e-6, nesterov=True, clipnorm=0.1)
+        model.compile(loss='mean_squared_error', optimizer=optimizer, metrics=metrics)
+        print(model.summary())
+        return model
+
     def get_model(self):
         model = Sequential()
         
         model.add(Conv3D(64, kernel_size=(3, 3, 3), 
                   input_shape=self.input_shape, activation='relu'))
         model.add(MaxPooling3D(pool_size=2, strides=(1, 2, 2)))
+
         model.add(Dropout(0.5)) 
         model.add(Conv3D(128, kernel_size=(3, 3, 3), 
                   activation='relu')) 
+        model.add(BatchNormalization()) 
+
         model.add(MaxPooling3D(pool_size=2, strides=2))
         model.add(Dropout(0.5))
-        model.add(Conv3D(128, kernel_size=(3, 3, 3), 
+        model.add(Conv3D(128, kernel_size=(3, 2, 2), 
                   activation='relu')) 
-        model.add(Conv3D(256, kernel_size=(3, 3, 3), 
-                  activation='relu'))
+        model.add(BatchNormalization())        
+
+        model.add(Conv3D(256, kernel_size=(3, 2, 2), 
+                  activation='relu')) 
+        model.add(BatchNormalization())
+
         model.add(MaxPooling3D(pool_size=2, strides=2)) 
-        model.add(Conv3D(256, kernel_size=(3, 3, 3), 
+        model.add(Conv3D(256, kernel_size=(3, 2, 2), 
                  activation='relu')) 
-        model.add(MaxPooling3D(pool_size=2, strides=2))
-       
+        model.add(BatchNormalization()) 
+
         model.add(Flatten()) 
-        model.add(Dense(1024, activation='relu'))
+        model.add(Dense(512, activation='tanh'))
         model.add(Dropout(0.5))
-        model.add(Dense(1024, activation='relu'))
+        model.add(Dense(512, activation='tanh'))
         model.add(Dropout(0.5))
-        model.add(Dense(self.output_shape, activation='linear'))
+        if self.norm:
+            model.add(Dense(self.output_shape, activation='tanh'))
+        else:
+            model.add(Dense(self.output_shape, activation='linear'))
         return model
 
 
@@ -414,10 +435,10 @@ class ResidualLSTM_v02(RegressionModel):
     def instantiate(self):
         model = self.get_model() 
         #optimizer = RMSprop(lr=0.0001, rho=0.9, decay=0.0, epsilon=1e-08)
-        #optimizer = Adam(lr=1e-5, decay=1e-6)
+        optimizer = Adam(lr=1e-5, decay=1e-6)
         #optimizer = SGD(lr=0.001, momentum=0.0, decay=0.0)
         metrics = ['mse']
-        model.compile(loss='mean_squared_error', optimizer='adam', metrics=metrics)
+        model.compile(loss='mean_squared_error', optimizer=optimizer, metrics=metrics)
         print(model.summary())
         return model
  
@@ -435,30 +456,30 @@ class ResidualLSTM_v02(RegressionModel):
         
         x = TimeDistributed(BatchNormalization())(x) 
         x = TimeDistributed(Conv2D(256,(3,3), padding="same",activation="relu",kernel_initializer="he_normal"))(x)
-        x = TimeDistributed(Conv2D(256,(3,3), padding="same",kernel_initializer="he_normal",activation="relu"))(x)
+        #x = TimeDistributed(Conv2D(256,(3,3), padding="same",kernel_initializer="he_normal",activation="relu"))(x)
         x = TimeDistributed(MaxPooling2D((2,2), strides=(2,2)))(x)  
 
         x = TimeDistributed(BatchNormalization())(x) 
         x = TimeDistributed(Conv2D(512, (3,3), padding='same', kernel_initializer="he_normal",activation='relu'))(x)
-        x = TimeDistributed(Conv2D(512, (3,3), padding='same', kernel_initializer="he_normal",activation='relu'))(x)
+        #x = TimeDistributed(Conv2D(512, (3,3), padding='same', kernel_initializer="he_normal",activation='relu'))(x)
 
         x = TimeDistributed(Flatten())(x)
 
-        lstm1 = LSTM(256, return_sequences=True, kernel_initializer="he_normal",dropout=0.5)(x)
-        lstm2 = LSTM(256, return_sequences=True, kernel_initializer="he_normal",dropout=0.5)(lstm1)
+        lstm1 = LSTM(256, return_sequences=True, kernel_initializer="he_normal",activation='tanh', dropout=0.5)(x)
+        lstm2 = LSTM(256, return_sequences=True, kernel_initializer="he_normal",activation='tanh', dropout=0.5)(lstm1)
         
         x = add([lstm1, lstm2])
          
         fltn = TimeDistributed(Flatten())(x)
-        drp = Dropout(0.5)(fltn)
-        final_lstm = LSTM(256, kernel_initializer="he_normal",dropout=0.5, return_sequences=False)(fltn) 
+        drp = Dropout(0.6)(fltn)
+        final_lstm = LSTM(256, kernel_initializer="he_normal",dropout=0.5, activation='tanh', return_sequences=False)(fltn) 
 
-        lstm1 = TimeDistributed(BatchNormalization())(lstm1) 
-        dense = Dropout(0.5)(final_lstm)
-        dense = Dense(1024,kernel_initializer="he_normal", activation='relu')(dense)
-        dense = Dense(1024,kernel_initializer="he_normal", activation='relu')(dense)
+        #lstm1 = TimeDistributed(BatchNormalization())(lstm1) 
+        #dense = Dropout(0.5)(final_lstm)
+        #dense = Dense(1024,kernel_initializer="he_normal", activation='relu')(dense)
+        #dense = Dense(1024,kernel_initializer="he_normal", activation='relu')(dense)
         #dense = Dense(2048, activation='relu')(dense)
-        outputs = Dense(self.output_shape, kernel_initializer="he_normal",activation='linear')(dense)
+        outputs = Dense(self.output_shape, kernel_initializer="he_normal",activation='linear')(final_lstm)
 
         model = Model(inputs=inputs, outputs=outputs)
         return model

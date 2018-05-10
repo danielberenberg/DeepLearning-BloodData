@@ -212,7 +212,7 @@ def get_sample_frames(sample):
     return filenames
   
 
-def build_image_sequence(frames, input_shape=(100, 100, 3), greyscale_on=False):
+def build_image_sequence(frames, input_shape=(32, 32, 3), greyscale_on=False):
     """
     return a list of images from filenames
     """
@@ -387,6 +387,10 @@ class FrameProcessor:
             X, y = [], []
             current_path = paths[i]
             current_hr = hr[i]
+            
+            if self.scaler:
+                current_hr = self.scaler.transform(current_hr)[0][0]
+            
             frame_dir = sorted(os.listdir(current_path))
             #hard-code to 2 for now, because there are a lot of samples
             for _ in range(2):
@@ -524,13 +528,16 @@ class FrameProcessor:
 
             frame_hor_dir = sorted(os.listdir(os.path.join(current_path, 'flow_h')))
             frame_ver_dir = sorted(os.listdir(os.path.join(current_path, 'flow_v')))
+
+            frame_hor_dir = [path for path in frame_hor_dir if path != 'flow_h' and path != 'flow_v']
+            frame_ver_dir = [path for path in frame_ver_dir if path != 'flow_h' and path != 'flow_v']
             #hard-code to 2 for now, because there are a lot of samples
             for _ in range(2):
                 start = random.randint(0, len(frame_hor_dir)-self.sequence_length)
                 frames_hor = frame_hor_dir[start:start+self.sequence_length]
-                frames_hor = [os.path.join(current_path, frame) for frame in frames_hor]
+                frames_hor = [os.path.join(os.path.join(current_path, 'flow_h'), frame) for frame in frames_hor]
                 frames_ver = frame_ver_dir[start:start+self.sequence_length]
-                frames_ver = [os.path.join(current_path, frame) for frame in frames_ver]
+                frames_ver = [os.path.join(os.path.join(current_path, 'flow_v'), frame) for frame in frames_ver]
 
                 sequence_hor = build_image_sequence(frames_hor, greyscale_on=self.greyscale_on)
                 sequence_ver = build_image_sequence(frames_ver, greyscale_on=self.greyscale_on)
@@ -550,31 +557,38 @@ class FrameProcessor:
 
     @threadsafe_generator    
     def train_generator_optical_flow(self, train_df):
-        bucket_list = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]
+        bucket_list = [.1, .2, .3, .4, .5, .6]
 
         while True:
             X, y = [], []
             for _ in range(self.batch_size):
                 
-                rand_bucket = bucket_list[random.randint(0, len(bucket_list)-1)]
-                df = train_df[buckets(train_df, rand_bucket)]
-                rand_subj_index = random.randint(0, len(df)-1)
-                rand_subj_df = df[rand_subj_index:rand_subj_index+1]
+                #rand_bucket = bucket_list[random.randint(0, len(bucket_list)-1)]
+                #df = train_df[buckets(train_df, rand_bucket)]
+                #rand_subj_index = random.randint(0, len(df)-1)
+                #rand_subj_df = df[rand_subj_index:rand_subj_index+1]
 
-                path = list(rand_subj_df["Path"])[0]
-                hr = list(rand_subj_df["Heart Rate"])[0]
+                #path = list(rand_subj_df["Path"])[0]
+                #hr = list(rand_subj_df["Heart Rate"])[0]
+                
+                random_index = random.randint(0, len(train_df)-1)
+                path = list(train_df['Path'])[random_index]
+                hr = list(train_df['Heart Rate'])[random_index]
                 
                 if self.scaler:
                     hr = self.scaler.transform(hr)[0][0]
                 
                 frame_hor_dir = sorted(os.listdir(os.path.join(path,'flow_h')))
                 frame_ver_dir = sorted(os.listdir(os.path.join(path,'flow_v')))
-
+                
+                frame_hor_dir = [path for path in frame_hor_dir if path != 'flow_h' and path != 'flow_v']
+                frame_ver_dir = [path for path in frame_ver_dir if path != 'flow_h' and path != 'flow_v']
+                
                 start = random.randint(0, len(frame_hor_dir)-self.sequence_length)
                 frames_hor = frame_hor_dir[start:start+self.sequence_length]
-                frames_hor = [os.path.join(path, frame) for frame in frames_hor]
+                frames_hor = [os.path.join(os.path.join(path, 'flow_h'), frame) for frame in frames_hor]
                 frames_ver = frame_ver_dir[start:start+self.sequence_length]
-                frames_ver = [os.path.join(path, frame) for frame in frames_ver]
+                frames_ver = [os.path.join(os.path.join(path, 'flow_v'), frame) for frame in frames_ver]
 
                 sequence_hor = build_image_sequence(frames_hor, greyscale_on=self.greyscale_on)
                 sequence_ver = build_image_sequence(frames_ver, greyscale_on=self.greyscale_on)
@@ -618,20 +632,27 @@ class FrameProcessor:
             yield np.array(X), np.array(y)
 
     def train_generator_v3(self, train_df):
-        bucket_list = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]
+        #bucket_list = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]
+        bucket_list = [.1, .2, .3, .4, .5, .6]
         while True:
             X, y = [], []
 
             for _ in range(self.batch_size):
-                rand_bucket = bucket_list[random.randint(0, len(bucket_list)-1)]
-                df = train_df[buckets(train_df, rand_bucket)]
-                #print(len(df))
-                rand_subj_index = random.randint(0, len(df)-1)
-                rand_subj_df = df[rand_subj_index:rand_subj_index+1]
- 
-                path = list(rand_subj_df["Path"])[0]
-                hr = list(rand_subj_df["Heart Rate"])[0]
+                #rand_bucket = bucket_list[random.randint(0, len(bucket_list)-1)]
+                #df = train_df[buckets(train_df, rand_bucket)]
+                #rand_subj_index = random.randint(0, len(df)-1)
+                #rand_subj_df = df[rand_subj_index:rand_subj_index+1]
+                
+                #path = list(rand_subj_df["Path"])[0]
+                #hr = list(rand_subj_df["Heart Rate"])[0]
+                
+                random_index = random.randint(0, len(train_df)-1)
+                path = list(train_df['Path'])[random_index]
+                hr = list(train_df['Heart Rate'])[random_index]
 
+                if self.scaler:
+                    hr = self.scaler.transform(hr)[0][0]
+               
                 frame_dir = sorted(os.listdir(path))
                 start = random.randint(0, len(frame_dir)-self.sequence_length)
                 frames = frame_dir[start:start+self.sequence_length]

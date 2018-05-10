@@ -114,7 +114,7 @@ def create_train_test_split_dataframes(data_path, metadata, output_dir,
     """
 
     metadf = pd.read_csv(metadata)
-    metadf['Path'] = metadf.apply (lambda row: os.path.join(data_path, "S" + row["Subject"].zfill(4), 
+    metadf['Path'] = metadf.apply (lambda row: os.path.join(data_path, "S" + str(row["Subject"]).zfill(4), 
         "Trial%d_frames" % row["Trial"]), axis=1)
     
     real_subjects_df = metadf[metadf['Subject'].apply(lambda x: x.isdigit())]

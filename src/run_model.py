@@ -158,6 +158,17 @@ def parse_input():
                         help="squash labels down to -1 to 1 range, good for LSTM",
                         default=False,
                         action="store_true")
+    
+    parser.add_argument("--dimensions",
+                        help="frame dims",
+                        type=int,
+                        nargs=2,
+                        default=(32,32))
+
+    parser.add_argument("--opt_flow",
+                        help="compute optical flow",
+                        default=False,
+                        action="store_true")
     return parser
 
 
@@ -186,6 +197,7 @@ def summarize_arguments(args):
     print(formatter % ("greyscale_on", args.greyscale_on)) 
     print(formatter % ("alt_opt_flow", args.alt_opt_flow)) 
     print(formatter % ("normalize", args.normalize)) 
+    print(formatter % ("optical_flow", args.opt_flow)) 
 class ArgumentError(Exception):
     """
     custom exception to thrown due to bad parameter input
@@ -305,6 +317,8 @@ def validate_arguments(args):
                                                                       args.ignore_augmented[2])
     
     regular = args.data[0]
+    if args.opt_flow:
+        assert args.model_type in ["OpticalFlowCNN", "3D-CNN"]
 
     # if --test=False and --train=False, exit because there's nothing to do
     if (not args.train) and (not args.test):
@@ -384,10 +398,13 @@ if __name__ == "__main__":
                         greyscale_on=greyscale_on)
 
     input_shape = None
+    x, y = args.dimensions
     if greyscale_on:
-        input_shape = (60, 100, 100, 1)
+        input_shape = (60, y, x, 1)
+    elif args.opt_flow:
+        input_shape = (60, x, y, 2)
     else:
-        input_shape = (60, 100, 100, 3)
+        input_shape = (60, x, y, 3)
     print(input_shape)
     cyclic_lr = [float(i) for i in args.cyclic_learning_rate]
 
@@ -406,7 +423,8 @@ if __name__ == "__main__":
                     input_shape=input_shape,
                     steps_per_epoch=args.steps_per_epoch,
                     cyclic_lr=cyclic_lr,
-                    alt_opt_flow=args.alt_opt_flow)
+                    alt_opt_flow=args.alt_opt_flow,
+                    opt_flow=args.opt_flow)
 
     print("starting ... ")
     start = time.time()
