@@ -399,10 +399,10 @@ if __name__ == "__main__":
 
     input_shape = None
     x, y = args.dimensions
-    if greyscale_on:
-        input_shape = (60, y, x, 1)
-    elif args.opt_flow:
+    if args.opt_flow:
         input_shape = (60, x, y, 2)
+    elif greyscale_on:
+        input_shape = (60, y, x, 1)
     else:
         input_shape = (60, x, y, 3)
     print(input_shape)

@@ -18,32 +18,12 @@
 #--vertical_flip \
 
 pip install --upgrade src/we_panic_utils/
-<<<<<<< HEAD
-<<<<<<< HEAD
-python src/run_model.py 3D-CNN rsz32_optflow \
+python src/run_model.py 3D-CNN rsz32 \
 --test \
 --partition_csv subject_data.csv \
---output_dir run_history/CNN_3D_32x32_optflow \
---input_dir run_history/CNN_3D_32x32_optflow \
+--output_dir run_history/3DCNN_dif_linear \
+--input_dir run_history/3DCNN_dif_linear \
 --epochs 100 \
---steps_per_epoch 400 \
---batch_size 5 \
-=======
-=======
->>>>>>> bc78e919c0a49fed8820e613df1e02f3629ad799
-python src/run_model.py 3D-CNN rsz \
---train \
---test \
---partition_csv subject_data.csv \
---output_dir run_history/CNN_3D_32x32_nobuck_linear \
---input_dir run_history/CNN_3D_32x32_nobuck_linear \
---epochs 200 \
 --steps_per_epoch 500 \
---batch_size 2 \
-<<<<<<< HEAD
->>>>>>> bc78e919c0a49fed8820e613df1e02f3629ad799
-=======
->>>>>>> bc78e919c0a49fed8820e613df1e02f3629ad799
+--batch_size 14 \
 --greyscale_on \
---opt_flow \
---normalize

@@ -225,14 +225,14 @@ class CNN_3D(RegressionModel):
         self.norm = norm
 
     def instantiate(self):
-        #return super(CNN_3D, self).instantiate()
+        return super(CNN_3D, self).instantiate()
     
         model = self.get_model() 
         metrics = ['mse']
 
-        optimizer = Adam(lr=1e-5, decay=1e-6)
-        #sgd = SGD(lr=0.0001, decay=1e-6, nesterov=True, clipnorm=0.1)
-        model.compile(loss='mean_squared_error', optimizer=optimizer, metrics=metrics)
+        #optimizer = Adam(lr=1e-5, decay=1e-6)
+        sgd = SGD(lr=0.00001, decay=1e-6, nesterov=True, clipnorm=0.1, momentum=0.9)
+        model.compile(loss='mean_squared_error', optimizer=sgd, metrics=metrics)
         print(model.summary())
         return model
 
@@ -243,30 +243,26 @@ class CNN_3D(RegressionModel):
                   input_shape=self.input_shape, activation='relu'))
         model.add(MaxPooling3D(pool_size=2, strides=(1, 2, 2)))
 
-        model.add(Dropout(0.5)) 
-        model.add(Conv3D(128, kernel_size=(3, 3, 3), 
-                  activation='relu')) 
-        model.add(BatchNormalization()) 
-
-        model.add(MaxPooling3D(pool_size=2, strides=2))
-        model.add(Dropout(0.5))
+        model.add(Conv3D(64, kernel_size=(3, 2, 2), 
+                  input_shape=self.input_shape, activation='relu'))
+        
         model.add(Conv3D(128, kernel_size=(3, 2, 2), 
-                  activation='relu')) 
-        model.add(BatchNormalization())        
+                  activation='relu'))
+        model.add(MaxPooling3D(pool_size=2, strides=(1, 2, 2)))
 
+        model.add(Conv3D(128, kernel_size=(3, 2, 2), 
+                  activation='relu'))
+        
+        model.add(MaxPooling3D(pool_size=2, strides=2))
+        model.add(Dropout(0.5)) 
         model.add(Conv3D(256, kernel_size=(3, 2, 2), 
                   activation='relu')) 
-        model.add(BatchNormalization())
-
-        model.add(MaxPooling3D(pool_size=2, strides=2)) 
-        model.add(Conv3D(256, kernel_size=(3, 2, 2), 
-                 activation='relu')) 
         model.add(BatchNormalization()) 
 
         model.add(Flatten()) 
-        model.add(Dense(512, activation='tanh'))
+        model.add(Dense(512, activation='relu'))
         model.add(Dropout(0.5))
-        model.add(Dense(512, activation='tanh'))
+        model.add(Dense(512, activation='relu'))
         model.add(Dropout(0.5))
         if self.norm:
             model.add(Dense(self.output_shape, activation='tanh'))

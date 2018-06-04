@@ -84,7 +84,6 @@ class Engine():
             #train_set, test_set, val_set = create_train_test_split_dataframes(self.data, self.metadata, self.outputs)
             train_set, test_set, val_set = ttswcvs3(self.data, self.metadata, self.outputs)
             if not (self.model_type in self.optical_flow_models and self.opt_flow):
-                
                 train_generator = self.processor.train_generator_v3(train_set)
                 val_generator = self.processor.testing_generator_v3(val_set)
                 test_generator = self.processor.testing_generator_v3(test_set)
@@ -159,7 +158,7 @@ class Engine():
                 
                 test_set = pd.read_csv(test_dir)
 
-                if not (self.model_type in self.optical_flow_models):
+                if not (self.model_type in self.optical_flow_models and self.opt_flow):
 
                     test_generator = self.processor.testing_generator_v3(test_set)
 

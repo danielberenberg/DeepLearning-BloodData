@@ -529,8 +529,8 @@ class FrameProcessor:
             frame_hor_dir = sorted(os.listdir(os.path.join(current_path, 'flow_h')))
             frame_ver_dir = sorted(os.listdir(os.path.join(current_path, 'flow_v')))
 
-            frame_hor_dir = [path for path in frame_hor_dir if path != 'flow_h' and path != 'flow_v']
-            frame_ver_dir = [path for path in frame_ver_dir if path != 'flow_h' and path != 'flow_v']
+            #frame_hor_dir = [path for path in frame_hor_dir if path != 'flow_h' and path != 'flow_v']
+            #frame_ver_dir = [path for path in frame_ver_dir if path != 'flow_h' and path != 'flow_v']
             #hard-code to 2 for now, because there are a lot of samples
             for _ in range(2):
                 start = random.randint(0, len(frame_hor_dir)-self.sequence_length)
@@ -581,8 +581,8 @@ class FrameProcessor:
                 frame_hor_dir = sorted(os.listdir(os.path.join(path,'flow_h')))
                 frame_ver_dir = sorted(os.listdir(os.path.join(path,'flow_v')))
                 
-                frame_hor_dir = [path for path in frame_hor_dir if path != 'flow_h' and path != 'flow_v']
-                frame_ver_dir = [path for path in frame_ver_dir if path != 'flow_h' and path != 'flow_v']
+                #frame_hor_dir = [path for path in frame_hor_dir if path != 'flow_h' and path != 'flow_v']
+                #frame_ver_dir = [path for path in frame_ver_dir if path != 'flow_h' and path != 'flow_v']
                 
                 start = random.randint(0, len(frame_hor_dir)-self.sequence_length)
                 frames_hor = frame_hor_dir[start:start+self.sequence_length]
